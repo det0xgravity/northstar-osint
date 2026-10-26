@@ -4,6 +4,13 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project uses
 [Semantic Versioning](https://semver.org/).
 
+## [0.8.2] - 2026-10-26
+
+### Fixed
+- The zsh easter egg failed with "__pr_base: bad substitution": pay-respects
+  re-expands the prompt, which Powerlevel10k doesn't allow. It now gets a plain
+  prompt character, and the old block is replaced in existing `~/.zshrc` files.
+
 ## [0.8.1] - 2026-10-26
 
 ### Added

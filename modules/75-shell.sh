@@ -147,14 +147,26 @@ ns_pay_respects() {
 }
 
 NS_ZSH_BLOCK_EGG=$(cat <<'EOF'
-# Easter egg (northstar): mistype a command, then pay your respects
-(( $+commands[pay-respects] )) && eval "$(pay-respects zsh --alias fuck --nocnf)"
+# Easter egg (northstar): mistype a command, then pay your respects (v2)
+if (( $+commands[pay-respects] )); then
+  eval "$(pay-respects zsh --alias fuck --nocnf)"
+  # pay-respects re-expands $PROMPT to find the prompt character, which
+  # Powerlevel10k's prompt doesn't allow ("bad substitution"): give it one
+  __pr_base() {
+    _PR_MODE="$1" _PR_PREFIX="❯" _PR_LAST_COMMAND="$2" _PR_ALIAS="$(alias)" _PR_SHELL="zsh" "$commands[pay-respects]"
+  }
+fi
 EOF
 )
+# Lines from earlier versions' blocks that are removed when found (exact match)
+NS_ZSH_RETIRED='# Easter egg (northstar): mistype a command, then pay your respects
+(( $+commands[pay-respects] )) && eval "$(pay-respects zsh --alias fuck --nocnf)"'
 
 # ns_zshrc_blocks <file>   insert any missing blocks after the Oh My Zsh source line
 ns_zshrc_blocks() {
   local blk
+  NS_RET="$NS_ZSH_RETIRED" awk 'BEGIN { n = split(ENVIRON["NS_RET"], r, "\n"); for (i = 1; i <= n; i++) gone[r[i]] = 1 }
+    !($0 in gone)' "$1" > "$1.tmp" && mv "$1.tmp" "$1"
   for blk in "$NS_ZSH_BLOCK_CLIP" "$NS_ZSH_BLOCK_NAV" "$NS_ZSH_BLOCK_EGG"; do
     grep -Fqx "$(printf '%s\n' "$blk" | head -1)" "$1" && continue
     NS_BLK="$blk" awk '{ print } $0 == "source \"$ZSH/oh-my-zsh.sh\"" { print ""; print ENVIRON["NS_BLK"] }' \
