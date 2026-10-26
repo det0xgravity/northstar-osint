@@ -4,6 +4,14 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project uses
 [Semantic Versioning](https://semver.org/).
 
+## [0.6.1] - 2026-10-26
+
+### Fixed
+- Clicking Flameshot in the app list seemed to do nothing: it only started a
+  tray icon, and GNOME has no tray. The entry now opens the capture directly
+  (`flameshot gui`), and GNOME gets tray icons via the packaged AppIndicator
+  extension (also used by KeePassXC).
+
 ## [0.6.0] - 2026-10-26
 
 ### Added

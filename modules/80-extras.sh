@@ -23,6 +23,37 @@ ns_flameshot_printkey() {
   ns_info "Print Screen now opens Flameshot"
 }
 
+# Clicking Flameshot in the app list only starts it in the background (a tray
+# icon), which looks like nothing happened. A same-named entry in the user's
+# applications folder overrides the system one: clicking now takes a screenshot.
+ns_flameshot_launcher() {
+  local apps="$HOME/.local/share/applications"
+  ns_has flameshot || return 0
+  mkdir -p "$apps"
+  cat > "$apps/org.flameshot.Flameshot.desktop" <<'EOF'
+[Desktop Entry]
+Type=Application
+Name=Flameshot
+GenericName=Screenshot tool
+Comment=Take an annotated screenshot (northstar: opens the capture straight away)
+Exec=flameshot gui
+Icon=org.flameshot.Flameshot
+Terminal=false
+Categories=Graphics;Utility;
+Keywords=screenshot;screen;capture;
+Actions=Launcher;Config;
+
+[Desktop Action Launcher]
+Name=Open the capture launcher (delay, full screen)
+Exec=flameshot launcher
+
+[Desktop Action Config]
+Name=Settings
+Exec=flameshot config
+EOF
+  ns_info "Flameshot in the app list now takes a screenshot straight away"
+}
+
 mod_extras() {
   local rc=0
   if ns_is_macos; then
@@ -34,6 +65,7 @@ mod_extras() {
     else
       ns_flatpak com.obsproject.Studio || rc=1
     fi
+    ns_flameshot_launcher
     ns_flameshot_printkey || rc=1
   fi
   return $rc

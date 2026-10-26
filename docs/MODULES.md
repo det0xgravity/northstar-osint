@@ -96,7 +96,7 @@ Creates a private Python environment with Google's [libphonenumber](https://gith
 | Tool | Purpose |
 |---|---|
 | [KeePassXC](https://keepassxc.org) | Store sock-puppet credentials inside the workstation |
-| [Flameshot](https://flameshot.org) | Annotated screenshots, bound to Print Screen on GNOME |
+| [Flameshot](https://flameshot.org) | Annotated screenshots: Print Screen on GNOME, and clicking it in the app list opens the capture straight away |
 | [OBS Studio](https://obsproject.com) | Screen recording (Flatpak; Debian's package on arm64 Linux) |
 
 ## vm *(Linux only)*

@@ -107,6 +107,9 @@ gsettings set org.gnome.desktop.wm.preferences num-workspaces 1
 
 To undo them: **Settings → Multitasking** (hot corner and workspaces), `gsettings reset org.gnome.mutter overlay-key`, and `gnome-extensions disable no-overview@fthx`. You can still open the overview with the dots at the top left, or Super+S.
 
+**Clicking Flameshot does nothing**
+Before v0.6.1, clicking Flameshot only started it in the background, waiting in the system tray, and GNOME has no tray by default. Now clicking it opens the capture directly (or press Print Screen). After `ns-update`, log out and back in: GNOME then also shows tray icons for Flameshot and KeePassXC.
+
 **Black screen when connecting over RDP**
 You're probably still logged in on the Proxmox console. Log out there first, since GNOME allows one session per user. Also check that `~/.xsession` names your desktop session.
 

@@ -63,15 +63,14 @@ PY
 # turn off the hot corner and the Super-key trigger. Also in VMs, use a single
 # fixed workspace: with GNOME's dynamic workspaces, a search that reuses a
 # browser window on the other workspace makes the whole screen slide there.
-ns_gnome_tweaks() {
-  ns_in_gnome_session || return 0
-  local ext="no-overview@fthx" virt=""
-  if [ ! -d "/usr/share/gnome-shell/extensions/$ext" ]; then
-    ns_apt gnome-shell-extensions-extra >/dev/null 2>&1 \
-      || ns_info "No-overview extension not packaged here — GNOME will still open the overview at login"
-  fi
-  if [ -d "/usr/share/gnome-shell/extensions/$ext" ]; then
-    python3 - "$ext" <<'PY'
+# ns_gnome_extension <uuid> <apt-package> <message>
+# Installs a packaged GNOME Shell extension if needed and enables it (from the
+# next login). Non-fatal: not every distribution packages every extension.
+ns_gnome_extension() {
+  local uuid="$1" pkg="$2" msg="$3"
+  [ -d "/usr/share/gnome-shell/extensions/$uuid" ] || ns_apt "$pkg" >/dev/null 2>&1
+  [ -d "/usr/share/gnome-shell/extensions/$uuid" ] || { ns_info "$pkg isn't available here — skipped"; return 0; }
+  python3 - "$uuid" <<'PY'
 import ast, subprocess, sys
 key = ["org.gnome.shell", "enabled-extensions"]
 raw = subprocess.check_output(["gsettings", "get"] + key, text=True)
@@ -79,8 +78,17 @@ exts = ast.literal_eval(raw.replace("@as ", "").strip())
 if sys.argv[1] not in exts:
     subprocess.check_call(["gsettings", "set"] + key + [str(exts + [sys.argv[1]])])
 PY
-    ns_info "Login no longer opens the Activities overview (from your next login)"
-  fi
+  ns_info "$msg"
+}
+
+ns_gnome_tweaks() {
+  ns_in_gnome_session || return 0
+  local virt=""
+  ns_gnome_extension no-overview@fthx gnome-shell-extensions-extra \
+    "Login no longer opens the Activities overview (from your next login)"
+  # GNOME has no system tray; Flameshot and KeePassXC live there
+  ns_gnome_extension ubuntu-appindicators@ubuntu.com gnome-shell-extension-appindicator \
+    "Tray icons enabled for Flameshot and KeePassXC (from your next login)"
   ns_has systemd-detect-virt && virt=$(systemd-detect-virt --vm 2>/dev/null)
   if [ -n "$virt" ] && [ "$virt" != none ]; then
     gsettings set org.gnome.desktop.interface enable-hot-corners false \
