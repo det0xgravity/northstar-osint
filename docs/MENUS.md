@@ -142,6 +142,10 @@ Case records (main menu: **Case: notes, details, report, close**; **Switch / cre
 
 Record result folders as numbered exhibits (optional OpenTimestamps proof), verify folders and the audit log's hash chain, list exhibits, and export the case with a SHA-256. Every result folder is sealed automatically when a search finishes. See [EVIDENCE.md](EVIDENCE.md).
 
+## ns-doctor
+
+**Health check** in the main menu. Lists every tool with its version, flags anything missing, and checks API key and case folder permissions, ports listening on the network (xrdp 3389, the amass engine 4000, Tor 9050), Firefox policies, free disk space and recent install warnings. The report is saved to `~/Northstar/support/` for bug reports. It contains no API keys or case data.
+
 ## ns-update
 
 Pulls the latest northstar-osint and runs `install.sh --update --yes` for every module except the ones you chose to skip, so modules added in a new release are installed too. If the download fails (usually because files in the checkout were edited by hand), it says so clearly, still upgrades the installed tools, and exits with an error.

@@ -290,3 +290,36 @@ ns_pause() {
   printf '\nPress Enter to close… '
   read -r _
 }
+
+# --- scripted dialogs (tests and CI) ---------------------------------------------------
+# NS_UI=script NS_UI_ANSWERS=<file>: every dialog takes the next line of the file
+# instead of asking. ui_list picks the first option starting with that line;
+# ui_question takes y/yes as yes; a missing line cancels. Browser, clipboard,
+# notification and folder actions are logged to stderr and not performed.
+if [ "${NS_UI:-}" = script ]; then
+  _ui_next() {
+    local n line
+    n=$(cat "$NS_UI_ANSWERS.pos" 2>/dev/null || echo 1)
+    line=$(sed -n "${n}p" "$NS_UI_ANSWERS")
+    echo $((n + 1)) > "$NS_UI_ANSWERS.pos"
+    [ -n "$line" ] || return 1
+    printf '%s\n' "$line"
+  }
+  ui_list() {
+    local want o; shift
+    want=$(_ui_next) || return 1
+    for o in "$@"; do case "$o" in "$want"*) printf '%s\n' "$o"; return 0 ;; esac; done
+    return 1
+  }
+  ui_entry()    { _ui_next; }
+  ui_secret()   { _ui_next; }
+  ui_files()    { _ui_next; }
+  ui_dir()      { _ui_next; }
+  ui_question() { case "$(_ui_next)" in y|Y|yes|Yes) return 0 ;; esac; return 1; }
+  ui_info()     { printf '[ui_info] %s\n' "$1" >&2; }
+  ui_error()    { printf '[ui_error] %s\n' "$1" >&2; }
+  ui_open()     { printf '[ui_open] %s\n' "$@" >&2; }
+  ui_clip()     { printf '[ui_clip] %s\n' "$1" >&2; }
+  ui_notify()   { printf '[ui_notify] %s\n' "$1" >&2; }
+  ui_reveal()   { printf '[ui_reveal] %s\n' "$1" >&2; }
+fi

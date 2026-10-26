@@ -1,0 +1,46 @@
+name: Install test
+
+# Real installs in clean containers, x86_64 and arm64. Weekly and on demand:
+# they take a while and depend on upstream package sources.
+on:
+  schedule:
+    - cron: "17 6 * * 1"
+  workflow_dispatch:
+
+jobs:
+  install:
+    strategy:
+      fail-fast: false
+      matrix:
+        runner: [ubuntu-24.04, ubuntu-24.04-arm]
+        image: ["debian:trixie", "ubuntu:24.04"]
+    runs-on: ${{ matrix.runner }}
+    container: ${{ matrix.image }}
+    timeout-minutes: 60
+    steps:
+      - name: Base packages and a normal user with sudo
+        run: |
+          apt-get update -q
+          DEBIAN_FRONTEND=noninteractive apt-get install -y -q sudo git ca-certificates curl python3
+          useradd -m -s /bin/bash ns
+          echo 'ns ALL=(ALL) NOPASSWD:ALL' > /etc/sudoers.d/ns
+      - uses: actions/checkout@v4
+      - name: Install (core, username, countries)
+        run: |
+          chown -R ns: "$GITHUB_WORKSPACE"
+          su ns -c "cd '$GITHUB_WORKSPACE' && ./install.sh --yes --only username,countries"
+      - name: Re-run is safe (idempotent)
+        run: su ns -c "cd '$GITHUB_WORKSPACE' && ./install.sh --yes --only username,countries"
+      - name: Tools work
+        run: |
+          su ns -c 'export PATH="$HOME/.local/share/northstar/bin:$HOME/.local/bin:$PATH"
+            set -e
+            sherlock --version
+            maigret --version
+            python3 "$HOME/.local/share/northstar/lib/ns_country.py" list | head -3
+            ns_evidence --help > /dev/null || true
+            test -x "$HOME/.local/share/northstar/bin/ns-country"
+            ./install.sh --version'
+        working-directory: ${{ github.workspace }}
+      - name: Functional tests
+        run: su ns -c "cd '$GITHUB_WORKSPACE' && bash tests/run.sh"

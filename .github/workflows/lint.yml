@@ -14,7 +14,7 @@ jobs:
         run: sudo apt-get update -q && sudo apt-get install -y -q shellcheck
 
       - name: shellcheck
-        run: shellcheck -x -S warning install.sh lib/common.sh lib/ui.sh modules/*.sh tools/*
+        run: shellcheck -x -S warning install.sh lib/common.sh lib/ui.sh modules/*.sh tools/* tests/run.sh
 
       - name: Bash syntax
         run: for f in install.sh lib/*.sh modules/*.sh tools/*; do bash -n "$f"; done
@@ -29,9 +29,20 @@ jobs:
 
       - name: Python and JSON
         run: |
-          python3 -m py_compile lib/gen_policies.py lib/ns_country.py lib/ns_breach.py lib/ns_darkweb.py lib/ns_evidence.py lib/ns_case.py
+          python3 -m py_compile lib/gen_policies.py lib/ns_country.py lib/ns_breach.py lib/ns_darkweb.py lib/ns_evidence.py lib/ns_case.py lib/ns_doctor.py
           python3 -m json.tool config/bookmarks.json > /dev/null
           python3 lib/ns_country.py validate
 
       - name: Installer smoke test
         run: ./install.sh --list
+
+  tests:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Functional tests (macOS runs them under its Bash 3.2)
+        run: /bin/bash tests/run.sh

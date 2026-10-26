@@ -68,6 +68,15 @@ mod_name() {
 
 ## Testing
 
+Run the offline test suite before opening a pull request. It needs no network or sudo, and runs on macOS's Bash 3.2 as well as Linux:
+
+```bash
+bash tests/run.sh
+```
+
+Menus can be driven without dialogs: set `NS_UI=script` and `NS_UI_ANSWERS` to a file with one answer per line (see the end of `lib/ui.sh`). Add a test to `tests/run.sh` for any new menu behaviour. CI runs it on every push, and a weekly workflow (`install.yml`) does real installs in Debian 13 and Ubuntu 24.04 containers on x86_64 and arm64.
+
+
 Test on a fresh VM snapshot for each platform you changed. At minimum, check that
 the install succeeds, that a second run is clean (idempotent), and that
 `./install.sh --update --yes` works.

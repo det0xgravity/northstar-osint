@@ -110,6 +110,7 @@ northstar                # main menu
 ├── Switch / create case
 ├── Open latest results
 ├── Open case folder
+├── Health check         # ns-doctor
 └── Update northstar     # ns-update
 ```
 

@@ -4,6 +4,22 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project uses
 [Semantic Versioning](https://semver.org/).
 
+## [0.15.0] - 2026-10-26
+
+Phase 4d of the review: health check and automated tests.
+
+### Added
+- `ns-doctor` (main menu: Health check): every tool with its version,
+  missing tools, key and case permissions, listening ports, Firefox policies,
+  disk space and recent install warnings, saved as a support report.
+- `NS_UI=script`: scripted dialogs, so menus run unattended in tests.
+- `tests/run.sh`: 25 offline functional tests (country packs, menu results
+  and sealing, evidence and audit chain tamper detection, case notes, secrets
+  never reaching case data, input validation, installer module selection).
+  CI runs them on Ubuntu and on macOS's Bash 3.2.
+- `install.yml`: weekly real installs in Debian 13 and Ubuntu 24.04 containers
+  on x86_64 and arm64 runners, run twice to check re-runs are safe.
+
 ## [0.14.0] - 2026-10-26
 
 Phase 4c of the review: case intake, notes and reports.

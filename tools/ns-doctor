@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+# ns-doctor — health check: tools and versions, permissions, listening ports,
+# browser policies, disk space and recent install problems. Writes a report you
+# can attach to a bug report (it contains no API keys or case data).
+# shellcheck source=../lib/ui.sh
+. "${NS_HOME:-$HOME/.local/share/northstar}/lib/ui.sh"
+
+report="$NS_DATA/support/doctor_$(date -u '+%Y%m%dT%H%M%SZ').txt"
+echo "Checking… (tool versions can take a minute)"
+ns_doctor "$report"
+rc=$?
+echo "Report saved to: $report"
+[ $rc -eq 0 ] && ui_notify "Health check: no problems found" || ui_notify "Health check found problems: see the terminal"
+ns_pause
