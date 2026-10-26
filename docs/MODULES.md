@@ -97,7 +97,12 @@ Creates a private Python environment with Google's [libphonenumber](https://gith
 |---|---|
 | [zsh](https://www.zsh.org) | Becomes your login shell |
 | [Oh My Zsh](https://ohmyz.sh) | zsh framework, with the plugins below |
-| `fzf`, `z` | **Ctrl+R** fuzzy-searches your command history, **Ctrl+T** finds files; `z part-of-name` jumps to a folder you've used before (e.g. `z osint_test`) |
+| `fzf`, `z` | **Ctrl+R** fuzzy-searches your command history, **Ctrl+T** finds files, **Alt+C** jumps into a subfolder; `z part-of-name` jumps to a folder you've used before (e.g. `z osint_test`) |
+| [fzf-tab](https://github.com/Aloxaf/fzf-tab) | **Tab** completion becomes a searchable menu, with a preview of each folder's contents |
+| `dirhistory` | **Alt+←** / **Alt+→** go back and forward through folders like a browser; **Alt+↑** goes up a level |
+| `history-substring-search` | Type part of a command, then **↑** / **↓** cycles through only the matching history |
+| [eza](https://eza.rocks) | Replaces `ls` with icons, colours and git status: `ll` long list, `la` including hidden files, `lt` folder tree |
+| [ranger](https://ranger.github.io) | Keyboard file manager with previews. Run `r` to browse; when you quit, the terminal stays in the folder you ended in |
 | `web-search` | `google "jane doe" site:linkedin.com`, `ddg …`, `github …` open the search in your browser |
 | `urltools`, `encode64`, `jsontools` | `urlencode` / `urldecode`; `e64` / `d64` for base64; `pp_json` pretty-prints JSON, `is_json` checks it |
 | `extract` | `x file.zip` (or .tar.gz, .7z, .rar…) unpacks any archive |

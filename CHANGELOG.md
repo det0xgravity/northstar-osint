@@ -4,6 +4,20 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project uses
 [Semantic Versioning](https://semver.org/).
 
+## [0.8.0] - 2026-10-26
+
+### Added
+- Terminal navigation: fzf-tab (searchable Tab completion with folder
+  previews), dirhistory (Alt+arrows through folders), history-substring-search
+  (↑/↓ through matching commands), eza (`ls`/`ll`/`la`/`lt` with icons and git
+  status) and ranger (`r` browses and leaves you in the folder you chose).
+
+### Changed
+- `~/.zshrc` extras (clipboard fix, navigation) are kept as blocks that are
+  added once, to new files and to files whose plugin line is still a northstar
+  default. Optional packages (fzf, eza, ranger, command-not-found) no longer
+  stop the shell module if one is missing on a distribution.
+
 ## [0.7.5] - 2026-10-26
 
 ### Added
