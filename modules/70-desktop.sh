@@ -90,6 +90,37 @@ PY
   fi
 }
 
+# Desktop background: northstar's own (assets/wallpaper), but only replacing the
+# distribution's default, never a background the user chose. Linux only.
+ns_wallpaper() {
+  local img="$NS_HOME/share/wallpaper/northstar.png" uri cur prop n=0
+  mkdir -p "$(dirname "$img")"
+  install -m 644 "$NS_REPO/assets/wallpaper/northstar.png" "$img" || return 1
+  uri="file://$img"
+  if ns_in_gnome_session; then
+    cur=$(gsettings get org.gnome.desktop.background picture-uri 2>/dev/null)
+    case "$cur" in
+      *"/usr/share/"*|"''"|*"$img"*)
+        gsettings set org.gnome.desktop.background picture-uri "$uri"
+        gsettings set org.gnome.desktop.background picture-uri-dark "$uri"
+        gsettings set org.gnome.desktop.background picture-options zoom
+        ns_info "Desktop background set to the northstar wallpaper" ;;
+      *) ns_info "Keeping your own desktop background (northstar's is in $img)" ;;
+    esac
+  elif [ "$NS_DE" = xfce ] && [ -n "${DBUS_SESSION_BUS_ADDRESS:-}" ] && ns_has xfconf-query; then
+    for prop in $(xfconf-query -c xfce4-desktop -l 2>/dev/null | grep '/last-image$'); do
+      cur=$(xfconf-query -c xfce4-desktop -p "$prop" 2>/dev/null)
+      case "$cur" in
+        ""|/usr/share/*|"$img")
+          xfconf-query -c xfce4-desktop -p "$prop" -s "$img" && n=$((n+1)) ;;
+      esac
+    done
+    if [ $n -gt 0 ]; then ns_info "Desktop background set to the northstar wallpaper"
+    else ns_info "Desktop background unchanged (northstar's is in $img)"; fi
+  fi
+  return 0
+}
+
 ns_macos_app() {
   local app="$HOME/Applications/Northstar.app"
   mkdir -p "$HOME/Applications"
@@ -109,5 +140,6 @@ mod_desktop() {
     ns_linux_launchers || return 1
     ns_gnome_dock
     ns_gnome_tweaks
+    ns_wallpaper
   fi
 }

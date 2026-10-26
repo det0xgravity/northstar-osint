@@ -4,6 +4,15 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project uses
 [Semantic Versioning](https://semver.org/).
 
+## [0.5.0] - 2026-10-26
+
+### Added
+- An original northstar desktop wallpaper (`assets/wallpaper/`): night sky,
+  compass and north star, map contours, aurora borealis, a maple leaf and the
+  coordinates of Alert, Nunavut. The `desktop` module sets it on GNOME and XFCE
+  only when the default background is still in use. A generator script is
+  included.
+
 ## [0.4.7] - 2026-10-26
 
 ### Changed

@@ -27,6 +27,7 @@ references to them.
 - `config/bookmarks.json`, `config/firefox-extensions.txt`: data, not code.
 - `config/countries/<cc>.json`: one country pack each (searches + bookmark
   folders). Format in `docs/COUNTRIES.md`.
+- `assets/wallpaper/`: original desktop wallpaper (PNG) and its generator script.
 - `docs/`: user documentation. Keep it in sync with behaviour changes.
 
 ## Hard rules
