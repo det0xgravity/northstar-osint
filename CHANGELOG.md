@@ -4,6 +4,20 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project uses
 [Semantic Versioning](https://semver.org/).
 
+## [0.10.0] - 2026-10-26
+
+Phase 2 of the review: evidence integrity.
+
+### Added
+- Every result folder is sealed when a search finishes: `manifest.sha256`
+  (checkable with `sha256sum -c`) and `provenance.json` (UTC time, operator,
+  host, northstar version, the version of each tool used).
+- `audit.log` is hash-chained and in UTC, with the operator: editing,
+  inserting or deleting a line breaks the chain.
+- `ns-evidence` (main menu: Evidence & exhibits): record exhibits
+  (`exhibits.csv`, optional OpenTimestamps proof), verify folders and the
+  audit chain, export the case with a SHA-256.
+
 ## [0.9.0] - 2026-10-26
 
 Phase 1 of the three-reviewer audit (investigator, OSINT specialist, QC).

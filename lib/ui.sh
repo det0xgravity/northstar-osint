@@ -219,10 +219,26 @@ ns_outdir() {
   printf '%s\n' "$d"
 }
 
+# ns_hash_str <text>   SHA-256 of a string (Linux sha256sum or macOS shasum)
+ns_hash_str() {
+  if ns_cmd sha256sum; then printf '%s' "$1" | sha256sum | cut -d' ' -f1
+  else printf '%s' "$1" | shasum -a 256 | cut -d' ' -f1; fi
+}
+
+_ns_field() { printf '%s' "$1" | tr '\t\n\r' '   '; }      # one TSV field: no tabs/newlines
+
 # ns_audit <tool> <target> <detail>
+# Appends: UTC time, case, tool, target, detail, operator, chain hash. The hash
+# is SHA-256(previous line + this line's other fields), so editing, inserting or
+# deleting any line breaks every hash after it (ns-evidence verifies the chain).
 ns_audit() {
-  printf '%s\t%s\t%s\t%s\t%s\n' "$(date '+%Y-%m-%d %H:%M:%S %z')" "$(ns_case)" \
-    "$1" "$2" "$3" >> "$(ns_case_dir)/audit.log"
+  local log body prev
+  log="$(ns_case_dir)/audit.log"
+  body=$(printf '%s\t%s\t%s\t%s\t%s\t%s' "$(date -u '+%Y-%m-%dT%H:%M:%SZ')" "$(ns_case)" \
+    "$(_ns_field "$1")" "$(_ns_field "$2")" "$(_ns_field "$3")" "$(id -un)")
+  prev=""
+  [ -s "$log" ] && prev=$(tail -n 1 "$log")
+  printf '%s\t%s\n' "$body" "$(ns_hash_str "$prev$body")" >> "$log"
 }
 
 # ns_run <outdir> <command> [args...]
@@ -235,8 +251,21 @@ ns_run() {
   fi
   printf '\n\033[1m▶ %s\033[0m\n' "$*"
   ns_audit "$1" "$(basename "$out")" "$*"
+  printf '%s\n' "$1" >> "$out/.ns-tools"          # provenance.json lists each tool's version
   ( cd "$out" && "$@" ) 2>&1 | tee -a "$out/console.log"
   return "${PIPESTATUS[0]}"
+}
+
+# ns_seal_result <outdir>   hash every file into manifest.sha256 + provenance.json
+ns_seal_result() {
+  ns_cmd ns_evidence || return 0
+  ns_evidence seal "$1" "$(cat "$NS_HOME/VERSION" 2>/dev/null || echo unknown)" 2>/dev/null \
+    && ns_audit ns-evidence "$(basename "$1")" "sealed: $(ns_hash_file "$1/manifest.sha256")"
+}
+
+# ns_hash_file <file>
+ns_hash_file() {
+  if ns_cmd sha256sum; then sha256sum "$1" | cut -d' ' -f1; else shasum -a 256 "$1" | cut -d' ' -f1; fi
 }
 
 # ns_finish <outdir> — shows where results went and keeps a launched terminal open.
@@ -244,6 +273,7 @@ ns_run() {
 # in front and open the menu's next dialog behind it, which looks like a hang.
 ns_finish() {
   printf '\n\033[1mResults saved to:\033[0m %s\n' "$1"
+  ns_seal_result "$1"
   mkdir -p "$NS_CONF" && printf '%s\n' "$1" > "$NS_CONF/last_result"
   if [ "${NS_FROM_MAIN:-0}" = 1 ]; then
     printf 'Back to the Northstar menu: choose "Open latest results" to see them.\n'

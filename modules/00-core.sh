@@ -26,6 +26,8 @@ mod_core() {
       ns_has flatpak && sudo flatpak update -y --noninteractive >/dev/null 2>&1 || true
     fi
   fi
+  # Independent timestamps for evidence manifests (ns-evidence)
+  ns_pipx ots opentimestamps-client || ns_warn "OpenTimestamps client not installed (optional)"
   ns_go_ensure || { ns_warn "Go toolchain unavailable — Go-based tools will be skipped"; rc=1; }
 
   # Runtime: shared UI library, menu tools and config
@@ -37,6 +39,7 @@ mod_core() {
   # Engines run as commands, so audit.log shows "ns_breach email …"
   install -m 755 "$NS_REPO/lib/ns_breach.py" "$NS_BIN/ns_breach"
   install -m 755 "$NS_REPO/lib/ns_darkweb.py" "$NS_BIN/ns_darkweb"
+  install -m 755 "$NS_REPO/lib/ns_evidence.py" "$NS_BIN/ns_evidence"
   cp "$NS_REPO"/config/*.json "$NS_REPO"/config/*.txt "$NS_HOME/config/" 2>/dev/null
   rm -f "$NS_HOME"/config/countries/*.json      # drop packs removed upstream
   cp "$NS_REPO"/config/countries/*.json "$NS_HOME/config/countries/"
@@ -49,6 +52,7 @@ mod_core() {
 
   printf '%s\n' "$NS_REPO" > "$NS_CONF/repo_path"
   printf '%s\n' "$NS_VERSION" > "$NS_CONF/version"
+  printf '%s\n' "$NS_VERSION" > "$NS_HOME/VERSION"        # recorded in each result's provenance.json
   [ -f "$NS_CONF/active_case" ] || echo "general" > "$NS_CONF/active_case"
 
   ns_path_setup

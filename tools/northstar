@@ -16,6 +16,7 @@ while true; do
     "Country search" \
     "Breach data" \
     "Dark web" \
+    "Evidence & exhibits" \
     "API keys" \
     "Switch / create case  (current: $case_name)" \
     "Open latest results" \
@@ -31,6 +32,7 @@ while true; do
     "Country search")          ns-country ;;
     "Breach data")             ns-breach ;;
     "Dark web")                ns-darkweb ;;
+    "Evidence & exhibits")     ns-evidence ;;
     "API keys")                ns-keys ;;
     "Switch / create case"*)
       new=$(ui_entry "Case name (letters, numbers, dashes):" "$case_name") || continue
