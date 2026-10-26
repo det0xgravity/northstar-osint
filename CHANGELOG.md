@@ -4,6 +4,15 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project uses
 [Semantic Versioning](https://semver.org/).
 
+## [0.7.2] - 2026-10-26
+
+### Changed
+- Powerlevel10k prompt on one line (the rainbow template without its two
+  `newline` segments). Replaces the v0.7.0 copy or a northstar-generated one,
+  never a style made with `p10k configure`.
+- Terminals get a dark theme: GNOME Console "night", Ptyxis dark, and the
+  wallpaper's navy in GNOME Terminal and the XFCE terminal.
+
 ## [0.7.1] - 2026-10-26
 
 ### Changed
