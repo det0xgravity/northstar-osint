@@ -128,10 +128,34 @@ ns_shell_p10k() {
   ns_info "Prompt: one-line rainbow style with a clock (change it with: p10k configure)"
 }
 
+# Easter egg: pay-respects, the maintained Rust successor to thefuck (which no
+# longer runs on Python 3.12+), answering to its old name. Official .deb from
+# the project's GitHub releases.
+ns_pay_respects() {
+  local arch tmp url
+  ns_has pay-respects && [ "$NS_UPDATE" != 1 ] && return 0
+  case "$NS_ARCH" in arm64) arch=arm64 ;; *) arch=amd64 ;; esac
+  url=$(curl -fsSL https://api.github.com/repos/iffse/pay-respects/releases/latest \
+        | jq -r --arg a "_$arch.deb" '.assets[] | select(.name | endswith($a)) | .browser_download_url' | head -1)
+  [ -n "$url" ] || return 1
+  tmp=$(mktemp -d)
+  curl -fsSL "$url" -o "$tmp/pay-respects.deb" \
+    && sudo DEBIAN_FRONTEND=noninteractive apt-get install -y -q "$tmp/pay-respects.deb" >/dev/null 2>&1
+  local rc=$?
+  rm -rf "$tmp"
+  return $rc
+}
+
+NS_ZSH_BLOCK_EGG=$(cat <<'EOF'
+# Easter egg (northstar): mistype a command, then pay your respects
+(( $+commands[pay-respects] )) && eval "$(pay-respects zsh --alias fuck --nocnf)"
+EOF
+)
+
 # ns_zshrc_blocks <file>   insert any missing blocks after the Oh My Zsh source line
 ns_zshrc_blocks() {
   local blk
-  for blk in "$NS_ZSH_BLOCK_CLIP" "$NS_ZSH_BLOCK_NAV"; do
+  for blk in "$NS_ZSH_BLOCK_CLIP" "$NS_ZSH_BLOCK_NAV" "$NS_ZSH_BLOCK_EGG"; do
     grep -Fqx "$(printf '%s\n' "$blk" | head -1)" "$1" && continue
     NS_BLK="$blk" awk '{ print } $0 == "source \"$ZSH/oh-my-zsh.sh\"" { print ""; print ENVIRON["NS_BLK"] }' \
       "$1" > "$1.tmp" && mv "$1.tmp" "$1"
@@ -200,6 +224,7 @@ mod_shell() {
   ns_git_sync https://github.com/zsh-users/zsh-autosuggestions.git "$custom/plugins/zsh-autosuggestions" || rc=1
   ns_git_sync https://github.com/zsh-users/zsh-syntax-highlighting.git "$custom/plugins/zsh-syntax-highlighting" || rc=1
   ns_git_sync https://github.com/Aloxaf/fzf-tab.git "$custom/plugins/fzf-tab" || rc=1
+  ns_pay_respects || ns_warn "pay-respects not installed (optional)"
   ns_info "Oh My Zsh, Powerlevel10k and plugins ✓"
 
   ns_shell_zshrc

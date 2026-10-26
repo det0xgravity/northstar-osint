@@ -4,6 +4,13 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project uses
 [Semantic Versioning](https://semver.org/).
 
+## [0.8.1] - 2026-10-26
+
+### Added
+- An easter egg in zsh. Mistype a command, then type the word thefuck made
+  famous. It's pay-respects, thefuck's maintained Rust successor (thefuck itself
+  no longer runs on Python 3.12+), installed from its official release .deb.
+
 ## [0.8.0] - 2026-10-26
 
 ### Added
