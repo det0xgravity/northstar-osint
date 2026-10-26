@@ -15,6 +15,7 @@ Commands:
   timeline CASEDIR            gather dated events and write timeline.csv + .html
   finding-add CASEDIR CATEGORY URL EXPLANATION [EVIDENCE_FILE]
   findings-export CASEDIR     findings grouped by category, as Markdown
+  variants NAME [YEAR]        likely usernames, then likely emails, most likely first
 """
 import csv
 import datetime
@@ -260,11 +261,53 @@ def cmd_findings_export(case_dir):
     return 0
 
 
+EMAIL_DOMAINS = ["gmail.com", "outlook.com", "hotmail.com", "yahoo.com", "icloud.com", "proton.me"]
+
+
+def ascii_lower(s):
+    import unicodedata
+    s = unicodedata.normalize("NFKD", s).encode("ascii", "ignore").decode()
+    return re.sub(r"[^a-z0-9 -]", "", s.lower())
+
+
+def cmd_variants(name, year=""):
+    parts = [p for p in re.split(r"[\s-]+", ascii_lower(name)) if p]
+    if not parts:
+        print("Give a name.")
+        return 1
+    first, last = parts[0], parts[-1] if len(parts) > 1 else ""
+    mid = parts[1][0] if len(parts) > 2 else ""
+    y = re.sub(r"\D", "", year)
+    yy = y[-2:] if len(y) >= 2 else ""
+    base = []
+    if last:
+        base += [first + last, f"{first}.{last}", f"{first}_{last}", first[0] + last, f"{first[0]}.{last}",
+                 first + last[0], last + first, f"{last}.{first}", last + first[0], f"{first}-{last}"]
+        if len(parts) > 2:                     # compound or two surnames (e.g. Núñez García): try the first one too
+            alt = parts[-2]
+            base += [first + alt, f"{first}.{alt}", first[0] + alt, f"{first}.{alt}.{last}"]
+        if mid:
+            base += [first + mid + last, f"{first}.{mid}.{last}", first[0] + mid + last]
+    base.append(first)
+    names = list(dict.fromkeys(base))
+    with_year = []
+    for suffix in [s for s in (yy, y) if s]:
+        with_year += [n + suffix for n in names[:6]] + [f"{n}_{suffix}" for n in names[:2]]
+    usernames = list(dict.fromkeys(names[:4] + with_year[:4] + names[4:] + with_year[4:]))
+    emails = [f"{u}@{d}" for u in usernames[:8] for d in EMAIL_DOMAINS[:3]]
+    emails += [f"{u}@{d}" for u in usernames[:4] for d in EMAIL_DOMAINS[3:]]
+    for u in usernames:
+        print(f"username\t{u}")
+    for e in dict.fromkeys(emails):
+        print(f"email\t{e}")
+    return 0
+
+
 def main(argv):
     cmds = {"profile-set": (cmd_profile_set, 1, 1), "profile-get": (cmd_profile_get, 2, 2),
             "profile-show": (cmd_profile_show, 1, 1), "event-add": (cmd_event_add, 4, 4),
             "timeline": (cmd_timeline, 1, 1), "finding-add": (cmd_finding_add, 4, 5),
-            "findings-export": (cmd_findings_export, 1, 1)}
+            "findings-export": (cmd_findings_export, 1, 1), "variants": (cmd_variants, 1, 2)}
     if len(argv) < 2 or argv[1] not in cmds or not cmds[argv[1]][1] <= len(argv) - 2 <= cmds[argv[1]][2]:
         print(__doc__)
         return 2

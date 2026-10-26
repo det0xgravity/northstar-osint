@@ -24,6 +24,7 @@ The hub. Besides opening each menu, it lets you:
 | Username search | sherlock, maigret (HTML report), socialscan, blackbird; opens WhatsMyName and a Google search | `sherlock.txt`, `maigret/`, `blackbird/` (CSV, JSON), `console.log` |
 | Email search | holehe (registered sites only), socialscan; opens HIBP, Epieos, IntelX. For breach data use **Breach data** (`ns-breach`) | `console.log` |
 | Google account | `ghunt email` | `ghunt.json` |
+| Generate username and email variants | From a full name and birth year (pre-filled from the Missing person profile): likely usernames (`janedoe`, `jane.doe`, `jdoe`, `janedoe99`, …; accents removed, compound surnames handled) and emails at common providers. Optionally checks the top 10 usernames with Sherlock and the top 10 emails with holehe | `usernames.txt`, `emails.txt`, `sherlock/`, `console.log` |
 | Instagram profile details | toutatis (session ID **redacted** from the audit log) | `console.log` |
 
 The search term is copied to your clipboard for the web services that open.

@@ -7,7 +7,8 @@ choice=$(ui_list "Username & email" \
   "Username search (sherlock, maigret, socialscan, blackbird)" \
   "Email search (holehe, socialscan)" \
   "Google account from email (GHunt — run 'ghunt login' once first)" \
-  "Instagram profile details (toutatis — needs a session ID)") || exit 0
+  "Instagram profile details (toutatis — needs a session ID)" \
+  "Generate username and email variants from a name") || exit 0
 
 case "$choice" in
 Username*)
@@ -47,6 +48,32 @@ Google*)
   e=$(ui_entry "Gmail / Google account email:") || exit 0
   out=$(ns_outdir ghunt "$e")
   ns_run "$out" ghunt email "$e" --json "$out/ghunt.json"
+  ns_finish "$out" ;;
+
+Generate*)
+  sub="$(ns_case_dir)/subject"
+  pre_name=""; pre_year=""
+  if ns_cmd ns_missing && [ -f "$sub/subject.json" ]; then
+    pre_name=$(ns_missing profile-get "$(ns_case_dir)" name)
+    pre_year=$(ns_missing profile-get "$(ns_case_dir)" dob | grep -oE '(19|20)[0-9]{2}' | head -1)
+  fi
+  name=$(ui_entry "Full name:" "$pre_name") || exit 0
+  year=$(ui_entry "Birth year (optional):" "$pre_year") || year=""
+  out=$(ns_outdir variants "$name")
+  ns_missing variants "$name" "$year" > "$out/variants.tsv"
+  grep '^username' "$out/variants.tsv" | cut -f2 > "$out/usernames.txt"
+  grep '^email' "$out/variants.tsv" | cut -f2 > "$out/emails.txt"
+  ns_audit variants "$name" "$(wc -l < "$out/usernames.txt" | tr -d ' ') usernames, $(wc -l < "$out/emails.txt" | tr -d ' ') emails"
+  echo "Likely usernames:"; sed 's/^/  /' "$out/usernames.txt" | head -12
+  if ui_question "Check the 10 most likely usernames with Sherlock? (a few minutes)"; then
+    # shellcheck disable=SC2046  # one argument per username, on purpose
+    ns_run "$out" sherlock $(head -10 "$out/usernames.txt") --print-found --txt --folderoutput sherlock
+  fi
+  if ui_question "Check the 10 most likely emails with holehe (which sites they're registered on)?"; then
+    while IFS= read -r e; do ns_run "$out" holehe "$e" --only-used; done <<EMAILS
+$(head -10 "$out/emails.txt")
+EMAILS
+  fi
   ns_finish "$out" ;;
 
 Instagram*)

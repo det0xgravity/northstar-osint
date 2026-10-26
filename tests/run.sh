@@ -140,6 +140,14 @@ check "timeline includes media metadata and dated findings" "grep -q 'Post by ja
 menu ns-missing "Export findings"
 check "findings export grouped by category" "grep -q '## Friends (1)' '$CASE/subject/findings.md'"
 
+section "Username and email variants"
+for t in sherlock holehe; do printf '#!/bin/sh\necho "%s $*"\n' "$t" > "$G/$t"; chmod +x "$G/$t"; done
+PATH="$G:$PATH" menu ns-username "Generate" "Jane Doe" "1999" "yes" "yes"
+vd=$(find "$CASE/variants" -mindepth 1 -maxdepth 1 -type d | head -1)
+check "variants generated" "grep -qx 'jane.doe' '$vd/usernames.txt' && grep -qx 'janedoe99' '$vd/usernames.txt' && grep -qx 'janedoe@gmail.com' '$vd/emails.txt'"
+check "top usernames passed to Sherlock" "grep -q 'sherlock janedoe jane.doe' '$vd/console.log'"
+check "emails checked with holehe" "[ \"\$(grep -c '^holehe ' '$vd/console.log')\" -eq 10 ]"
+
 section "Installer module selection"
 I="$W/inst"; mkdir -p "$I/modules" "$I/bin" "$I/home"
 cp "$R/install.sh" "$I/" && cp -R "$R/lib" "$I/"
