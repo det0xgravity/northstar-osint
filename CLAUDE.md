@@ -90,6 +90,17 @@ Ubuntu, Kali, Parrot, macOS, and the country menus on real hardware.
    with lifted version caps (`modules/40-frameworks.sh`); if it breaks, look for
    a maintained fork or drop it.
 
+## Future ideas (not started)
+
+- **Local search of lawfully held breach data.** Discussed 2026-10-26 and
+  parked by the maintainer. Only "bring your own data": import files the
+  investigator lawfully holds (legal process, incident response, data shared
+  by a CERT or partner) into a local SQLite FTS index, with source and legal
+  basis recorded per import in audit.log, mode 600 storage, masked passwords,
+  and deletion per dataset. Never bundle, download or automate access to
+  breach dumps (forums, Telegram, torrents). An optional offline copy of HIBP
+  Pwned Passwords (hashes only, official downloader, ~40-70 GB) is acceptable.
+
 ## Publishing
 
 - Repo: https://github.com/det0xgravity/northstar-osint (public).
