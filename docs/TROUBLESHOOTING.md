@@ -78,6 +78,9 @@ Run `ghunt login` once and follow its prompts.
 **No Tor Browser or Mullvad Browser in an arm64 VM**
 That's expected: neither has a stable arm64 Linux build yet. See [INSTALL.md](INSTALL.md#running-in-a-vm-on-apple-silicon).
 
+**A menu seems to stop after "Results saved to:"**
+Its next dialog has probably opened behind another window: GNOME doesn't let a new window jump in front of the one you're using. Press Alt+Tab to find it. Since v0.4.3, tools started from the main menu no longer open the file manager by themselves, so this mostly happens after *Image analysis*, which opens the folder so you can drag the image into the search pages. Use **Open latest results** in the main menu to see what a search produced.
+
 **The Activities overview keeps opening**
 northstar turns off the top-left hot corner in VMs and the overview at login. To change either back: **Settings → Multitasking → Hot Corner**, or run `gnome-extensions disable no-overview@fthx`. The overview also opens when you press the Super (Windows/⌘) key. In UTM, that key goes to the VM while it has keyboard focus.
 

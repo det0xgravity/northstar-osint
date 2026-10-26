@@ -15,6 +15,7 @@ while true; do
     "Image analysis" \
     "Country search" \
     "Switch / create case  (current: $case_name)" \
+    "Open latest results" \
     "Open case folder" \
     "Update northstar") || break
 
@@ -32,6 +33,9 @@ while true; do
       ui_info "Active case: $(ns_case)
 Results will be saved under:
 $NS_DATA/Cases/$(ns_case)" ;;
+    "Open latest results")
+      last=$(cat "$NS_CONF/last_result" 2>/dev/null)
+      if [ -n "$last" ] && [ -d "$last" ]; then ui_reveal "$last"; else ui_reveal "$(ns_case_dir)"; fi ;;
     "Open case folder")        ui_reveal "$(ns_case_dir)" ;;
     "Update northstar")        ns-update ;;
   esac

@@ -183,10 +183,17 @@ ns_run() {
   return "${PIPESTATUS[0]}"
 }
 
-# ns_finish <outdir> — shows where results went and keeps a launched terminal open
+# ns_finish <outdir> — shows where results went and keeps a launched terminal open.
+# From the main menu the folder isn't opened: GNOME would put the file manager
+# in front and open the menu's next dialog behind it, which looks like a hang.
 ns_finish() {
   printf '\n\033[1mResults saved to:\033[0m %s\n' "$1"
-  ui_reveal "$1"
+  mkdir -p "$NS_CONF" && printf '%s\n' "$1" > "$NS_CONF/last_result"
+  if [ "${NS_FROM_MAIN:-0}" = 1 ]; then
+    printf 'Back to the Northstar menu: choose "Open latest results" to see them.\n'
+  else
+    ui_reveal "$1"
+  fi
   ns_pause
 }
 

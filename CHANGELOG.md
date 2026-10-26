@@ -4,6 +4,17 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project uses
 [Semantic Versioning](https://semver.org/).
 
+## [0.4.3] - 2026-10-26
+
+### Fixed
+- After a search started from the main menu, the file manager opened in front
+  and GNOME opened the menu behind it, so the menu looked frozen at "Results
+  saved to:". From the main menu, results folders are no longer opened
+  automatically.
+
+### Added
+- "Open latest results" in the main menu.
+
 ## [0.4.2] - 2026-10-26
 
 ### Changed

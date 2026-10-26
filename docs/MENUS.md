@@ -1,6 +1,6 @@
 # Menus
 
-All menus save their output to `~/Northstar/Cases/<active case>/<kind>/<target>_<timestamp>/` and add a line to the case's `audit.log`. Each result folder also has a `console.log` with everything the tools printed. When a search finishes, the folder opens automatically.
+All menus save their output to `~/Northstar/Cases/<active case>/<kind>/<target>_<timestamp>/` and add a line to the case's `audit.log`. Each result folder also has a `console.log` with everything the tools printed. When a tool you started on its own finishes, its folder opens automatically. From the main menu, use **Open latest results** instead, so the menu stays in front.
 
 Launch everything from `northstar`, or each tool on its own (`ns-domain`, etc.) from a terminal or the applications menu.
 
@@ -9,6 +9,7 @@ Launch everything from `northstar`, or each tool on its own (`ns-domain`, etc.) 
 The hub. Besides opening each menu, it lets you:
 
 - **Switch / create case**: sets the active case. Names are sanitised to letters, numbers, `.`, `_`, `@` and `-`.
+- **Open latest results**: the folder from the last search you ran
 - **Open case folder**
 - **Update northstar**: runs `ns-update`.
 

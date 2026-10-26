@@ -95,6 +95,7 @@ northstar                # main menu
 ├── Image analysis       # ns-image
 ├── Country search       # ns-country
 ├── Switch / create case
+├── Open latest results
 ├── Open case folder
 └── Update northstar     # ns-update
 ```
