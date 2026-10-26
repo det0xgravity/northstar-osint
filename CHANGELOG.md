@@ -4,6 +4,16 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project uses
 [Semantic Versioning](https://semver.org/).
 
+## [0.7.0] - 2026-10-26
+
+### Added
+- `shell` module (Linux): zsh as the login shell, with Oh My Zsh,
+  Powerlevel10k (rainbow style; `p10k configure` to change it),
+  zsh-autosuggestions and zsh-syntax-highlighting, all from their official
+  repositories. The MesloLGS NF font is set in GNOME Console, Ptyxis,
+  GNOME Terminal and the XFCE terminal. An existing `~/.zshrc` is kept as
+  `~/.zshrc.pre-northstar`.
+
 ## [0.6.1] - 2026-10-26
 
 ### Fixed

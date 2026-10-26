@@ -91,6 +91,19 @@ Creates a private Python environment with Google's [libphonenumber](https://gith
 - **Wallpaper** (GNOME and XFCE): northstar's own desktop background, a night sky with a north star, aurora borealis and a Canadian maple leaf. It's only set if you're still on the distribution's default background. The image is in `~/.local/share/northstar/share/wallpaper/`.
 - **macOS**: `~/Applications/Northstar.app`. Your Mac's wallpaper is never changed.
 
+## shell *(Linux only)*
+
+| Component | Purpose |
+|---|---|
+| [zsh](https://www.zsh.org) | Becomes your login shell |
+| [Oh My Zsh](https://ohmyz.sh) | zsh framework; plugins `git`, `sudo` (press Esc twice to add sudo), `colored-man-pages` |
+| [Powerlevel10k](https://github.com/romkatv/powerlevel10k) | The prompt, using its own "rainbow" style. Restyle any time with `p10k configure` |
+| [zsh-autosuggestions](https://github.com/zsh-users/zsh-autosuggestions) | Suggests commands from your history as you type (→ to accept) |
+| [zsh-syntax-highlighting](https://github.com/zsh-users/zsh-syntax-highlighting) | Colours commands as you type, so typos show in red |
+| [MesloLGS NF](https://github.com/romkatv/powerlevel10k-media) | The font Powerlevel10k's icons need, set in GNOME Console, Ptyxis, GNOME Terminal and the XFCE terminal |
+
+All of it is cloned from the official repositories and updated by `ns-update`. Your existing `~/.zshrc`, if any, is kept as `~/.zshrc.pre-northstar`. The new `~/.zshrc` is yours to edit: northstar won't rewrite it. Commands that start with a space aren't saved in history, which is handy for anything sensitive. On macOS this module doesn't run, and your shell is left alone.
+
 ## extras
 
 | Tool | Purpose |

@@ -81,6 +81,7 @@ ns-update                                # pull the latest version and upgrade e
 | `darkweb` | Tor client service and torsocks for `ns-darkweb` |
 | `countries` | Phone-number analysis for the country menus (the country bookmarks come with `browsers`) |
 | `desktop` | App-menu launchers, GNOME dock favourites, macOS `Northstar.app` |
+| `shell` | zsh with Oh My Zsh, the Powerlevel10k prompt, autosuggestions, syntax highlighting and the MesloLGS NF font *(Linux)* |
 | `extras` | KeePassXC, Flameshot (bound to Print Screen on GNOME), OBS Studio |
 | `vm` | QEMU guest agent, xrdp, clone-safe identity, `ns-seal` *(Linux only)* |
 

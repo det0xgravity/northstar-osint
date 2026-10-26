@@ -123,6 +123,7 @@ rm -f ~/.local/share/applications/northstar.desktop ~/.local/share/applications/
 sudo rm -f /etc/firefox/policies/policies.json /etc/firefox-esr/policies/policies.json \
            /etc/brave/policies/managed/northstar.json /usr/local/sbin/ns-seal
 # Remove the line tagged "northstar-osint" from ~/.bashrc / ~/.zshrc / ~/.profile
+# shell module: chsh -s /bin/bash; rm -rf ~/.oh-my-zsh ~/.p10k.zsh; mv ~/.zshrc.pre-northstar ~/.zshrc (if it exists)
 ```
 
 Your case data in `~/Northstar` is left alone. Delete it yourself if you mean to.
