@@ -4,6 +4,17 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project uses
 [Semantic Versioning](https://semver.org/).
 
+## [0.4.1] - 2026-10-26
+
+### Fixed
+- Menus could hang after a search on GNOME (Wayland): `wl-copy` waits to grab
+  focus because GNOME lacks the clipboard data-control protocol. The clipboard
+  now uses `xclip` through XWayland when available, and any clipboard helper
+  is given at most 3 seconds.
+- Username search: Sherlock's text file needs `--txt` in current Sherlock, and
+  Blackbird saved nothing (it needs `--csv`/`--json` and writes into its own
+  folder). Both now save into the case folder.
+
 ## [0.4.0] - 2026-10-26
 
 ### Added

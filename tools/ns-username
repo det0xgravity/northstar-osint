@@ -14,10 +14,17 @@ Username*)
   u=$(ui_entry "Username (without @):") || exit 0
   u="${u#@}"
   out=$(ns_outdir username "$u")
-  ns_run "$out" sherlock "$u" --print-found --output "$out/sherlock.txt"
+  ns_run "$out" sherlock "$u" --print-found --txt --output "$out/sherlock.txt"
   ns_run "$out" maigret "$u" --html --folderoutput "$out/maigret"
   ns_run "$out" socialscan "$u"
-  ns_run "$out" blackbird --username "$u"
+  # Blackbird always saves into its own install folder; move this run's files
+  bb="$NS_HOME/src/blackbird/results"; mark="$out/.blackbird-start"; touch "$mark"
+  ns_run "$out" blackbird --username "$u" --csv --json
+  if [ -d "$bb" ]; then
+    mkdir -p "$out/blackbird"
+    find "$bb" -mindepth 1 -maxdepth 1 -newer "$mark" -exec mv {} "$out/blackbird/" \;
+  fi
+  rm -f "$mark"
   ui_clip "$u"
   ui_open "https://whatsmyname.app/" "$(ns_google "\"$u\"")"
   echo "Username copied to clipboard for WhatsMyName."

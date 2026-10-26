@@ -105,11 +105,21 @@ ui_open() {
   fi
 }
 
+# Clipboard helpers can block: wl-copy on GNOME waits to grab focus because
+# mutter lacks the data-control protocol. So prefer xclip (works through
+# XWayland on GNOME, and under xrdp), cap each attempt at 3 seconds, and keep
+# the background clipboard owner off our stdout/stderr.
+_ui_clip_run() {
+  if ns_cmd timeout; then timeout 3 "$@"; else "$@"; fi
+}
 ui_clip() {
   if ui_mac; then printf '%s' "$1" | pbcopy
-  elif [ -n "${WAYLAND_DISPLAY:-}" ] && ns_cmd wl-copy; then printf '%s' "$1" | wl-copy
-  elif ns_cmd xclip; then printf '%s' "$1" | xclip -selection clipboard
+  elif [ -n "${DISPLAY:-}" ] && ns_cmd xclip; then
+    printf '%s' "$1" | _ui_clip_run xclip -selection clipboard >/dev/null 2>&1
+  elif [ -n "${WAYLAND_DISPLAY:-}" ] && ns_cmd wl-copy; then
+    printf '%s' "$1" | _ui_clip_run wl-copy >/dev/null 2>&1
   fi
+  return 0
 }
 
 ui_reveal() {

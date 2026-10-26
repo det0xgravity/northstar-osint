@@ -16,7 +16,7 @@ The hub. Besides opening each menu, it lets you:
 
 | Option | Runs | Output |
 |---|---|---|
-| Username search | sherlock, maigret (HTML report), socialscan, blackbird; opens WhatsMyName and a Google search | `sherlock.txt`, `maigret/`, `console.log` |
+| Username search | sherlock, maigret (HTML report), socialscan, blackbird; opens WhatsMyName and a Google search | `sherlock.txt`, `maigret/`, `blackbird/` (CSV, JSON), `console.log` |
 | Email search | holehe (registered sites only), socialscan, h8mail; opens HIBP, Epieos, IntelX | `h8mail.csv`, `console.log` |
 | Google account | `ghunt email` | `ghunt.json` |
 | Instagram profile details | toutatis (session ID **redacted** from the audit log) | `console.log` |

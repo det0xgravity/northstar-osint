@@ -64,6 +64,9 @@ Many sources need API keys. Each tool's own documentation explains where its key
 **amass leaves a process running**
 Amass v5 starts a background engine (`amass engine`) the first time you run an enumeration, and it keeps running so later searches start faster. It listens on port 4000 **on all network interfaces**, so stop it when you're done, especially on a shared network: `pkill -f 'amass engine'`. Its database lives in `~/.config/amass` (Linux) or `~/Library/Application Support/amass` (macOS), not in the case folder.
 
+**Maigret reports "Too many errors of type Bot protection"**
+Some sites block automated checks from your IP address, so those sites show no result rather than a false "not found". Retry later, or from a different network or VPN exit.
+
 **Instagram tools fail or rate-limit**
 Use a sock-puppet login: `instaloader --login <puppet>`. For toutatis, use the `sessionid` cookie from that account.
 
