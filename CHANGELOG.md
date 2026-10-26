@@ -4,6 +4,13 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project uses
 [Semantic Versioning](https://semver.org/).
 
+## [0.7.3] - 2026-10-26
+
+### Changed
+- The prompt shows the time on the right (HH:MM:SS), so terminal screenshots
+  record when each command ran. Command duration still appears for commands
+  that take 3 seconds or more.
+
 ## [0.7.2] - 2026-10-26
 
 ### Changed
