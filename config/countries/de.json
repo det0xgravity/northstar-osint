@@ -1,0 +1,162 @@
+{
+  "code": "DE",
+  "name": "Germany",
+  "phone_region": "DE",
+  "searches": [
+    {
+      "label": "Person",
+      "prompt": "Full name:",
+      "links": [
+        "g:\"{q}\" (site:openjur.de OR site:dejure.org OR site:rechtsprechung-im-internet.de)",
+        "g:\"{q}\" (site:linkedin.com/in OR site:xing.com/profile) Deutschland",
+        "g:\"{q}\" (Traueranzeige OR Todesanzeige)",
+        "g:\"{q}\" (site:spiegel.de OR site:zeit.de OR site:sueddeutsche.de OR site:faz.net OR site:tagesschau.de)",
+        "https://neu.insolvenzbekanntmachungen.de/",
+        "https://www.dastelefonbuch.de/"
+      ]
+    },
+    {
+      "label": "Business / organization",
+      "prompt": "Company or organization name:",
+      "links": [
+        "https://www.unternehmensregister.de/",
+        "https://www.handelsregister.de/",
+        "https://www.bundesanzeiger.de/",
+        "https://opencorporates.com/companies/de?q={q}",
+        "https://neu.insolvenzbekanntmachungen.de/",
+        "https://register.dpma.de/",
+        "g:\"{q}\" (Betrug OR Klage OR Insolvenz OR Abmahnung)"
+      ],
+      "note": "German registers can't be pre-filled: paste the name from your clipboard."
+    },
+    {
+      "label": "Phone number",
+      "prompt": "Phone number (any format):",
+      "type": "phone",
+      "links": [
+        "g:\"{alt}\" OR \"{national}\" OR \"{intl}\" OR \"{e164}\"",
+        "g:\"{alt}\" OR \"{national}\" OR \"{e164}\" (scam OR fraud OR spam)",
+        "g:\"{alt}\" OR \"{national}\" OR \"{intl}\" (site:facebook.com OR site:linkedin.com OR site:tellows.de OR site:werruft.info)",
+        "https://www.dastelefonbuch.de/",
+        "https://www.dasoertliche.de/"
+      ]
+    },
+    {
+      "label": "Address / property",
+      "prompt": "Address or postcode:",
+      "links": [
+        "https://www.google.com/maps/search/?api=1&query={q}",
+        "https://www.openstreetmap.org/search?query={q}",
+        "g:\"{q}\""
+      ]
+    },
+    {
+      "label": "Courts & legal",
+      "prompt": "Name, company or case:",
+      "links": [
+        "https://www.rechtsprechung-im-internet.de/",
+        "https://openjur.de/",
+        "g:\"{q}\" site:dejure.org OR site:openjur.de"
+      ]
+    },
+    {
+      "label": "Financial & regulatory check",
+      "prompt": "Person or firm name:",
+      "links": [
+        "https://portal.mvp.bafin.de/database/InstInfo/",
+        "g:\"{q}\" site:bafin.de (Warnung OR Verbraucherschutz)",
+        "https://www.finanz-sanktionsliste.de/fisalis/",
+        "https://www.sanctionsmap.eu/"
+      ]
+    },
+    {
+      "label": "Political & lobbying",
+      "prompt": "Person or organization name:",
+      "links": [
+        "https://www.lobbyregister.bundestag.de/",
+        "https://www.abgeordnetenwatch.de/",
+        "g:\"{q}\" site:bundestag.de (Parteispende OR Spende)"
+      ]
+    },
+    {
+      "label": "Aircraft",
+      "prompt": "Registration (e.g. D-EABC):",
+      "transform": [
+        "upper"
+      ],
+      "links": [
+        "https://www.flightradar24.com/data/aircraft/{q}",
+        "g:\"{q}\" aircraft"
+      ]
+    }
+  ],
+  "bookmarks": [
+    {
+      "name": "Companies & Finance",
+      "children": [
+        {
+          "name": "Unternehmensregister",
+          "url": "https://www.unternehmensregister.de/"
+        },
+        {
+          "name": "Handelsregister",
+          "url": "https://www.handelsregister.de/"
+        },
+        {
+          "name": "Bundesanzeiger",
+          "url": "https://www.bundesanzeiger.de/"
+        },
+        {
+          "name": "Insolvenzbekanntmachungen",
+          "url": "https://neu.insolvenzbekanntmachungen.de/"
+        },
+        {
+          "name": "BaFin Company Database",
+          "url": "https://portal.mvp.bafin.de/database/InstInfo/"
+        },
+        {
+          "name": "Finanz-Sanktionsliste",
+          "url": "https://www.finanz-sanktionsliste.de/fisalis/"
+        },
+        {
+          "name": "DPMAregister (trade marks)",
+          "url": "https://register.dpma.de/"
+        }
+      ]
+    },
+    {
+      "name": "Law & Politics",
+      "children": [
+        {
+          "name": "Rechtsprechung im Internet",
+          "url": "https://www.rechtsprechung-im-internet.de/"
+        },
+        {
+          "name": "openJur",
+          "url": "https://openjur.de/"
+        },
+        {
+          "name": "Lobbyregister (Bundestag)",
+          "url": "https://www.lobbyregister.bundestag.de/"
+        },
+        {
+          "name": "abgeordnetenwatch.de",
+          "url": "https://www.abgeordnetenwatch.de/"
+        }
+      ]
+    },
+    {
+      "name": "People & Phone",
+      "children": [
+        {
+          "name": "Das Telefonbuch",
+          "url": "https://www.dastelefonbuch.de/"
+        },
+        {
+          "name": "Das Örtliche",
+          "url": "https://www.dasoertliche.de/"
+        }
+      ]
+    }
+  ]
+}

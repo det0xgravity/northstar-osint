@@ -65,9 +65,9 @@ You can paste a full URL as the domain. The scheme, path and `www.` are stripped
 | Reverse search an image URL | Opens Google Lens, Yandex, Bing and TinEye with the URL; saves a copy and its EXIF |
 | Analyze a local image | Copies the image to the case, saves its EXIF and a SHA-256 hash, opens Maps if GPS is present, and opens reverse-search pages ready for drag-and-drop |
 
-## ns-canada
+## ns-country
 
-See [CANADA.md](CANADA.md).
+Country-specific public-records searches. `ns-country` asks for a country, or takes a code: `ns-country GB`. `ns-canada` opens the Canada pack directly. See [COUNTRIES.md](COUNTRIES.md).
 
 ## ns-update
 

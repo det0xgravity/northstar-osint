@@ -77,9 +77,9 @@ On arm64 Linux, such as a VM on Apple Silicon, Tor Browser and Mullvad Browser a
 
 > Don't add extensions to Tor Browser or Mullvad Browser. They protect you by making every user look identical, and each extension makes you more unique.
 
-## canada
+## countries
 
-Creates a private Python environment with Google's [libphonenumber](https://github.com/daviddrysdale/python-phonenumbers) for the phone analysis in `ns-canada`. See [CANADA.md](CANADA.md).
+Creates a private Python environment with Google's [libphonenumber](https://github.com/daviddrysdale/python-phonenumbers) for the phone analysis in `ns-country`. The country packs themselves are installed by `core`, and their bookmark folders by `browsers`. See [COUNTRIES.md](COUNTRIES.md).
 
 ## desktop
 

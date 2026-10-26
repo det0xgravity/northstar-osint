@@ -44,6 +44,11 @@ Then add it to the module table in `docs/MODULES.md`.
 Edit `config/bookmarks.json` (keep the folder structure), then run
 `./tools/ns-linkcheck config/bookmarks.json`.
 
+### Add or improve a country
+Each country is one JSON file in `config/countries/`. The format, and the checks to run, are in
+[docs/COUNTRIES.md](docs/COUNTRIES.md#adding-or-improving-a-country). Local knowledge is the
+most valuable contribution here: registries investigators in that country actually use.
+
 ### Add a Firefox extension
 Add its addons.mozilla.org **slug** (the part of the URL after `/addon/`) to
 `config/firefox-extensions.txt`. The GUID is looked up automatically.

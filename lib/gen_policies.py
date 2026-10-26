@@ -57,6 +57,7 @@ def main():
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--bookmarks", required=True)
     ap.add_argument("--local", help="optional user bookmarks file, merged in")
+    ap.add_argument("--countries", help="folder of country packs; their bookmarks go under 'Countries'")
     ap.add_argument("--extensions", required=True, action="append",
                     help="add-on slug list; repeat to add files (missing files are skipped)")
     ap.add_argument("--out", required=True)
@@ -69,6 +70,16 @@ def main():
         with open(args.local, encoding="utf-8") as fh:
             tree += json.load(fh)
         print(f"   merged local bookmarks from {args.local}")
+
+    if args.countries and os.path.isdir(args.countries):
+        packs = []
+        for fn in sorted(os.listdir(args.countries)):
+            if fn.endswith(".json"):
+                with open(os.path.join(args.countries, fn), encoding="utf-8") as fh:
+                    packs.append(json.load(fh))
+        packs.sort(key=lambda p: (p["code"] != "INT", p["name"]))   # International first
+        tree.append({"name": "Countries", "children": [
+            {"name": p["name"], "children": p["bookmarks"]} for p in packs if p.get("bookmarks")]})
 
     extensions, missing = {}, []
     slugs = []
@@ -112,8 +123,9 @@ def main():
                  f"    <DT><H3>{html.escape(args.folder)}</H3>\n    <DL><p>\n"
                  + to_html(tree) + "\n    </DL><p>\n</DL><p>\n")
 
-    links = sum(1 for f in tree for _ in f.get("children", []))
-    print(f"   {len(extensions)} extensions, {links} bookmarks in {len(tree)} folders")
+    def count(nodes):
+        return sum(count(n["children"]) if "children" in n else 1 for n in nodes)
+    print(f"   {len(extensions)} extensions, {count(tree)} bookmarks")
     return 1 if missing else 0
 
 

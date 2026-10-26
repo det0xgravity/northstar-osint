@@ -1,0 +1,65 @@
+#!/usr/bin/env bash
+# ns-country — country-specific public-records searches. Pick a country, then a
+# search type: opens targeted searches and that country's registries in the
+# browser, copies the query for registries that can't be pre-filled, and logs
+# every search to the case. Countries are data packs in config/countries/.
+# Usage: ns-country [COUNTRY-CODE]
+# shellcheck source=../lib/ui.sh
+. "${NS_HOME:-$HOME/.local/share/northstar}/lib/ui.sh"
+
+PY="$NS_HOME/venvs/core/bin/python"          # has phonenumbers for phone analysis
+[ -x "$PY" ] || PY=python3
+pack() { NS_COUNTRIES="$NS_HOME/config/countries" "$PY" "$NS_HOME/lib/ns_country.py" "$@"; }
+
+code=$(ns_upper "${1:-}")
+if [ -z "$code" ]; then
+  last=$(cat "$NS_CONF/last_country" 2>/dev/null)
+  items=()
+  while IFS=$'\t' read -r c name; do
+    [ -n "$c" ] || continue
+    if [ "$c" = "$last" ]; then
+      items=("$name ($c)" ${items[@]+"${items[@]}"})     # last-used country first
+    else
+      items+=("$name ($c)")
+    fi
+  done < <(pack list)
+  [ ${#items[@]} -gt 0 ] || { ui_error "No country packs found in $NS_HOME/config/countries. Run ns-update."; exit 1; }
+  pick=$(ui_list "Country search" "${items[@]}") || exit 0
+  code=${pick##*(}; code=${code%)}
+fi
+
+labels=()
+while IFS= read -r l; do
+  case "$l" in error*) ui_error "${l#error?}"; exit 1 ;; esac
+  [ -n "$l" ] && labels+=("$l")
+done < <(pack searches "$code")
+[ ${#labels[@]} -gt 0 ] || { ui_error "Unknown country code: $code"; exit 1; }
+mkdir -p "$NS_CONF" && printf '%s\n' "$code" > "$NS_CONF/last_country"
+
+choice=$(ui_list "$(pack name "$code") search" "${labels[@]}") || exit 0
+q=$(ui_entry "$(pack prompt "$code" "$choice")") || exit 0
+
+urls=(); info=""; clip="$q"; dir="$code"; what="search"
+while IFS=$'\t' read -r kind val; do
+  case "$kind" in
+    url)   urls+=("$val") ;;
+    info)  info="$info$val
+" ;;
+    clip)  clip="$val" ;;
+    dir)   dir="$val" ;;
+    kind)  what="$val" ;;
+    error) ui_error "$val"; exit 1 ;;
+  esac
+done < <(pack run "$code" "$choice" "$q")
+
+ui_open ${urls[@]+"${urls[@]}"}
+out=$(ns_outdir "$dir" "$clip")
+printf 'country\t%s\nsearch\t%s\nquery\t%s\n' "$code" "$choice" "$clip" > "$out/query.txt"
+[ -n "$info" ] && printf '%s' "$info" > "$out/details.txt"
+printf '%s\n' ${urls[@]+"${urls[@]}"} > "$out/links.txt"
+ns_audit "ns-country:$code:$what" "$clip" "${#urls[@]} searches opened in browser"
+ui_clip "$clip"
+ui_info "${info:+$info
+}Searches are open in your browser.
+
+\"$clip\" is on your clipboard - paste it (Ctrl/Cmd+V) into any registry page that opened without a search."

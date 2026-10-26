@@ -1,0 +1,150 @@
+{
+  "code": "IE",
+  "name": "Ireland",
+  "phone_region": "IE",
+  "searches": [
+    {
+      "label": "Person",
+      "prompt": "Full name:",
+      "links": [
+        "g:\"{q}\" site:courts.ie",
+        "g:\"{q}\" site:rip.ie",
+        "g:\"{q}\" site:ie.linkedin.com",
+        "g:\"{q}\" (site:irishtimes.com OR site:independent.ie OR site:rte.ie OR site:thejournal.ie)",
+        "g:\"{q}\" site:irisoifigiuil.ie",
+        "https://www.courts.ie/judgments"
+      ]
+    },
+    {
+      "label": "Business / organization",
+      "prompt": "Company or organization name:",
+      "links": [
+        "https://core.cro.ie/",
+        "https://opencorporates.com/companies/ie?q={q}",
+        "https://www.charitiesregulator.ie/en/information-for-the-public/search-the-register-of-charities",
+        "https://registers.centralbank.ie/",
+        "https://www.etenders.gov.ie/",
+        "g:\"{q}\" site:cro.ie OR site:irisoifigiuil.ie"
+      ],
+      "note": "CRO and the Charities Register can't be pre-filled: paste the name from your clipboard."
+    },
+    {
+      "label": "Phone number",
+      "prompt": "Phone number (any format):",
+      "type": "phone",
+      "links": [
+        "g:\"{alt}\" OR \"{national}\" OR \"{intl}\" OR \"{e164}\"",
+        "g:\"{alt}\" OR \"{national}\" OR \"{e164}\" (scam OR fraud OR spam)",
+        "g:\"{alt}\" OR \"{national}\" OR \"{intl}\" (site:facebook.com OR site:linkedin.com OR site:donedeal.ie OR site:adverts.ie)"
+      ]
+    },
+    {
+      "label": "Address / property",
+      "prompt": "Address or postcode:",
+      "links": [
+        "https://www.google.com/maps/search/?api=1&query={q}",
+        "https://www.openstreetmap.org/search?query={q}",
+        "g:\"{q}\"",
+        "https://www.propertypriceregister.ie/",
+        "https://www.landdirect.ie/"
+      ]
+    },
+    {
+      "label": "Courts & legal",
+      "prompt": "Name, company or case:",
+      "links": [
+        "https://www.courts.ie/judgments",
+        "https://www.bailii.org/ie/",
+        "g:\"{q}\" site:courts.ie"
+      ]
+    },
+    {
+      "label": "Financial & regulatory check",
+      "prompt": "Person or firm name:",
+      "links": [
+        "https://registers.centralbank.ie/",
+        "https://www.centralbank.ie/consumer-hub/unauthorised-firms",
+        "g:\"{q}\" site:centralbank.ie",
+        "g:\"{q}\" site:isi.gov.ie"
+      ]
+    },
+    {
+      "label": "Political donations & lobbying",
+      "prompt": "Person or organization name:",
+      "links": [
+        "https://www.sipo.ie/",
+        "https://www.lobbying.ie/",
+        "g:\"{q}\" site:lobbying.ie OR site:sipo.ie"
+      ]
+    }
+  ],
+  "bookmarks": [
+    {
+      "name": "Corporate & Financial",
+      "children": [
+        {
+          "name": "Companies Registration Office (CORE)",
+          "url": "https://core.cro.ie/"
+        },
+        {
+          "name": "Charities Register",
+          "url": "https://www.charitiesregulator.ie/en/information-for-the-public/search-the-register-of-charities"
+        },
+        {
+          "name": "Central Bank Registers",
+          "url": "https://registers.centralbank.ie/"
+        },
+        {
+          "name": "Central Bank Unauthorised Firms",
+          "url": "https://www.centralbank.ie/consumer-hub/unauthorised-firms"
+        },
+        {
+          "name": "eTenders",
+          "url": "https://www.etenders.gov.ie/"
+        },
+        {
+          "name": "Iris Oifigiúil (state gazette)",
+          "url": "https://www.irisoifigiuil.ie/"
+        }
+      ]
+    },
+    {
+      "name": "Legal & Government",
+      "children": [
+        {
+          "name": "Courts Service Judgments",
+          "url": "https://www.courts.ie/judgments"
+        },
+        {
+          "name": "BAILII Ireland",
+          "url": "https://www.bailii.org/ie/"
+        },
+        {
+          "name": "Standards in Public Office (SIPO)",
+          "url": "https://www.sipo.ie/"
+        },
+        {
+          "name": "Register of Lobbying",
+          "url": "https://www.lobbying.ie/"
+        }
+      ]
+    },
+    {
+      "name": "Property & People",
+      "children": [
+        {
+          "name": "Residential Property Price Register",
+          "url": "https://www.propertypriceregister.ie/"
+        },
+        {
+          "name": "landdirect.ie (Tailte Éireann)",
+          "url": "https://www.landdirect.ie/"
+        },
+        {
+          "name": "RIP.ie (death notices)",
+          "url": "https://rip.ie/"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,225 @@
+{
+  "code": "GB",
+  "name": "United Kingdom",
+  "phone_region": "GB",
+  "searches": [
+    {
+      "label": "Person",
+      "prompt": "Full name:",
+      "links": [
+        "https://find-and-update.company-information.service.gov.uk/search/officers?q={q}",
+        "https://find-and-update.company-information.service.gov.uk/search/disqualified-officers?q={q}",
+        "https://www.thegazette.co.uk/all-notices/notice?text={q}",
+        "https://caselaw.nationalarchives.gov.uk/search?query={q}",
+        "g:\"{q}\" site:uk.linkedin.com",
+        "g:\"{q}\" (site:funeral-notices.co.uk OR site:legacy.com) UK",
+        "g:\"{q}\" (site:bbc.co.uk OR site:theguardian.com OR site:thetimes.co.uk)",
+        "https://www.insolvencydirect.bis.gov.uk/eiir/",
+        "https://probatesearch.service.gov.uk/"
+      ]
+    },
+    {
+      "label": "Business / organization",
+      "prompt": "Company or organization name:",
+      "links": [
+        "https://find-and-update.company-information.service.gov.uk/search/companies?q={q}",
+        "https://opencorporates.com/companies/gb?q={q}",
+        "https://register-of-charities.charitycommission.gov.uk/en/charity-search",
+        "https://register.fca.org.uk/s/",
+        "https://www.find-tender.service.gov.uk/Search",
+        "https://www.contractsfinder.service.gov.uk/Search",
+        "https://trademarks.ipo.gov.uk/ipo-tmtext",
+        "g:\"{q}\" (scam OR fraud OR complaint OR tribunal) UK"
+      ]
+    },
+    {
+      "label": "Phone number",
+      "prompt": "Phone number (any format):",
+      "type": "phone",
+      "links": [
+        "g:\"{alt}\" OR \"{national}\" OR \"{intl}\" OR \"{e164}\"",
+        "g:\"{alt}\" OR \"{national}\" OR \"{e164}\" (scam OR fraud OR spam)",
+        "g:\"{alt}\" OR \"{national}\" OR \"{intl}\" (site:facebook.com OR site:linkedin.com OR site:who-called.co.uk OR site:tellows.co.uk)"
+      ]
+    },
+    {
+      "label": "Address / property",
+      "prompt": "Address or postcode:",
+      "links": [
+        "https://www.google.com/maps/search/?api=1&query={q}",
+        "https://www.openstreetmap.org/search?query={q}",
+        "g:\"{q}\"",
+        "https://search-property-information.service.gov.uk/",
+        "https://find-energy-certificate.service.gov.uk/",
+        "https://landregistry.data.gov.uk/app/ppd",
+        "https://www.police.uk/"
+      ]
+    },
+    {
+      "label": "Courts & legal",
+      "prompt": "Name, company or case:",
+      "links": [
+        "https://caselaw.nationalarchives.gov.uk/search?query={q}",
+        "https://www.bailii.org/",
+        "https://www.thegazette.co.uk/all-notices/notice?text={q}"
+      ]
+    },
+    {
+      "label": "Financial & regulatory check",
+      "prompt": "Person or firm name:",
+      "links": [
+        "https://register.fca.org.uk/s/",
+        "https://www.fca.org.uk/scamsmart/warning-list",
+        "https://find-and-update.company-information.service.gov.uk/search/disqualified-officers?q={q}",
+        "https://www.insolvencydirect.bis.gov.uk/eiir/",
+        "https://www.gov.uk/government/publications/the-uk-sanctions-list",
+        "g:\"{q}\" site:fca.org.uk"
+      ]
+    },
+    {
+      "label": "Political donations & interests",
+      "prompt": "Person or organization name:",
+      "links": [
+        "https://search.electoralcommission.org.uk/",
+        "g:\"{q}\" site:parliament.uk (interests OR register)",
+        "https://registrarofconsultantlobbyists.org.uk/"
+      ]
+    },
+    {
+      "label": "Vehicle (registration)",
+      "prompt": "Registration number:",
+      "transform": [
+        "alnum",
+        "upper"
+      ],
+      "links": [
+        "https://vehicleenquiry.service.gov.uk/",
+        "https://www.check-mot.service.gov.uk/",
+        "g:\"{q}\""
+      ],
+      "note": "DVLA and MOT checks can't be pre-filled: paste the registration from your clipboard."
+    },
+    {
+      "label": "Aircraft",
+      "prompt": "Registration (e.g. G-ABCD):",
+      "transform": [
+        "upper"
+      ],
+      "links": [
+        "https://www.caa.co.uk/aircraft-register/g-info/",
+        "https://www.flightradar24.com/data/aircraft/{q}",
+        "g:\"{q}\" aircraft"
+      ]
+    }
+  ],
+  "bookmarks": [
+    {
+      "name": "Corporate & Financial",
+      "children": [
+        {
+          "name": "Companies House",
+          "url": "https://find-and-update.company-information.service.gov.uk/"
+        },
+        {
+          "name": "Charity Commission Register",
+          "url": "https://register-of-charities.charitycommission.gov.uk/"
+        },
+        {
+          "name": "FCA Financial Services Register",
+          "url": "https://register.fca.org.uk/s/"
+        },
+        {
+          "name": "FCA Warning List",
+          "url": "https://www.fca.org.uk/scamsmart/warning-list"
+        },
+        {
+          "name": "Individual Insolvency Register",
+          "url": "https://www.insolvencydirect.bis.gov.uk/eiir/"
+        },
+        {
+          "name": "UK Sanctions List",
+          "url": "https://www.gov.uk/government/publications/the-uk-sanctions-list"
+        },
+        {
+          "name": "Find a Tender",
+          "url": "https://www.find-tender.service.gov.uk/"
+        },
+        {
+          "name": "Contracts Finder",
+          "url": "https://www.contractsfinder.service.gov.uk/"
+        },
+        {
+          "name": "UK IPO Trade Mark Search",
+          "url": "https://trademarks.ipo.gov.uk/ipo-tmtext"
+        }
+      ]
+    },
+    {
+      "name": "Legal & Government",
+      "children": [
+        {
+          "name": "Find Case Law (National Archives)",
+          "url": "https://caselaw.nationalarchives.gov.uk/"
+        },
+        {
+          "name": "BAILII",
+          "url": "https://www.bailii.org/"
+        },
+        {
+          "name": "The Gazette",
+          "url": "https://www.thegazette.co.uk/"
+        },
+        {
+          "name": "Probate Search",
+          "url": "https://probatesearch.service.gov.uk/"
+        },
+        {
+          "name": "Electoral Commission Donations",
+          "url": "https://search.electoralcommission.org.uk/"
+        },
+        {
+          "name": "Register of Consultant Lobbyists",
+          "url": "https://registrarofconsultantlobbyists.org.uk/"
+        }
+      ]
+    },
+    {
+      "name": "Property & Places",
+      "children": [
+        {
+          "name": "HM Land Registry Property Search",
+          "url": "https://search-property-information.service.gov.uk/"
+        },
+        {
+          "name": "Price Paid Data",
+          "url": "https://landregistry.data.gov.uk/app/ppd"
+        },
+        {
+          "name": "Energy Performance Certificates",
+          "url": "https://find-energy-certificate.service.gov.uk/"
+        },
+        {
+          "name": "Police.uk Crime Map",
+          "url": "https://www.police.uk/"
+        }
+      ]
+    },
+    {
+      "name": "Transport",
+      "children": [
+        {
+          "name": "DVLA Vehicle Enquiry",
+          "url": "https://vehicleenquiry.service.gov.uk/"
+        },
+        {
+          "name": "MOT History",
+          "url": "https://www.check-mot.service.gov.uk/"
+        },
+        {
+          "name": "CAA G-INFO Aircraft Register",
+          "url": "https://www.caa.co.uk/aircraft-register/g-info/"
+        }
+      ]
+    }
+  ]
+}

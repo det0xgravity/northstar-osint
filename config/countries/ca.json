@@ -1,0 +1,373 @@
+{
+  "code": "CA",
+  "name": "Canada",
+  "phone_region": "CA",
+  "searches": [
+    {
+      "label": "Person",
+      "prompt": "Full name:",
+      "links": [
+        "g:\"{q}\" site:canlii.org",
+        "g:\"{q}\" (site:legacy.com OR site:inmemoriam.ca OR site:dignitymemorial.com) Canada",
+        "g:\"{q}\" site:ca.linkedin.com",
+        "g:\"{q}\" (site:cbc.ca OR site:ctvnews.ca OR site:globalnews.ca OR site:thestar.com OR site:theglobeandmail.com)",
+        "g:\"{q}\" site:gazette.gc.ca",
+        "g:\"{q}\" (site:ontario.ca OR site:canada.ca OR site:gc.ca)",
+        "https://www.canada411.ca/",
+        "https://geds-sage.gc.ca/"
+      ]
+    },
+    {
+      "label": "Business / organization",
+      "prompt": "Business or organization name:",
+      "links": [
+        "https://opencorporates.com/companies?q={q}",
+        "https://ised-isde.canada.ca/cc/lgcy/fdrlCrpSrch.html",
+        "https://www.ontario.ca/page/ontario-business-registry",
+        "https://www.sedarplus.ca/",
+        "https://apps.cra-arc.gc.ca/ebci/hacc/srch/pub/dsplyAdvncdSrch",
+        "https://fintrac-canafe.canada.ca/msb-esm/reg-eng",
+        "g:\"{q}\" site:canlii.org",
+        "g:\"{q}\" (scam OR fraud OR complaint OR lawsuit) Canada"
+      ]
+    },
+    {
+      "label": "Phone number",
+      "type": "phone",
+      "prompt": "Phone number (any format):",
+      "links": [
+        "g:\"{alt}\" OR \"{national}\" OR \"{intl}\" OR \"{digits}\"",
+        "g:\"{alt}\" OR \"{digits}\" (scam OR fraud OR spam)",
+        "g:\"{alt}\" OR \"{national}\" (site:facebook.com OR site:kijiji.ca OR site:linkedin.com)",
+        "https://www.canada411.ca/",
+        "https://www.cnac.ca/"
+      ],
+      "note": "Canada411's reverse lookup can't be pre-filled: paste the number from your clipboard."
+    },
+    {
+      "label": "Address / postal code",
+      "prompt": "Address or postal code:",
+      "links": [
+        "https://www.google.com/maps/search/?api=1&query={q}",
+        "https://www.openstreetmap.org/search?query={q}",
+        "g:\"{q}\"",
+        "https://www.onland.ca/",
+        "https://www.aboutmyproperty.ca/",
+        "https://www.canadapost-postescanada.ca/info/mc/personal/postalcode/fpc.jsf"
+      ]
+    },
+    {
+      "label": "Financial & regulatory check",
+      "prompt": "Person or firm name:",
+      "links": [
+        "https://www.aretheyregistered.ca/",
+        "https://fintrac-canafe.canada.ca/msb-esm/reg-eng",
+        "https://fintrac-canafe.canada.ca/msb-esm/revoked-revoquee-eng",
+        "https://www.ic.gc.ca/app/scr/bsf-osb/ins/login.html?lang=eng",
+        "https://www.international.gc.ca/world-monde/international_relations-relations_internationales/sanctions/consolidated-consolide.aspx?lang=eng",
+        "g:\"{q}\" (site:osc.ca OR site:bcsc.bc.ca OR site:securities-administrators.ca OR site:albertasecurities.com OR site:lautorite.qc.ca)",
+        "g:\"{q}\" site:canlii.org"
+      ]
+    },
+    {
+      "label": "Political contributions & lobbying",
+      "prompt": "Person or organization name:",
+      "links": [
+        "https://www.elections.ca/WPAPPS/WPF/EN/CCS/Index",
+        "https://www.elections.on.ca/en/political-financing0.html",
+        "https://contributions.electionsbc.gov.bc.ca/pcs/SA1ASearch.aspx",
+        "https://lobbycanada.gc.ca/",
+        "g:\"{q}\" site:lobbycanada.gc.ca"
+      ]
+    },
+    {
+      "label": "Vessel",
+      "prompt": "Vessel name or official number:",
+      "links": [
+        "https://eve.tc.canada.ca/en/VR-IB/search",
+        "https://recherche-collection-search.bac-lac.gc.ca/eng/home/searchadvanced?SubsetCode=253&DataSource=Archives%7CFonAndCol",
+        "g:\"{q}\" vessel Canada"
+      ]
+    },
+    {
+      "label": "Aircraft",
+      "prompt": "Registration (e.g. C-GABC):",
+      "transform": [
+        "upper"
+      ],
+      "links": [
+        "https://wwwapps.tc.gc.ca/saf-sec-sur/2/ccarcs-riacc/RchSimp.aspx",
+        "g:\"{q}\" aircraft"
+      ]
+    },
+    {
+      "label": "Vehicle (VIN)",
+      "prompt": "17-character VIN:",
+      "transform": [
+        "alnum",
+        "upper"
+      ],
+      "links": [
+        "https://vpic.nhtsa.dot.gov/decoder/Decoder?VIN={q}",
+        "g:\"{q}\""
+      ]
+    },
+    {
+      "label": "Amateur radio call sign",
+      "prompt": "Call sign:",
+      "transform": [
+        "callsign",
+        "upper"
+      ],
+      "links": [
+        "https://www.qrz.com/db/{q}",
+        "https://ised-isde.canada.ca/site/amateur-radio-operator-certificate-services/en",
+        "g:\"{q}\""
+      ]
+    }
+  ],
+  "bookmarks": [
+    {
+      "name": "Corporate & Financial",
+      "children": [
+        {
+          "name": "Corporations Canada - Federal Corporation Search",
+          "url": "https://ised-isde.canada.ca/cc/lgcy/fdrlCrpSrch.html"
+        },
+        {
+          "name": "Ontario Business Registry",
+          "url": "https://www.ontario.ca/page/ontario-business-registry"
+        },
+        {
+          "name": "BC Registries",
+          "url": "https://www.bcregistry.gov.bc.ca/"
+        },
+        {
+          "name": "Quebec Enterprise Register (REQ)",
+          "url": "https://www.registreentreprises.gouv.qc.ca/"
+        },
+        {
+          "name": "Manitoba Companies Office",
+          "url": "https://companiesoffice.gov.mb.ca/"
+        },
+        {
+          "name": "Saskatchewan ISC",
+          "url": "https://www.isc.ca/"
+        },
+        {
+          "name": "OpenCorporates",
+          "url": "https://opencorporates.com/"
+        },
+        {
+          "name": "SEDAR+ (securities filings)",
+          "url": "https://www.sedarplus.ca/"
+        },
+        {
+          "name": "CSA National Registration Search",
+          "url": "https://www.aretheyregistered.ca/"
+        },
+        {
+          "name": "FINTRAC Money Services Business Registry",
+          "url": "https://fintrac-canafe.canada.ca/msb-esm/reg-eng"
+        },
+        {
+          "name": "FINTRAC Revoked MSB Registrations",
+          "url": "https://fintrac-canafe.canada.ca/msb-esm/revoked-revoquee-eng"
+        },
+        {
+          "name": "OSB Bankruptcy & Insolvency Records Search",
+          "url": "https://www.ic.gc.ca/app/scr/bsf-osb/ins/login.html?lang=eng"
+        },
+        {
+          "name": "CRA Charities - Advanced Search",
+          "url": "https://apps.cra-arc.gc.ca/ebci/hacc/srch/pub/dsplyAdvncdSrch"
+        },
+        {
+          "name": "CIPO Trademark Search",
+          "url": "https://ised-isde.canada.ca/cipo/trademark-search/srch"
+        },
+        {
+          "name": "Canadian Sanctions - Consolidated List",
+          "url": "https://www.international.gc.ca/world-monde/international_relations-relations_internationales/sanctions/consolidated-consolide.aspx?lang=eng"
+        },
+        {
+          "name": "Canadian Anti-Fraud Centre",
+          "url": "https://antifraudcentre-centreantifraude.ca/"
+        }
+      ]
+    },
+    {
+      "name": "Legal & Government",
+      "children": [
+        {
+          "name": "CanLII (case law)",
+          "url": "https://www.canlii.org/"
+        },
+        {
+          "name": "Canada Gazette",
+          "url": "https://gazette.gc.ca/"
+        },
+        {
+          "name": "GEDS (federal employee directory)",
+          "url": "https://geds-sage.gc.ca/"
+        },
+        {
+          "name": "Open Government Portal",
+          "url": "https://open.canada.ca/"
+        },
+        {
+          "name": "Federal Contracts Search",
+          "url": "https://search.open.canada.ca/contracts/"
+        },
+        {
+          "name": "Federal Grants & Contributions",
+          "url": "https://search.open.canada.ca/grants/"
+        },
+        {
+          "name": "Registry of Lobbyists",
+          "url": "https://lobbycanada.gc.ca/"
+        },
+        {
+          "name": "Elections Canada - Contributions",
+          "url": "https://www.elections.ca/WPAPPS/WPF/EN/CCS/Index"
+        },
+        {
+          "name": "Elections Canada - Financial Reports",
+          "url": "https://www.elections.ca/WPAPPS/WPF/EN/FC/Index"
+        },
+        {
+          "name": "Elections Ontario - Political Financing",
+          "url": "https://www.elections.on.ca/en/political-financing0.html"
+        },
+        {
+          "name": "Elections BC - Contributions",
+          "url": "https://contributions.electionsbc.gov.bc.ca/pcs/SA1ASearch.aspx"
+        },
+        {
+          "name": "Ontario Public Sector Salary Disclosure",
+          "url": "https://www.ontario.ca/page/public-sector-salary-disclosure"
+        },
+        {
+          "name": "Library and Archives Canada - Collection Search",
+          "url": "https://recherche-collection-search.bac-lac.gc.ca/"
+        }
+      ]
+    },
+    {
+      "name": "Licensed Professionals (ON)",
+      "children": [
+        {
+          "name": "Law Society of Ontario - Directory",
+          "url": "https://lso.ca/public-resources/finding-a-lawyer-or-paralegal/directory-search"
+        },
+        {
+          "name": "CPSO - Doctor Search",
+          "url": "https://doctors.cpso.on.ca/"
+        },
+        {
+          "name": "CNO - Find a Nurse",
+          "url": "https://registry.cno.org/"
+        },
+        {
+          "name": "PEO - Engineer Directory",
+          "url": "https://www.peo.on.ca/directory"
+        },
+        {
+          "name": "RECO - Real Estate Registrants",
+          "url": "https://www.reco.on.ca/"
+        },
+        {
+          "name": "FSRA (mortgage brokers, insurance)",
+          "url": "https://www.fsrao.ca/"
+        }
+      ]
+    },
+    {
+      "name": "Property & Places",
+      "children": [
+        {
+          "name": "OnLand (Ontario land registry)",
+          "url": "https://www.onland.ca/"
+        },
+        {
+          "name": "MPAC AboutMyProperty",
+          "url": "https://www.aboutmyproperty.ca/"
+        },
+        {
+          "name": "BC Assessment",
+          "url": "https://www.bcassessment.ca/"
+        },
+        {
+          "name": "Ontario GeoHub",
+          "url": "https://geohub.lio.gov.on.ca/"
+        },
+        {
+          "name": "NRCan Toporama",
+          "url": "https://atlas.gc.ca/toporama/en/"
+        },
+        {
+          "name": "Canada Post - Find a Postal Code",
+          "url": "https://www.canadapost-postescanada.ca/info/mc/personal/postalcode/fpc.jsf"
+        }
+      ]
+    },
+    {
+      "name": "People & Communications",
+      "children": [
+        {
+          "name": "Canada411",
+          "url": "https://www.canada411.ca/"
+        },
+        {
+          "name": "CNAC (numbering administrator)",
+          "url": "https://www.cnac.ca/"
+        },
+        {
+          "name": "Legacy.com - Obituary Search",
+          "url": "https://www.legacy.com/obituaries/search"
+        },
+        {
+          "name": "InMemoriam.ca",
+          "url": "https://www.inmemoriam.ca/"
+        },
+        {
+          "name": "Canada's Missing",
+          "url": "https://canadasmissing.ca/"
+        },
+        {
+          "name": "CIRA (.ca registry)",
+          "url": "https://www.cira.ca/"
+        }
+      ]
+    },
+    {
+      "name": "Transport & Radio",
+      "children": [
+        {
+          "name": "Transport Canada - Vessel Registration Search",
+          "url": "https://eve.tc.canada.ca/en/VR-IB/search"
+        },
+        {
+          "name": "LAC - Historic Ship Registrations",
+          "url": "https://recherche-collection-search.bac-lac.gc.ca/eng/home/searchadvanced?SubsetCode=253&DataSource=Archives%7CFonAndCol"
+        },
+        {
+          "name": "Canadian Civil Aircraft Register",
+          "url": "https://wwwapps.tc.gc.ca/saf-sec-sur/2/ccarcs-riacc/RchSimp.aspx"
+        },
+        {
+          "name": "ISED Spectrum Management (radio licences)",
+          "url": "https://sms-sgs.ic.gc.ca/"
+        },
+        {
+          "name": "ISED Amateur Radio Services",
+          "url": "https://ised-isde.canada.ca/site/amateur-radio-operator-certificate-services/en"
+        },
+        {
+          "name": "NHTSA VIN Decoder",
+          "url": "https://vpic.nhtsa.dot.gov/decoder/"
+        }
+      ]
+    }
+  ]
+}

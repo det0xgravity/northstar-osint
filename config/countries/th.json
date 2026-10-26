@@ -1,0 +1,112 @@
+{
+  "code": "TH",
+  "name": "Thailand",
+  "phone_region": "TH",
+  "searches": [
+    {
+      "label": "Person",
+      "prompt": "Full name (Thai or English):",
+      "links": [
+        "g:\"{q}\" site:deka.supremecourt.or.th",
+        "g:\"{q}\" site:th.linkedin.com",
+        "g:\"{q}\" (site:bangkokpost.com OR site:nationthailand.com OR site:thairath.co.th OR site:khaosod.co.th)"
+      ]
+    },
+    {
+      "label": "Business / organization",
+      "prompt": "Company name or registration number:",
+      "links": [
+        "https://datawarehouse.dbd.go.th/",
+        "https://opencorporates.com/companies/th?q={q}",
+        "https://www.gprocurement.go.th/",
+        "g:\"{q}\" (scam OR fraud OR โกง OR complaint) Thailand"
+      ],
+      "note": "DBD DataWarehouse holds company registrations and filed financial statements."
+    },
+    {
+      "label": "Phone number",
+      "prompt": "Phone number (any format):",
+      "type": "phone",
+      "links": [
+        "g:\"{alt}\" OR \"{national}\" OR \"{intl}\" OR \"{e164}\"",
+        "g:\"{alt}\" OR \"{national}\" OR \"{e164}\" (scam OR fraud OR spam)",
+        "g:\"{alt}\" OR \"{national}\" OR \"{intl}\" (site:facebook.com OR site:linkedin.com OR site:kaidee.com)"
+      ]
+    },
+    {
+      "label": "Address / property",
+      "prompt": "Address or postcode:",
+      "links": [
+        "https://www.google.com/maps/search/?api=1&query={q}",
+        "https://www.openstreetmap.org/search?query={q}",
+        "g:\"{q}\""
+      ]
+    },
+    {
+      "label": "Courts & legal",
+      "prompt": "Name, company or case:",
+      "links": [
+        "http://deka.supremecourt.or.th/",
+        "https://www.led.go.th/",
+        "g:\"{q}\" site:supremecourt.or.th OR site:led.go.th"
+      ],
+      "note": "The Legal Execution Department (LED) publishes bankruptcy and asset-seizure records."
+    },
+    {
+      "label": "Financial & regulatory check",
+      "prompt": "Person or firm name:",
+      "links": [
+        "https://www.sec.or.th/",
+        "g:\"{q}\" site:sec.or.th",
+        "https://www.bot.or.th/"
+      ]
+    },
+    {
+      "label": "Aircraft",
+      "prompt": "Registration (e.g. HS-ABC):",
+      "transform": [
+        "upper"
+      ],
+      "links": [
+        "https://www.flightradar24.com/data/aircraft/{q}",
+        "g:\"{q}\" aircraft"
+      ]
+    }
+  ],
+  "bookmarks": [
+    {
+      "name": "Business & Finance",
+      "children": [
+        {
+          "name": "DBD DataWarehouse",
+          "url": "https://datawarehouse.dbd.go.th/"
+        },
+        {
+          "name": "SEC Thailand",
+          "url": "https://www.sec.or.th/"
+        },
+        {
+          "name": "Bank of Thailand",
+          "url": "https://www.bot.or.th/"
+        },
+        {
+          "name": "e-GP (government procurement)",
+          "url": "https://www.gprocurement.go.th/"
+        }
+      ]
+    },
+    {
+      "name": "Law",
+      "children": [
+        {
+          "name": "Supreme Court Decisions",
+          "url": "http://deka.supremecourt.or.th/"
+        },
+        {
+          "name": "Legal Execution Department",
+          "url": "https://www.led.go.th/"
+        }
+      ]
+    }
+  ]
+}

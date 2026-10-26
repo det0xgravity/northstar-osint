@@ -1,0 +1,122 @@
+{
+  "code": "PH",
+  "name": "Philippines",
+  "phone_region": "PH",
+  "searches": [
+    {
+      "label": "Person",
+      "prompt": "Full name:",
+      "links": [
+        "g:\"{q}\" (site:elibrary.judiciary.gov.ph OR site:lawphil.net)",
+        "g:\"{q}\" site:ph.linkedin.com",
+        "g:\"{q}\" (site:inquirer.net OR site:philstar.com OR site:rappler.com OR site:gmanetwork.com OR site:abs-cbn.com)"
+      ]
+    },
+    {
+      "label": "Business / organization",
+      "prompt": "Company or business name:",
+      "links": [
+        "https://checkwithsec.sec.gov.ph/",
+        "https://bnrs.dti.gov.ph/",
+        "https://opencorporates.com/companies/ph?q={q}",
+        "https://www.philgeps.gov.ph/",
+        "https://www.ipophil.gov.ph/",
+        "g:\"{q}\" (scam OR fraud OR estafa OR complaint) Philippines"
+      ],
+      "note": "Corporations are registered with the SEC; sole proprietorships with the DTI."
+    },
+    {
+      "label": "Phone number",
+      "prompt": "Phone number (any format):",
+      "type": "phone",
+      "links": [
+        "g:\"{alt}\" OR \"{national}\" OR \"{intl}\" OR \"{e164}\"",
+        "g:\"{alt}\" OR \"{national}\" OR \"{e164}\" (scam OR fraud OR spam)",
+        "g:\"{alt}\" OR \"{national}\" OR \"{intl}\" (site:facebook.com OR site:linkedin.com OR site:carousell.ph)"
+      ]
+    },
+    {
+      "label": "Address / property",
+      "prompt": "Address or postcode:",
+      "links": [
+        "https://www.google.com/maps/search/?api=1&query={q}",
+        "https://www.openstreetmap.org/search?query={q}",
+        "g:\"{q}\""
+      ]
+    },
+    {
+      "label": "Courts & legal",
+      "prompt": "Name, company or case:",
+      "links": [
+        "https://elibrary.judiciary.gov.ph/",
+        "https://lawphil.net/",
+        "g:\"{q}\" site:elibrary.judiciary.gov.ph OR site:lawphil.net"
+      ]
+    },
+    {
+      "label": "Financial & regulatory check",
+      "prompt": "Person or firm name:",
+      "links": [
+        "https://www.sec.gov.ph/advisories/",
+        "g:\"{q}\" site:sec.gov.ph advisory",
+        "https://www.bsp.gov.ph/",
+        "g:\"{q}\" site:bsp.gov.ph"
+      ]
+    },
+    {
+      "label": "Aircraft",
+      "prompt": "Registration (e.g. RP-C1234):",
+      "transform": [
+        "upper"
+      ],
+      "links": [
+        "https://www.flightradar24.com/data/aircraft/{q}",
+        "g:\"{q}\" aircraft"
+      ]
+    }
+  ],
+  "bookmarks": [
+    {
+      "name": "Business & Finance",
+      "children": [
+        {
+          "name": "Check with SEC",
+          "url": "https://checkwithsec.sec.gov.ph/"
+        },
+        {
+          "name": "SEC Advisories",
+          "url": "https://www.sec.gov.ph/advisories/"
+        },
+        {
+          "name": "DTI Business Name Registration",
+          "url": "https://bnrs.dti.gov.ph/"
+        },
+        {
+          "name": "Bangko Sentral ng Pilipinas",
+          "url": "https://www.bsp.gov.ph/"
+        },
+        {
+          "name": "PhilGEPS (government procurement)",
+          "url": "https://www.philgeps.gov.ph/"
+        },
+        {
+          "name": "IPOPHL (trade marks)",
+          "url": "https://www.ipophil.gov.ph/"
+        }
+      ]
+    },
+    {
+      "name": "Law",
+      "children": [
+        {
+          "name": "Supreme Court E-Library",
+          "url": "https://elibrary.judiciary.gov.ph/"
+        },
+        {
+          "name": "Lawphil",
+          "url": "https://lawphil.net/"
+        }
+      ]
+    }
+  ]
+}

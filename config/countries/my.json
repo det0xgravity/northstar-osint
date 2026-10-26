@@ -1,0 +1,120 @@
+{
+  "code": "MY",
+  "name": "Malaysia",
+  "phone_region": "MY",
+  "searches": [
+    {
+      "label": "Person",
+      "prompt": "Full name:",
+      "links": [
+        "g:\"{q}\" site:kehakiman.gov.my OR site:commonlii.org/my",
+        "g:\"{q}\" site:my.linkedin.com",
+        "g:\"{q}\" (site:thestar.com.my OR site:nst.com.my OR site:malaysiakini.com OR site:freemalaysiatoday.com)",
+        "https://www.mdi.gov.my/"
+      ],
+      "note": "The Insolvency Department's bankruptcy status search is on mdi.gov.my."
+    },
+    {
+      "label": "Business / organization",
+      "prompt": "Company name or registration number:",
+      "links": [
+        "https://www.ssm-einfo.my/",
+        "https://www.ssm.com.my/",
+        "https://opencorporates.com/companies/my?q={q}",
+        "https://www.bursamalaysia.com/",
+        "https://www.eperolehan.gov.my/",
+        "g:\"{q}\" (scam OR fraud OR penipuan OR complaint) Malaysia"
+      ],
+      "note": "SSM e-Info charges per company profile."
+    },
+    {
+      "label": "Phone number",
+      "prompt": "Phone number (any format):",
+      "type": "phone",
+      "links": [
+        "g:\"{alt}\" OR \"{national}\" OR \"{intl}\" OR \"{e164}\"",
+        "g:\"{alt}\" OR \"{national}\" OR \"{e164}\" (scam OR fraud OR spam)",
+        "g:\"{alt}\" OR \"{national}\" OR \"{intl}\" (site:facebook.com OR site:linkedin.com OR site:mudah.my OR site:semakmule.rmp.gov.my)"
+      ],
+      "note": "The police's Semak Mule service checks phone and bank numbers reported in scams."
+    },
+    {
+      "label": "Address / property",
+      "prompt": "Address or postcode:",
+      "links": [
+        "https://www.google.com/maps/search/?api=1&query={q}",
+        "https://www.openstreetmap.org/search?query={q}",
+        "g:\"{q}\""
+      ]
+    },
+    {
+      "label": "Financial & regulatory check",
+      "prompt": "Person or firm name:",
+      "links": [
+        "https://www.bnm.gov.my/financial-consumer-alert-list",
+        "https://www.sc.com.my/regulation/enforcement/investor-alerts/sc-investor-alerts",
+        "https://semakmule.rmp.gov.my/",
+        "g:\"{q}\" site:bnm.gov.my OR site:sc.com.my"
+      ]
+    },
+    {
+      "label": "Aircraft",
+      "prompt": "Registration (e.g. 9M-ABC):",
+      "transform": [
+        "upper"
+      ],
+      "links": [
+        "https://www.flightradar24.com/data/aircraft/{q}",
+        "g:\"{q}\" aircraft"
+      ]
+    }
+  ],
+  "bookmarks": [
+    {
+      "name": "Business & Finance",
+      "children": [
+        {
+          "name": "SSM e-Info",
+          "url": "https://www.ssm-einfo.my/"
+        },
+        {
+          "name": "Companies Commission of Malaysia (SSM)",
+          "url": "https://www.ssm.com.my/"
+        },
+        {
+          "name": "Bursa Malaysia",
+          "url": "https://www.bursamalaysia.com/"
+        },
+        {
+          "name": "BNM Financial Consumer Alert List",
+          "url": "https://www.bnm.gov.my/financial-consumer-alert-list"
+        },
+        {
+          "name": "Securities Commission Investor Alerts",
+          "url": "https://www.sc.com.my/regulation/enforcement/investor-alerts/sc-investor-alerts"
+        },
+        {
+          "name": "ePerolehan (government procurement)",
+          "url": "https://www.eperolehan.gov.my/"
+        }
+      ]
+    },
+    {
+      "name": "Law & Scams",
+      "children": [
+        {
+          "name": "Malaysian Judiciary",
+          "url": "https://www.kehakiman.gov.my/"
+        },
+        {
+          "name": "Malaysian Department of Insolvency",
+          "url": "https://www.mdi.gov.my/"
+        },
+        {
+          "name": "Semak Mule (PDRM scam check)",
+          "url": "https://semakmule.rmp.gov.my/"
+        }
+      ]
+    }
+  ]
+}

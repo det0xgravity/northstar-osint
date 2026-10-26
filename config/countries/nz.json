@@ -1,0 +1,166 @@
+{
+  "code": "NZ",
+  "name": "New Zealand",
+  "phone_region": "NZ",
+  "searches": [
+    {
+      "label": "Person",
+      "prompt": "Full name:",
+      "links": [
+        "g:\"{q}\" site:nzlii.org",
+        "g:\"{q}\" site:nz.linkedin.com",
+        "g:\"{q}\" site:gazette.govt.nz",
+        "g:\"{q}\" (site:rnz.co.nz OR site:nzherald.co.nz OR site:stuff.co.nz)",
+        "g:\"{q}\" (site:funeral-notices.co.nz OR site:nzherald.co.nz/death-notices)",
+        "https://www.insolvency.govt.nz/"
+      ]
+    },
+    {
+      "label": "Business / organization",
+      "prompt": "Company or organization name:",
+      "links": [
+        "https://app.companiesoffice.govt.nz/companies/app/ui/pages/companies/search?q={q}&type=entities",
+        "https://www.nzbn.govt.nz/",
+        "https://register.charities.govt.nz/",
+        "https://fsp-register.companiesoffice.govt.nz/",
+        "https://opencorporates.com/companies/nz?q={q}",
+        "https://www.gets.govt.nz/",
+        "g:\"{q}\" (scam OR fraud OR complaint OR liquidation) New Zealand"
+      ]
+    },
+    {
+      "label": "Phone number",
+      "prompt": "Phone number (any format):",
+      "type": "phone",
+      "links": [
+        "g:\"{alt}\" OR \"{national}\" OR \"{intl}\" OR \"{e164}\"",
+        "g:\"{alt}\" OR \"{national}\" OR \"{e164}\" (scam OR fraud OR spam)",
+        "g:\"{alt}\" OR \"{national}\" OR \"{intl}\" (site:facebook.com OR site:linkedin.com OR site:trademe.co.nz)"
+      ]
+    },
+    {
+      "label": "Address / property",
+      "prompt": "Address or postcode:",
+      "links": [
+        "https://www.google.com/maps/search/?api=1&query={q}",
+        "https://www.openstreetmap.org/search?query={q}",
+        "g:\"{q}\""
+      ]
+    },
+    {
+      "label": "Courts & legal",
+      "prompt": "Name, company or case:",
+      "links": [
+        "https://www.nzlii.org/",
+        "https://www.courtsofnz.govt.nz/judgments",
+        "g:\"{q}\" site:nzlii.org OR site:courtsofnz.govt.nz OR site:justice.govt.nz"
+      ]
+    },
+    {
+      "label": "Financial & regulatory check",
+      "prompt": "Person or firm name:",
+      "links": [
+        "https://fsp-register.companiesoffice.govt.nz/",
+        "https://www.insolvency.govt.nz/",
+        "g:\"{q}\" site:fma.govt.nz (warning OR scam OR alert)"
+      ]
+    },
+    {
+      "label": "Political donations & interests",
+      "prompt": "Person or organization name:",
+      "links": [
+        "g:\"{q}\" site:elections.nz donation",
+        "g:\"{q}\" site:parliament.nz (pecuniary OR interests)"
+      ]
+    },
+    {
+      "label": "Vehicle (plate)",
+      "prompt": "Plate number:",
+      "transform": [
+        "alnum",
+        "upper"
+      ],
+      "links": [
+        "https://rightcar.govt.nz/",
+        "g:\"{q}\""
+      ]
+    },
+    {
+      "label": "Aircraft",
+      "prompt": "Registration (e.g. ZK-ABC):",
+      "transform": [
+        "upper"
+      ],
+      "links": [
+        "https://www.aviation.govt.nz/aircraft/aircraft-registration/aircraft-register-search/",
+        "https://www.flightradar24.com/data/aircraft/{q}",
+        "g:\"{q}\" aircraft"
+      ]
+    }
+  ],
+  "bookmarks": [
+    {
+      "name": "Corporate & Financial",
+      "children": [
+        {
+          "name": "NZ Companies Office",
+          "url": "https://app.companiesoffice.govt.nz/"
+        },
+        {
+          "name": "NZBN Register",
+          "url": "https://www.nzbn.govt.nz/"
+        },
+        {
+          "name": "Charities Register",
+          "url": "https://register.charities.govt.nz/"
+        },
+        {
+          "name": "Financial Service Providers Register",
+          "url": "https://fsp-register.companiesoffice.govt.nz/"
+        },
+        {
+          "name": "Financial Markets Authority",
+          "url": "https://www.fma.govt.nz/"
+        },
+        {
+          "name": "Insolvency and Trustee Service",
+          "url": "https://www.insolvency.govt.nz/"
+        },
+        {
+          "name": "GETS (government tenders)",
+          "url": "https://www.gets.govt.nz/"
+        }
+      ]
+    },
+    {
+      "name": "Legal & Government",
+      "children": [
+        {
+          "name": "NZLII",
+          "url": "https://www.nzlii.org/"
+        },
+        {
+          "name": "Courts of New Zealand Judgments",
+          "url": "https://www.courtsofnz.govt.nz/judgments"
+        },
+        {
+          "name": "New Zealand Gazette",
+          "url": "https://gazette.govt.nz/"
+        }
+      ]
+    },
+    {
+      "name": "Transport",
+      "children": [
+        {
+          "name": "Rightcar (vehicle information)",
+          "url": "https://rightcar.govt.nz/"
+        },
+        {
+          "name": "CAA Aircraft Register",
+          "url": "https://www.aviation.govt.nz/aircraft/aircraft-registration/aircraft-register-search/"
+        }
+      ]
+    }
+  ]
+}

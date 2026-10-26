@@ -19,10 +19,14 @@ references to them.
 - `lib/ui.sh`: runtime library for menu tools (`ui_*` dialogs via zenity or
   osascript, `ns_outdir`, `ns_run`, `ns_audit`, `ns_finish`, case handling).
 - `lib/gen_policies.py`: builds Firefox/Brave policy JSON and a bookmarks export.
+- `lib/ns_country.py`: engine for `ns-country` (reads the country packs, builds
+  search links, phone analysis, `validate`).
 - `modules/NN-name.sh`: one module each; it registers with
   `ns_register name "desc" "linux macos" mod_name`.
 - `tools/`: menu tools installed to `~/.local/share/northstar/bin`.
 - `config/bookmarks.json`, `config/firefox-extensions.txt`: data, not code.
+- `config/countries/<cc>.json`: one country pack each (searches + bookmark
+  folders). Format in `docs/COUNTRIES.md`.
 - `docs/`: user documentation. Keep it in sync with behaviour changes.
 
 ## Hard rules
@@ -45,7 +49,8 @@ references to them.
 shellcheck -x -S warning install.sh lib/common.sh lib/ui.sh modules/*.sh tools/*
 for f in install.sh lib/*.sh modules/*.sh tools/*; do bash -n "$f"; done
 grep -nE 'declare -A|local -A|mapfile|readarray|\$\{[A-Za-z_]+(,,|\^\^)|&>>' install.sh lib/*.sh modules/*.sh tools/*
-python3 -m py_compile lib/gen_policies.py && python3 -m json.tool config/bookmarks.json >/dev/null
+python3 -m py_compile lib/gen_policies.py lib/ns_country.py && python3 -m json.tool config/bookmarks.json >/dev/null
+python3 lib/ns_country.py validate
 ./install.sh --list
 ```
 
@@ -68,9 +73,9 @@ on x86_64 (Proxmox) and on arm64 (UTM on Apple Silicon).
    aarch64 Linux builds. When it does (and Flathub builds aarch64), remove the
    skip in `modules/50-browsers.sh` and the notes in `docs/`.
 3. **Bookmarks to check by hand.** `ns-linkcheck` can't verify sites that block
-   scripts (403): Quebec registry, CanLII, lobbycanada, LAC Collection Search,
-   LSO, CNO, PEO, FSRA, CIRA, SecurityTrails, Censys, Epieos. GEDS returned 503
-   and archive.ph didn't connect during the check; both are probably fine.
+   scripts (403), including many in the country packs. Government sites in
+   Australia, Indonesia, Thailand and Vietnam also drop connections from abroad
+   (curl 000); their URLs were confirmed by search in Oct 2026, not by loading.
 4. **Pinned workarounds to revisit.** theHarvester is pinned to 4.11.1 on
    Python < 3.14 (`modules/20-domain.sh`); drop the pin once supported distros
    ship 3.14. SpiderFoot is unmaintained (last commit Nov 2023) and installed

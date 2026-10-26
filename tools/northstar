@@ -13,7 +13,7 @@ while true; do
     "Media download" \
     "Metadata" \
     "Image analysis" \
-    "Canada search" \
+    "Country search" \
     "Switch / create case  (current: $case_name)" \
     "Open case folder" \
     "Update northstar") || break
@@ -24,7 +24,7 @@ while true; do
     "Media download")          ns-media ;;
     "Metadata")                ns-metadata ;;
     "Image analysis")          ns-image ;;
-    "Canada search")           ns-canada ;;
+    "Country search")          ns-country ;;
     "Switch / create case"*)
       new=$(ui_entry "Case name (letters, numbers, dashes):" "$case_name") || continue
       ns_set_case "$new"

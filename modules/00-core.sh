@@ -29,11 +29,14 @@ mod_core() {
   ns_go_ensure || { ns_warn "Go toolchain unavailable — Go-based tools will be skipped"; rc=1; }
 
   # Runtime: shared UI library, menu tools and config
-  mkdir -p "$NS_BIN" "$NS_HOME/lib" "$NS_HOME/config" "$NS_CONF" \
+  mkdir -p "$NS_BIN" "$NS_HOME/lib" "$NS_HOME/config/countries" "$NS_CONF" \
            "$NS_DATA/Cases" "$HOME/.local/bin"
   install -m 644 "$NS_REPO/lib/ui.sh" "$NS_HOME/lib/ui.sh"
   install -m 644 "$NS_REPO/lib/gen_policies.py" "$NS_HOME/lib/gen_policies.py"
+  install -m 644 "$NS_REPO/lib/ns_country.py" "$NS_HOME/lib/ns_country.py"
   cp "$NS_REPO"/config/*.json "$NS_REPO"/config/*.txt "$NS_HOME/config/" 2>/dev/null
+  rm -f "$NS_HOME"/config/countries/*.json      # drop packs removed upstream
+  cp "$NS_REPO"/config/countries/*.json "$NS_HOME/config/countries/"
   local t
   for t in "$NS_REPO"/tools/*; do
     install -m 755 "$t" "$NS_BIN/$(basename "$t")"

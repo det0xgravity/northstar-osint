@@ -1,0 +1,141 @@
+{
+  "code": "ES",
+  "name": "Spain",
+  "phone_region": "ES",
+  "searches": [
+    {
+      "label": "Person",
+      "prompt": "Full name:",
+      "links": [
+        "g:\"{q}\" site:poderjudicial.es",
+        "https://www.publicidadconcursal.es/",
+        "g:\"{q}\" site:boe.es",
+        "g:\"{q}\" (esquela OR fallecimiento OR \"ha fallecido\")",
+        "g:\"{q}\" site:es.linkedin.com",
+        "g:\"{q}\" (site:elpais.com OR site:elmundo.es OR site:abc.es OR site:lavanguardia.com OR site:rtve.es)"
+      ]
+    },
+    {
+      "label": "Business / organization",
+      "prompt": "Company name:",
+      "links": [
+        "https://www.registradores.org/",
+        "https://www.boe.es/diario_borme/",
+        "g:\"{q}\" site:boe.es borme",
+        "https://opencorporates.com/companies/es?q={q}",
+        "https://contrataciondelestado.es/",
+        "https://www.oepm.es/",
+        "g:\"{q}\" (estafa OR fraude OR concurso OR denuncia)"
+      ]
+    },
+    {
+      "label": "Phone number",
+      "prompt": "Phone number (any format):",
+      "type": "phone",
+      "links": [
+        "g:\"{alt}\" OR \"{national}\" OR \"{intl}\" OR \"{e164}\"",
+        "g:\"{alt}\" OR \"{national}\" OR \"{e164}\" (scam OR fraud OR spam)",
+        "g:\"{alt}\" OR \"{national}\" OR \"{intl}\" (site:facebook.com OR site:linkedin.com OR site:milanuncios.com OR site:listaspam.com)"
+      ]
+    },
+    {
+      "label": "Address / property",
+      "prompt": "Address or postcode:",
+      "links": [
+        "https://www.google.com/maps/search/?api=1&query={q}",
+        "https://www.openstreetmap.org/search?query={q}",
+        "g:\"{q}\"",
+        "https://www.sedecatastro.gob.es/"
+      ]
+    },
+    {
+      "label": "Courts & legal",
+      "prompt": "Name, company or case:",
+      "links": [
+        "https://www.poderjudicial.es/search/indexAN.jsp",
+        "https://www.publicidadconcursal.es/",
+        "g:\"{q}\" site:poderjudicial.es"
+      ]
+    },
+    {
+      "label": "Financial & regulatory check",
+      "prompt": "Person or firm name:",
+      "links": [
+        "https://www.cnmv.es/",
+        "g:\"{q}\" site:cnmv.es (advertencia OR chiringuito)",
+        "https://www.bde.es/"
+      ]
+    },
+    {
+      "label": "Political & lobbying",
+      "prompt": "Person or organization name:",
+      "links": [
+        "g:\"{q}\" site:congreso.es",
+        "g:\"{q}\" site:transparencia.gob.es"
+      ]
+    },
+    {
+      "label": "Aircraft",
+      "prompt": "Registration (e.g. EC-ABC):",
+      "transform": [
+        "upper"
+      ],
+      "links": [
+        "https://www.flightradar24.com/data/aircraft/{q}",
+        "g:\"{q}\" aircraft"
+      ]
+    }
+  ],
+  "bookmarks": [
+    {
+      "name": "Empresas & Finanzas",
+      "children": [
+        {
+          "name": "Registradores de España",
+          "url": "https://www.registradores.org/"
+        },
+        {
+          "name": "BORME",
+          "url": "https://www.boe.es/diario_borme/"
+        },
+        {
+          "name": "Plataforma de Contratación",
+          "url": "https://contrataciondelestado.es/"
+        },
+        {
+          "name": "OEPM (trade marks)",
+          "url": "https://www.oepm.es/"
+        },
+        {
+          "name": "CNMV",
+          "url": "https://www.cnmv.es/"
+        },
+        {
+          "name": "Banco de España",
+          "url": "https://www.bde.es/"
+        }
+      ]
+    },
+    {
+      "name": "Justicia & Inmuebles",
+      "children": [
+        {
+          "name": "CENDOJ (court decisions)",
+          "url": "https://www.poderjudicial.es/search/indexAN.jsp"
+        },
+        {
+          "name": "Registro Público Concursal",
+          "url": "https://www.publicidadconcursal.es/"
+        },
+        {
+          "name": "BOE",
+          "url": "https://www.boe.es/"
+        },
+        {
+          "name": "Sede Electrónica del Catastro",
+          "url": "https://www.sedecatastro.gob.es/"
+        }
+      ]
+    }
+  ]
+}

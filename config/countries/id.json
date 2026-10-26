@@ -1,0 +1,111 @@
+{
+  "code": "ID",
+  "name": "Indonesia",
+  "phone_region": "ID",
+  "searches": [
+    {
+      "label": "Person",
+      "prompt": "Full name:",
+      "links": [
+        "g:\"{q}\" site:putusan3.mahkamahagung.go.id",
+        "g:\"{q}\" site:id.linkedin.com",
+        "g:\"{q}\" (site:kompas.com OR site:detik.com OR site:tempo.co OR site:thejakartapost.com OR site:cnnindonesia.com)"
+      ]
+    },
+    {
+      "label": "Business / organization",
+      "prompt": "Company name:",
+      "links": [
+        "https://ahu.go.id/pencarian/profil-pt",
+        "https://oss.go.id/",
+        "https://opencorporates.com/companies/id?q={q}",
+        "https://www.idx.co.id/",
+        "https://inaproc.id/",
+        "g:\"{q}\" (penipuan OR fraud OR scam OR pailit) Indonesia"
+      ],
+      "note": "AHU (Ministry of Law) holds company deeds; detailed profiles are paid."
+    },
+    {
+      "label": "Phone number",
+      "prompt": "Phone number (any format):",
+      "type": "phone",
+      "links": [
+        "g:\"{alt}\" OR \"{national}\" OR \"{intl}\" OR \"{e164}\"",
+        "g:\"{alt}\" OR \"{national}\" OR \"{e164}\" (scam OR fraud OR spam)",
+        "g:\"{alt}\" OR \"{national}\" OR \"{intl}\" (site:facebook.com OR site:linkedin.com OR site:olx.co.id)"
+      ]
+    },
+    {
+      "label": "Address / property",
+      "prompt": "Address or postcode:",
+      "links": [
+        "https://www.google.com/maps/search/?api=1&query={q}",
+        "https://www.openstreetmap.org/search?query={q}",
+        "g:\"{q}\""
+      ]
+    },
+    {
+      "label": "Courts & legal",
+      "prompt": "Name, company or case:",
+      "links": [
+        "https://putusan3.mahkamahagung.go.id/",
+        "g:\"{q}\" site:putusan3.mahkamahagung.go.id"
+      ]
+    },
+    {
+      "label": "Financial & regulatory check",
+      "prompt": "Person or firm name:",
+      "links": [
+        "https://www.ojk.go.id/",
+        "g:\"{q}\" site:ojk.go.id (waspada OR ilegal OR investasi)"
+      ]
+    },
+    {
+      "label": "Aircraft",
+      "prompt": "Registration (e.g. PK-ABC):",
+      "transform": [
+        "upper"
+      ],
+      "links": [
+        "https://www.flightradar24.com/data/aircraft/{q}",
+        "g:\"{q}\" aircraft"
+      ]
+    }
+  ],
+  "bookmarks": [
+    {
+      "name": "Business & Finance",
+      "children": [
+        {
+          "name": "AHU (company registry)",
+          "url": "https://ahu.go.id/"
+        },
+        {
+          "name": "OSS (business licensing)",
+          "url": "https://oss.go.id/"
+        },
+        {
+          "name": "Indonesia Stock Exchange",
+          "url": "https://www.idx.co.id/"
+        },
+        {
+          "name": "OJK (financial regulator)",
+          "url": "https://www.ojk.go.id/"
+        },
+        {
+          "name": "INAPROC (government procurement)",
+          "url": "https://inaproc.id/"
+        }
+      ]
+    },
+    {
+      "name": "Law",
+      "children": [
+        {
+          "name": "Direktori Putusan Mahkamah Agung",
+          "url": "https://putusan3.mahkamahagung.go.id/"
+        }
+      ]
+    }
+  ]
+}

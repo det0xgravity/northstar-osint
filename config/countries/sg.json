@@ -1,0 +1,121 @@
+{
+  "code": "SG",
+  "name": "Singapore",
+  "phone_region": "SG",
+  "searches": [
+    {
+      "label": "Person",
+      "prompt": "Full name:",
+      "links": [
+        "g:\"{q}\" site:elitigation.sg",
+        "g:\"{q}\" site:sg.linkedin.com",
+        "g:\"{q}\" (obituary OR \"passed away\") Singapore",
+        "g:\"{q}\" (site:straitstimes.com OR site:channelnewsasia.com OR site:todayonline.com OR site:mothership.sg)"
+      ]
+    },
+    {
+      "label": "Business / organization",
+      "prompt": "Company name or UEN:",
+      "links": [
+        "https://www.bizfile.gov.sg/",
+        "https://opencorporates.com/companies/sg?q={q}",
+        "https://www.charities.gov.sg/",
+        "https://www.gebiz.gov.sg/",
+        "https://www.ipos.gov.sg/",
+        "g:\"{q}\" (scam OR fraud OR complaint OR winding up) Singapore"
+      ],
+      "note": "Bizfile charges for detailed business profiles; the basic search is free."
+    },
+    {
+      "label": "Phone number",
+      "prompt": "Phone number (any format):",
+      "type": "phone",
+      "links": [
+        "g:\"{alt}\" OR \"{national}\" OR \"{intl}\" OR \"{e164}\"",
+        "g:\"{alt}\" OR \"{national}\" OR \"{e164}\" (scam OR fraud OR spam)",
+        "g:\"{alt}\" OR \"{national}\" OR \"{intl}\" (site:facebook.com OR site:linkedin.com OR site:carousell.sg OR site:scamalert.sg)"
+      ]
+    },
+    {
+      "label": "Address / property",
+      "prompt": "Address or postcode:",
+      "links": [
+        "https://www.google.com/maps/search/?api=1&query={q}",
+        "https://www.openstreetmap.org/search?query={q}",
+        "g:\"{q}\""
+      ]
+    },
+    {
+      "label": "Courts & legal",
+      "prompt": "Name, company or case:",
+      "links": [
+        "https://www.elitigation.sg/gd/",
+        "g:\"{q}\" site:elitigation.sg OR site:judiciary.gov.sg"
+      ]
+    },
+    {
+      "label": "Financial & regulatory check",
+      "prompt": "Person or firm name:",
+      "links": [
+        "https://eservices.mas.gov.sg/fid",
+        "https://www.mas.gov.sg/investor-alert-list",
+        "g:\"{q}\" site:mas.gov.sg (enforcement OR prohibition OR alert)"
+      ]
+    },
+    {
+      "label": "Aircraft",
+      "prompt": "Registration (e.g. 9V-ABC):",
+      "transform": [
+        "upper"
+      ],
+      "links": [
+        "https://www.flightradar24.com/data/aircraft/{q}",
+        "g:\"{q}\" aircraft"
+      ]
+    }
+  ],
+  "bookmarks": [
+    {
+      "name": "Business & Finance",
+      "children": [
+        {
+          "name": "Bizfile (ACRA)",
+          "url": "https://www.bizfile.gov.sg/"
+        },
+        {
+          "name": "MAS Financial Institutions Directory",
+          "url": "https://eservices.mas.gov.sg/fid"
+        },
+        {
+          "name": "MAS Investor Alert List",
+          "url": "https://www.mas.gov.sg/investor-alert-list"
+        },
+        {
+          "name": "Charity Portal",
+          "url": "https://www.charities.gov.sg/"
+        },
+        {
+          "name": "GeBIZ (government procurement)",
+          "url": "https://www.gebiz.gov.sg/"
+        },
+        {
+          "name": "IPOS (trade marks)",
+          "url": "https://www.ipos.gov.sg/"
+        }
+      ]
+    },
+    {
+      "name": "Law",
+      "children": [
+        {
+          "name": "eLitigation Judgments",
+          "url": "https://www.elitigation.sg/gd/"
+        },
+        {
+          "name": "Singapore Statutes Online",
+          "url": "https://sso.agc.gov.sg/"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,262 @@
+{
+  "code": "US",
+  "name": "United States",
+  "phone_region": "US",
+  "searches": [
+    {
+      "label": "Person",
+      "prompt": "Full name:",
+      "links": [
+        "https://www.courtlistener.com/?q={q}",
+        "https://www.fec.gov/data/receipts/individual-contributions/?contributor_name={q}",
+        "g:\"{q}\" site:linkedin.com/in",
+        "g:\"{q}\" (site:legacy.com OR site:tributearchive.com) obituary",
+        "g:\"{q}\" (site:apnews.com OR site:reuters.com OR site:nytimes.com OR site:washingtonpost.com)",
+        "https://www.bop.gov/inmateloc/",
+        "https://www.nsopw.gov/"
+      ]
+    },
+    {
+      "label": "Business / organization",
+      "prompt": "Business or organization name:",
+      "links": [
+        "https://opencorporates.com/companies?q={q}",
+        "https://www.sec.gov/cgi-bin/browse-edgar?company={q}&owner=exclude&action=getcompany",
+        "https://projects.propublica.org/nonprofits/search?q={q}",
+        "https://apps.irs.gov/app/eos/",
+        "https://sam.gov/",
+        "https://www.usaspending.gov/search",
+        "https://tmsearch.uspto.gov/",
+        "g:\"{q}\" (lawsuit OR fraud OR complaint OR settlement)"
+      ],
+      "note": "State business registries: use OpenCorporates, or the Secretary of State site for the state."
+    },
+    {
+      "label": "Phone number",
+      "prompt": "Phone number (any format):",
+      "type": "phone",
+      "links": [
+        "g:\"{alt}\" OR \"{national}\" OR \"{intl}\" OR \"{e164}\"",
+        "g:\"{alt}\" OR \"{national}\" OR \"{e164}\" (scam OR fraud OR spam)",
+        "g:\"{alt}\" OR \"{national}\" OR \"{intl}\" (site:facebook.com OR site:linkedin.com OR site:craigslist.org OR site:instagram.com)"
+      ]
+    },
+    {
+      "label": "Address / property",
+      "prompt": "Address or postcode:",
+      "links": [
+        "https://www.google.com/maps/search/?api=1&query={q}",
+        "https://www.openstreetmap.org/search?query={q}",
+        "g:\"{q}\"",
+        "https://publicrecords.netronline.com/"
+      ]
+    },
+    {
+      "label": "Courts & legal",
+      "prompt": "Name, company or case:",
+      "links": [
+        "https://www.courtlistener.com/?q={q}",
+        "https://pacer.uscourts.gov/",
+        "g:\"{q}\" site:justia.com",
+        "g:\"{q}\" site:casetext.com OR site:law.cornell.edu"
+      ],
+      "note": "PACER needs an account and charges per page; CourtListener's RECAP archive is free."
+    },
+    {
+      "label": "Financial & regulatory check",
+      "prompt": "Person or firm name:",
+      "links": [
+        "https://brokercheck.finra.org/",
+        "https://adviserinfo.sec.gov/",
+        "https://sanctionssearch.ofac.treas.gov/",
+        "https://www.fincen.gov/msb-registrant-search",
+        "https://www.consumerfinance.gov/data-research/consumer-complaints/search/?searchText={q}",
+        "g:\"{q}\" site:sec.gov/litigation"
+      ]
+    },
+    {
+      "label": "Political contributions & lobbying",
+      "prompt": "Person or organization name:",
+      "links": [
+        "https://www.fec.gov/data/receipts/individual-contributions/?contributor_name={q}",
+        "https://www.opensecrets.org/search?q={q}",
+        "https://lda.senate.gov/filings/public/filing/search/",
+        "https://efile.fara.gov/ords/fara/f?p=1235:10"
+      ]
+    },
+    {
+      "label": "Vessel",
+      "prompt": "Vessel name or official number:",
+      "links": [
+        "https://cgmix.uscg.mil/PSIX/PSIXSearch.aspx",
+        "g:\"{q}\" vessel"
+      ]
+    },
+    {
+      "label": "Aircraft (N-number)",
+      "prompt": "N-number (e.g. N12345):",
+      "transform": [
+        "alnum",
+        "upper"
+      ],
+      "links": [
+        "https://registry.faa.gov/AircraftInquiry/Search/NNumberResult?nNumberTxt={q}",
+        "https://www.flightradar24.com/data/aircraft/{q}",
+        "g:\"{q}\" aircraft"
+      ]
+    },
+    {
+      "label": "Vehicle (VIN)",
+      "prompt": "17-character VIN:",
+      "transform": [
+        "alnum",
+        "upper"
+      ],
+      "links": [
+        "https://vpic.nhtsa.dot.gov/decoder/Decoder?VIN={q}",
+        "https://www.nicb.org/vincheck",
+        "https://www.nhtsa.gov/recalls",
+        "g:\"{q}\""
+      ]
+    },
+    {
+      "label": "Amateur radio call sign",
+      "prompt": "Call sign:",
+      "transform": [
+        "callsign",
+        "upper"
+      ],
+      "links": [
+        "https://www.qrz.com/db/{q}",
+        "https://wireless2.fcc.gov/UlsApp/UlsSearch/searchLicense.jsp",
+        "g:\"{q}\""
+      ]
+    }
+  ],
+  "bookmarks": [
+    {
+      "name": "Corporate & Financial",
+      "children": [
+        {
+          "name": "OpenCorporates (all state registries)",
+          "url": "https://opencorporates.com/companies/us"
+        },
+        {
+          "name": "SEC EDGAR Company Search",
+          "url": "https://www.sec.gov/edgar/search/"
+        },
+        {
+          "name": "ProPublica Nonprofit Explorer",
+          "url": "https://projects.propublica.org/nonprofits/"
+        },
+        {
+          "name": "IRS Tax Exempt Organization Search",
+          "url": "https://apps.irs.gov/app/eos/"
+        },
+        {
+          "name": "FINRA BrokerCheck",
+          "url": "https://brokercheck.finra.org/"
+        },
+        {
+          "name": "SEC Investment Adviser Search",
+          "url": "https://adviserinfo.sec.gov/"
+        },
+        {
+          "name": "FinCEN MSB Registrant Search",
+          "url": "https://www.fincen.gov/msb-registrant-search"
+        },
+        {
+          "name": "OFAC Sanctions List Search",
+          "url": "https://sanctionssearch.ofac.treas.gov/"
+        },
+        {
+          "name": "CFPB Consumer Complaints",
+          "url": "https://www.consumerfinance.gov/data-research/consumer-complaints/"
+        },
+        {
+          "name": "SAM.gov (federal contractors, exclusions)",
+          "url": "https://sam.gov/"
+        },
+        {
+          "name": "USAspending",
+          "url": "https://www.usaspending.gov/"
+        },
+        {
+          "name": "USPTO Trademark Search",
+          "url": "https://tmsearch.uspto.gov/"
+        }
+      ]
+    },
+    {
+      "name": "Courts & Government",
+      "children": [
+        {
+          "name": "CourtListener",
+          "url": "https://www.courtlistener.com/"
+        },
+        {
+          "name": "PACER",
+          "url": "https://pacer.uscourts.gov/"
+        },
+        {
+          "name": "Federal Bureau of Prisons Inmate Locator",
+          "url": "https://www.bop.gov/inmateloc/"
+        },
+        {
+          "name": "National Sex Offender Public Website",
+          "url": "https://www.nsopw.gov/"
+        },
+        {
+          "name": "NETR Online Public Records Directory",
+          "url": "https://publicrecords.netronline.com/"
+        }
+      ]
+    },
+    {
+      "name": "Political & Lobbying",
+      "children": [
+        {
+          "name": "FEC Individual Contributions",
+          "url": "https://www.fec.gov/data/receipts/individual-contributions/"
+        },
+        {
+          "name": "OpenSecrets",
+          "url": "https://www.opensecrets.org/"
+        },
+        {
+          "name": "Senate Lobbying Disclosure",
+          "url": "https://lda.senate.gov/filings/public/filing/search/"
+        },
+        {
+          "name": "FARA (foreign agents)",
+          "url": "https://efile.fara.gov/ords/fara/f?p=1235:10"
+        }
+      ]
+    },
+    {
+      "name": "Transport & Radio",
+      "children": [
+        {
+          "name": "FAA Aircraft Registry",
+          "url": "https://registry.faa.gov/aircraftinquiry/"
+        },
+        {
+          "name": "USCG PSIX Vessel Search",
+          "url": "https://cgmix.uscg.mil/PSIX/PSIXSearch.aspx"
+        },
+        {
+          "name": "NHTSA VIN Decoder",
+          "url": "https://vpic.nhtsa.dot.gov/decoder/"
+        },
+        {
+          "name": "NICB VINCheck",
+          "url": "https://www.nicb.org/vincheck"
+        },
+        {
+          "name": "FCC License Search (ULS)",
+          "url": "https://wireless2.fcc.gov/UlsApp/UlsSearch/searchLicense.jsp"
+        }
+      ]
+    }
+  ]
+}

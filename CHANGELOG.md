@@ -4,6 +4,27 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project uses
 [Semantic Versioning](https://semver.org/).
 
+## [0.4.0] - 2026-10-26
+
+### Added
+- `ns-country`: country-specific public-records searches, driven by data packs
+  in `config/countries/`. 17 countries (Canada, United States, United Kingdom,
+  Ireland, Australia, New Zealand, Germany, France, Netherlands, Spain, Italy,
+  Singapore, Malaysia, Philippines, Thailand, Indonesia, Vietnam) plus an
+  International pack (sanctions, leaks, company identifiers, vessels,
+  aircraft, crypto addresses, EU institutions).
+- Phone-number analysis for every country (libphonenumber), with searches in
+  all common formats.
+- A "Countries" bookmark folder, with one subfolder per country.
+- `lib/ns_country.py validate`, run in CI, checks every pack.
+- `docs/COUNTRIES.md`, including how to add a country.
+
+### Changed
+- Canada is now a country pack. `ns-canada` still works and opens it directly.
+  The Canada bookmarks moved to Countries → Canada.
+- The `canada` module is now `countries`.
+- `ns-linkcheck` checks the country packs as well as the bookmarks.
+
 ## [0.3.1] - 2026-10-26
 
 Fixes from the first real install (Debian 13 arm64, UTM).

@@ -11,11 +11,12 @@ ns-domain|Domain Recon|network-workgroup|Subdomains, DNS, crawling, archives, lo
 ns-media|Media Download|video-x-generic|Collect video, images, galleries and streams
 ns-metadata|Metadata|document-properties|View, export and strip file metadata
 ns-image|Image Analysis|image-x-generic|Reverse image search and EXIF/GPS
-ns-canada|Canada Search|applications-internet|Canadian people, business, phone, property and regulatory records"
+ns-country|Country Search|applications-internet|Public-records searches for Canada, the US, UK, Europe, Asia-Pacific and more"
 
 ns_linux_launchers() {
   local apps="$HOME/.local/share/applications" id name icon desc
   mkdir -p "$apps"
+  rm -f "$apps/ns-canada.desktop"     # replaced by ns-country in v0.4
   while IFS='|' read -r id name icon desc; do
     [ -n "$id" ] || continue
     cat > "$apps/$id.desktop" <<EOF
@@ -42,8 +43,9 @@ ns_gnome_dock() {
 import ast, subprocess
 raw = subprocess.check_output(["gsettings", "get", "org.gnome.shell", "favorite-apps"], text=True)
 favs = ast.literal_eval(raw.replace("@as ", "").strip())
+favs = [f for f in favs if f != "ns-canada.desktop"]   # replaced by ns-country
 for app in ["northstar.desktop", "ns-username.desktop", "ns-domain.desktop", "ns-media.desktop",
-            "ns-metadata.desktop", "ns-image.desktop", "ns-canada.desktop"]:
+            "ns-metadata.desktop", "ns-image.desktop", "ns-country.desktop"]:
     if app not in favs:
         favs.append(app)
 subprocess.check_call(["gsettings", "set", "org.gnome.shell", "favorite-apps", str(favs)])

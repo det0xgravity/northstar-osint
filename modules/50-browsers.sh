@@ -20,6 +20,7 @@ ns_install_policies() {
   python3 "$NS_REPO/lib/gen_policies.py" \
     --bookmarks  "$NS_REPO/config/bookmarks.json" \
     --local      "$NS_CONF/bookmarks.local.json" \
+    --countries  "$NS_REPO/config/countries" \
     --extensions "$NS_REPO/config/firefox-extensions.txt" \
     --extensions "$NS_CONF/firefox-extensions.local.txt" \
     --out        "$tmp"

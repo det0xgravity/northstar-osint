@@ -1,0 +1,111 @@
+{
+  "code": "VN",
+  "name": "Vietnam",
+  "phone_region": "VN",
+  "searches": [
+    {
+      "label": "Person",
+      "prompt": "Full name:",
+      "links": [
+        "g:\"{q}\" site:congbobanan.toaan.gov.vn",
+        "g:\"{q}\" site:vn.linkedin.com",
+        "g:\"{q}\" (site:vnexpress.net OR site:tuoitre.vn OR site:thanhnien.vn OR site:vietnamnews.vn)"
+      ]
+    },
+    {
+      "label": "Business / organization",
+      "prompt": "Company name or tax code:",
+      "links": [
+        "https://dangkykinhdoanh.gov.vn/",
+        "https://tracuunnt.gdt.gov.vn/",
+        "https://opencorporates.com/companies/vn?q={q}",
+        "https://muasamcong.mpi.gov.vn/",
+        "g:\"{q}\" (lừa đảo OR fraud OR scam) Vietnam"
+      ],
+      "note": "The tax-code lookup (tracuunnt) confirms a company's legal name, address and status."
+    },
+    {
+      "label": "Phone number",
+      "prompt": "Phone number (any format):",
+      "type": "phone",
+      "links": [
+        "g:\"{alt}\" OR \"{national}\" OR \"{intl}\" OR \"{e164}\"",
+        "g:\"{alt}\" OR \"{national}\" OR \"{e164}\" (scam OR fraud OR spam)",
+        "g:\"{alt}\" OR \"{national}\" OR \"{intl}\" (site:facebook.com OR site:linkedin.com OR site:chotot.com)"
+      ]
+    },
+    {
+      "label": "Address / property",
+      "prompt": "Address or postcode:",
+      "links": [
+        "https://www.google.com/maps/search/?api=1&query={q}",
+        "https://www.openstreetmap.org/search?query={q}",
+        "g:\"{q}\""
+      ]
+    },
+    {
+      "label": "Courts & legal",
+      "prompt": "Name, company or case:",
+      "links": [
+        "https://congbobanan.toaan.gov.vn/",
+        "g:\"{q}\" site:congbobanan.toaan.gov.vn"
+      ]
+    },
+    {
+      "label": "Financial & regulatory check",
+      "prompt": "Person or firm name:",
+      "links": [
+        "https://www.ssc.gov.vn/",
+        "https://www.sbv.gov.vn/",
+        "g:\"{q}\" site:ssc.gov.vn OR site:sbv.gov.vn"
+      ]
+    },
+    {
+      "label": "Aircraft",
+      "prompt": "Registration (e.g. VN-A123):",
+      "transform": [
+        "upper"
+      ],
+      "links": [
+        "https://www.flightradar24.com/data/aircraft/{q}",
+        "g:\"{q}\" aircraft"
+      ]
+    }
+  ],
+  "bookmarks": [
+    {
+      "name": "Business & Finance",
+      "children": [
+        {
+          "name": "National Business Registration Portal",
+          "url": "https://dangkykinhdoanh.gov.vn/"
+        },
+        {
+          "name": "Tax Code Lookup (GDT)",
+          "url": "https://tracuunnt.gdt.gov.vn/"
+        },
+        {
+          "name": "State Securities Commission",
+          "url": "https://www.ssc.gov.vn/"
+        },
+        {
+          "name": "State Bank of Vietnam",
+          "url": "https://www.sbv.gov.vn/"
+        },
+        {
+          "name": "National e-Procurement System",
+          "url": "https://muasamcong.mpi.gov.vn/"
+        }
+      ]
+    },
+    {
+      "name": "Law",
+      "children": [
+        {
+          "name": "Published Court Judgments",
+          "url": "https://congbobanan.toaan.gov.vn/"
+        }
+      ]
+    }
+  ]
+}

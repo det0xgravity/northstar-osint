@@ -1,0 +1,180 @@
+{
+  "code": "AU",
+  "name": "Australia",
+  "phone_region": "AU",
+  "searches": [
+    {
+      "label": "Person",
+      "prompt": "Full name:",
+      "links": [
+        "g:\"{q}\" site:austlii.edu.au",
+        "g:\"{q}\" site:au.linkedin.com",
+        "g:\"{q}\" (funeral OR obituary OR \"death notice\") Australia",
+        "g:\"{q}\" (site:abc.net.au OR site:smh.com.au OR site:theage.com.au OR site:news.com.au)",
+        "https://www.afsa.gov.au/bankruptcy-register-search"
+      ],
+      "note": "The bankruptcy register (NPII) charges a small fee per search."
+    },
+    {
+      "label": "Business / organization",
+      "prompt": "Business or organization name:",
+      "links": [
+        "https://abr.business.gov.au/Search/ResultsActive?SearchText={q}",
+        "https://connectonline.asic.gov.au/",
+        "https://www.acnc.gov.au/charityregister",
+        "https://opencorporates.com/companies/au?q={q}",
+        "https://www.tenders.gov.au/",
+        "https://search.ipaustralia.gov.au/trademarks/search/quick",
+        "g:\"{q}\" (scam OR fraud OR complaint OR liquidation) Australia"
+      ]
+    },
+    {
+      "label": "Phone number",
+      "prompt": "Phone number (any format):",
+      "type": "phone",
+      "links": [
+        "g:\"{alt}\" OR \"{national}\" OR \"{intl}\" OR \"{e164}\"",
+        "g:\"{alt}\" OR \"{national}\" OR \"{e164}\" (scam OR fraud OR spam)",
+        "g:\"{alt}\" OR \"{national}\" OR \"{intl}\" (site:facebook.com OR site:linkedin.com OR site:gumtree.com.au)",
+        "https://www.whitepages.com.au/"
+      ]
+    },
+    {
+      "label": "Address / property",
+      "prompt": "Address or postcode:",
+      "links": [
+        "https://www.google.com/maps/search/?api=1&query={q}",
+        "https://www.openstreetmap.org/search?query={q}",
+        "g:\"{q}\""
+      ]
+    },
+    {
+      "label": "Courts & legal",
+      "prompt": "Name, company or case:",
+      "links": [
+        "https://www.austlii.edu.au/",
+        "g:\"{q}\" site:austlii.edu.au",
+        "g:\"{q}\" site:fedcourt.gov.au OR site:hcourt.gov.au"
+      ]
+    },
+    {
+      "label": "Financial & regulatory check",
+      "prompt": "Person or firm name:",
+      "links": [
+        "https://moneysmart.gov.au/financial-advice/financial-advisers-register",
+        "g:\"{q}\" site:moneysmart.gov.au",
+        "https://connectonline.asic.gov.au/",
+        "https://www.dfat.gov.au/international-relations/security/sanctions/consolidated-list",
+        "g:\"{q}\" site:asic.gov.au OR site:austrac.gov.au"
+      ]
+    },
+    {
+      "label": "Political donations & lobbying",
+      "prompt": "Person or organization name:",
+      "links": [
+        "https://transparency.aec.gov.au/",
+        "https://lobbyists.ag.gov.au/register",
+        "g:\"{q}\" site:aph.gov.au (interests OR register)"
+      ]
+    },
+    {
+      "label": "Vehicle (VIN)",
+      "prompt": "17-character VIN:",
+      "transform": [
+        "alnum",
+        "upper"
+      ],
+      "links": [
+        "https://www.ppsr.gov.au/",
+        "https://vpic.nhtsa.dot.gov/decoder/Decoder?VIN={q}",
+        "g:\"{q}\""
+      ],
+      "note": "A PPSR search shows finance owing, write-offs and theft; it costs a small fee."
+    },
+    {
+      "label": "Aircraft",
+      "prompt": "Registration (e.g. VH-ABC):",
+      "transform": [
+        "upper"
+      ],
+      "links": [
+        "https://www.casa.gov.au/search-centre/aircraft-register",
+        "https://www.flightradar24.com/data/aircraft/{q}",
+        "g:\"{q}\" aircraft"
+      ]
+    }
+  ],
+  "bookmarks": [
+    {
+      "name": "Corporate & Financial",
+      "children": [
+        {
+          "name": "ABN Lookup",
+          "url": "https://abr.business.gov.au/"
+        },
+        {
+          "name": "ASIC Connect (company and business names)",
+          "url": "https://connectonline.asic.gov.au/"
+        },
+        {
+          "name": "ACNC Charity Register",
+          "url": "https://www.acnc.gov.au/charityregister"
+        },
+        {
+          "name": "Moneysmart Financial Advisers Register",
+          "url": "https://moneysmart.gov.au/financial-advice/financial-advisers-register"
+        },
+        {
+          "name": "DFAT Consolidated Sanctions List",
+          "url": "https://www.dfat.gov.au/international-relations/security/sanctions/consolidated-list"
+        },
+        {
+          "name": "AusTender",
+          "url": "https://www.tenders.gov.au/"
+        },
+        {
+          "name": "IP Australia Trade Mark Search",
+          "url": "https://search.ipaustralia.gov.au/trademarks/search/quick"
+        }
+      ]
+    },
+    {
+      "name": "Legal & Government",
+      "children": [
+        {
+          "name": "AustLII",
+          "url": "https://www.austlii.edu.au/"
+        },
+        {
+          "name": "Bankruptcy Register Search (AFSA)",
+          "url": "https://www.afsa.gov.au/bankruptcy-register-search"
+        },
+        {
+          "name": "AEC Transparency Register",
+          "url": "https://transparency.aec.gov.au/"
+        },
+        {
+          "name": "Australian Government Register of Lobbyists",
+          "url": "https://lobbyists.ag.gov.au/register"
+        }
+      ]
+    },
+    {
+      "name": "Transport & People",
+      "children": [
+        {
+          "name": "PPSR",
+          "url": "https://www.ppsr.gov.au/"
+        },
+        {
+          "name": "CASA Aircraft Register",
+          "url": "https://www.casa.gov.au/search-centre/aircraft-register"
+        },
+        {
+          "name": "White Pages Australia",
+          "url": "https://www.whitepages.com.au/"
+        }
+      ]
+    }
+  ]
+}

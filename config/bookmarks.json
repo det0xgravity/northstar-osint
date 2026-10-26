@@ -1,103 +1,131 @@
 [
-  {"name": "Collections", "children": [
-    {"name": "Awesome OSINT (jivoi)", "url": "https://github.com/jivoi/awesome-osint"},
-    {"name": "OSINT Stuff Tool Collection (Cipher387)", "url": "https://github.com/cipher387/osint_stuff_tool_collection"},
-    {"name": "OSINT Framework", "url": "https://osintframework.com/"},
-    {"name": "Bellingcat Online Investigations Toolkit", "url": "https://bellingcat.gitbook.io/toolkit"},
-    {"name": "UK-OSINT", "url": "https://www.uk-osint.net/"}
-  ]},
-  {"name": "Canada - Corporate & Financial", "children": [
-    {"name": "Corporations Canada - Federal Corporation Search", "url": "https://ised-isde.canada.ca/cc/lgcy/fdrlCrpSrch.html"},
-    {"name": "Ontario Business Registry", "url": "https://www.ontario.ca/page/ontario-business-registry"},
-    {"name": "BC Registries", "url": "https://www.bcregistry.gov.bc.ca/"},
-    {"name": "Quebec Enterprise Register (REQ)", "url": "https://www.registreentreprises.gouv.qc.ca/"},
-    {"name": "Manitoba Companies Office", "url": "https://companiesoffice.gov.mb.ca/"},
-    {"name": "Saskatchewan ISC", "url": "https://www.isc.ca/"},
-    {"name": "OpenCorporates", "url": "https://opencorporates.com/"},
-    {"name": "SEDAR+ (securities filings)", "url": "https://www.sedarplus.ca/"},
-    {"name": "CSA National Registration Search", "url": "https://www.aretheyregistered.ca/"},
-    {"name": "FINTRAC Money Services Business Registry", "url": "https://fintrac-canafe.canada.ca/msb-esm/reg-eng"},
-    {"name": "FINTRAC Revoked MSB Registrations", "url": "https://fintrac-canafe.canada.ca/msb-esm/revoked-revoquee-eng"},
-    {"name": "OSB Bankruptcy & Insolvency Records Search", "url": "https://www.ic.gc.ca/app/scr/bsf-osb/ins/login.html?lang=eng"},
-    {"name": "CRA Charities - Advanced Search", "url": "https://apps.cra-arc.gc.ca/ebci/hacc/srch/pub/dsplyAdvncdSrch"},
-    {"name": "CIPO Trademark Search", "url": "https://ised-isde.canada.ca/cipo/trademark-search/srch"},
-    {"name": "Canadian Sanctions - Consolidated List", "url": "https://www.international.gc.ca/world-monde/international_relations-relations_internationales/sanctions/consolidated-consolide.aspx?lang=eng"},
-    {"name": "Canadian Anti-Fraud Centre", "url": "https://antifraudcentre-centreantifraude.ca/"}
-  ]},
-  {"name": "Canada - Legal & Government", "children": [
-    {"name": "CanLII (case law)", "url": "https://www.canlii.org/"},
-    {"name": "Canada Gazette", "url": "https://gazette.gc.ca/"},
-    {"name": "GEDS (federal employee directory)", "url": "https://geds-sage.gc.ca/"},
-    {"name": "Open Government Portal", "url": "https://open.canada.ca/"},
-    {"name": "Federal Contracts Search", "url": "https://search.open.canada.ca/contracts/"},
-    {"name": "Federal Grants & Contributions", "url": "https://search.open.canada.ca/grants/"},
-    {"name": "Registry of Lobbyists", "url": "https://lobbycanada.gc.ca/"},
-    {"name": "Elections Canada - Contributions", "url": "https://www.elections.ca/WPAPPS/WPF/EN/CCS/Index"},
-    {"name": "Elections Canada - Financial Reports", "url": "https://www.elections.ca/WPAPPS/WPF/EN/FC/Index"},
-    {"name": "Elections Ontario - Political Financing", "url": "https://www.elections.on.ca/en/political-financing0.html"},
-    {"name": "Elections BC - Contributions", "url": "https://contributions.electionsbc.gov.bc.ca/pcs/SA1ASearch.aspx"},
-    {"name": "Ontario Public Sector Salary Disclosure", "url": "https://www.ontario.ca/page/public-sector-salary-disclosure"},
-    {"name": "Library and Archives Canada - Collection Search", "url": "https://recherche-collection-search.bac-lac.gc.ca/"}
-  ]},
-  {"name": "Canada - Licensed Professionals (ON)", "children": [
-    {"name": "Law Society of Ontario - Directory", "url": "https://lso.ca/public-resources/finding-a-lawyer-or-paralegal/directory-search"},
-    {"name": "CPSO - Doctor Search", "url": "https://doctors.cpso.on.ca/"},
-    {"name": "CNO - Find a Nurse", "url": "https://registry.cno.org/"},
-    {"name": "PEO - Engineer Directory", "url": "https://www.peo.on.ca/directory"},
-    {"name": "RECO - Real Estate Registrants", "url": "https://www.reco.on.ca/"},
-    {"name": "FSRA (mortgage brokers, insurance)", "url": "https://www.fsrao.ca/"}
-  ]},
-  {"name": "Canada - Property & Places", "children": [
-    {"name": "OnLand (Ontario land registry)", "url": "https://www.onland.ca/"},
-    {"name": "MPAC AboutMyProperty", "url": "https://www.aboutmyproperty.ca/"},
-    {"name": "BC Assessment", "url": "https://www.bcassessment.ca/"},
-    {"name": "Ontario GeoHub", "url": "https://geohub.lio.gov.on.ca/"},
-    {"name": "NRCan Toporama", "url": "https://atlas.gc.ca/toporama/en/"},
-    {"name": "Canada Post - Find a Postal Code", "url": "https://www.canadapost-postescanada.ca/info/mc/personal/postalcode/fpc.jsf"}
-  ]},
-  {"name": "Canada - People & Communications", "children": [
-    {"name": "Canada411", "url": "https://www.canada411.ca/"},
-    {"name": "CNAC (numbering administrator)", "url": "https://www.cnac.ca/"},
-    {"name": "Legacy.com - Obituary Search", "url": "https://www.legacy.com/obituaries/search"},
-    {"name": "InMemoriam.ca", "url": "https://www.inmemoriam.ca/"},
-    {"name": "Canada's Missing", "url": "https://canadasmissing.ca/"},
-    {"name": "CIRA (.ca registry)", "url": "https://www.cira.ca/"}
-  ]},
-  {"name": "Canada - Transport & Radio", "children": [
-    {"name": "Transport Canada - Vessel Registration Search", "url": "https://eve.tc.canada.ca/en/VR-IB/search"},
-    {"name": "LAC - Historic Ship Registrations", "url": "https://recherche-collection-search.bac-lac.gc.ca/eng/home/searchadvanced?SubsetCode=253&DataSource=Archives%7CFonAndCol"},
-    {"name": "Canadian Civil Aircraft Register", "url": "https://wwwapps.tc.gc.ca/saf-sec-sur/2/ccarcs-riacc/RchSimp.aspx"},
-    {"name": "ISED Spectrum Management (radio licences)", "url": "https://sms-sgs.ic.gc.ca/"},
-    {"name": "ISED Amateur Radio Services", "url": "https://ised-isde.canada.ca/site/amateur-radio-operator-certificate-services/en"},
-    {"name": "NHTSA VIN Decoder", "url": "https://vpic.nhtsa.dot.gov/decoder/"}
-  ]},
-  {"name": "Domains & Infrastructure", "children": [
-    {"name": "crt.sh", "url": "https://crt.sh/"},
-    {"name": "DNSDumpster", "url": "https://dnsdumpster.com/"},
-    {"name": "ViewDNS.info", "url": "https://viewdns.info/"},
-    {"name": "URLScan", "url": "https://urlscan.io/"},
-    {"name": "SecurityTrails", "url": "https://securitytrails.com/"},
-    {"name": "Shodan", "url": "https://www.shodan.io/"},
-    {"name": "Censys", "url": "https://search.censys.io/"},
-    {"name": "Wayback Machine", "url": "https://web.archive.org/"},
-    {"name": "archive.today", "url": "https://archive.ph/"}
-  ]},
-  {"name": "Images & Media", "children": [
-    {"name": "TinEye", "url": "https://tineye.com/"},
-    {"name": "Yandex Images", "url": "https://yandex.com/images/"},
-    {"name": "Google Lens", "url": "https://lens.google.com/"},
-    {"name": "FotoForensics", "url": "https://fotoforensics.com/"}
-  ]},
-  {"name": "People & Accounts", "children": [
-    {"name": "WhatsMyName", "url": "https://whatsmyname.app/"},
-    {"name": "Have I Been Pwned", "url": "https://haveibeenpwned.com/"},
-    {"name": "Intelligence X", "url": "https://intelx.io/"},
-    {"name": "Epieos", "url": "https://epieos.com/"}
-  ]},
-  {"name": "Geolocation", "children": [
-    {"name": "Copernicus Browser (satellite)", "url": "https://browser.dataspace.copernicus.eu/"},
-    {"name": "Overpass Turbo", "url": "https://overpass-turbo.eu/"},
-    {"name": "SunCalc", "url": "https://www.suncalc.org/"},
-    {"name": "Google Earth Web", "url": "https://earth.google.com/web/"}
-  ]}
+  {
+    "name": "Collections",
+    "children": [
+      {
+        "name": "Awesome OSINT (jivoi)",
+        "url": "https://github.com/jivoi/awesome-osint"
+      },
+      {
+        "name": "OSINT Stuff Tool Collection (Cipher387)",
+        "url": "https://github.com/cipher387/osint_stuff_tool_collection"
+      },
+      {
+        "name": "OSINT Framework",
+        "url": "https://osintframework.com/"
+      },
+      {
+        "name": "Bellingcat Online Investigations Toolkit",
+        "url": "https://bellingcat.gitbook.io/toolkit"
+      },
+      {
+        "name": "UK-OSINT",
+        "url": "https://www.uk-osint.net/"
+      }
+    ]
+  },
+  {
+    "name": "Domains & Infrastructure",
+    "children": [
+      {
+        "name": "crt.sh",
+        "url": "https://crt.sh/"
+      },
+      {
+        "name": "DNSDumpster",
+        "url": "https://dnsdumpster.com/"
+      },
+      {
+        "name": "ViewDNS.info",
+        "url": "https://viewdns.info/"
+      },
+      {
+        "name": "URLScan",
+        "url": "https://urlscan.io/"
+      },
+      {
+        "name": "SecurityTrails",
+        "url": "https://securitytrails.com/"
+      },
+      {
+        "name": "Shodan",
+        "url": "https://www.shodan.io/"
+      },
+      {
+        "name": "Censys",
+        "url": "https://search.censys.io/"
+      },
+      {
+        "name": "Wayback Machine",
+        "url": "https://web.archive.org/"
+      },
+      {
+        "name": "archive.today",
+        "url": "https://archive.ph/"
+      }
+    ]
+  },
+  {
+    "name": "Images & Media",
+    "children": [
+      {
+        "name": "TinEye",
+        "url": "https://tineye.com/"
+      },
+      {
+        "name": "Yandex Images",
+        "url": "https://yandex.com/images/"
+      },
+      {
+        "name": "Google Lens",
+        "url": "https://lens.google.com/"
+      },
+      {
+        "name": "FotoForensics",
+        "url": "https://fotoforensics.com/"
+      }
+    ]
+  },
+  {
+    "name": "People & Accounts",
+    "children": [
+      {
+        "name": "WhatsMyName",
+        "url": "https://whatsmyname.app/"
+      },
+      {
+        "name": "Have I Been Pwned",
+        "url": "https://haveibeenpwned.com/"
+      },
+      {
+        "name": "Intelligence X",
+        "url": "https://intelx.io/"
+      },
+      {
+        "name": "Epieos",
+        "url": "https://epieos.com/"
+      }
+    ]
+  },
+  {
+    "name": "Geolocation",
+    "children": [
+      {
+        "name": "Copernicus Browser (satellite)",
+        "url": "https://browser.dataspace.copernicus.eu/"
+      },
+      {
+        "name": "Overpass Turbo",
+        "url": "https://overpass-turbo.eu/"
+      },
+      {
+        "name": "SunCalc",
+        "url": "https://www.suncalc.org/"
+      },
+      {
+        "name": "Google Earth Web",
+        "url": "https://earth.google.com/web/"
+      }
+    ]
+  }
 ]

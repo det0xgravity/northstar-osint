@@ -1,0 +1,219 @@
+{
+  "code": "INT",
+  "name": "International",
+  "phone_region": null,
+  "searches": [
+    {
+      "label": "Sanctions & watchlists",
+      "prompt": "Person, company or vessel name:",
+      "links": [
+        "https://www.opensanctions.org/search/?q={q}",
+        "https://sanctionssearch.ofac.treas.gov/",
+        "https://main.un.org/securitycouncil/en/content/un-sc-consolidated-list",
+        "https://www.sanctionsmap.eu/",
+        "https://www.gov.uk/government/publications/the-uk-sanctions-list",
+        "https://www.worldbank.org/en/projects-operations/procurement/debarred-firms",
+        "https://www.interpol.int/How-we-work/Notices/Red-Notices/View-Red-Notices"
+      ],
+      "note": "OFAC, the UN and World Bank lists can't be pre-filled: paste the name from your clipboard."
+    },
+    {
+      "label": "Company (any country)",
+      "prompt": "Company name:",
+      "links": [
+        "https://opencorporates.com/companies?q={q}",
+        "https://search.gleif.org/#/search/simpleSearch={q}",
+        "https://offshoreleaks.icij.org/search?q={q}",
+        "https://aleph.occrp.org/search?q={q}",
+        "g:\"{q}\" (annual report OR \"beneficial owner\" OR director)"
+      ]
+    },
+    {
+      "label": "Leaks & investigations",
+      "prompt": "Person or company name:",
+      "links": [
+        "https://offshoreleaks.icij.org/search?q={q}",
+        "https://aleph.occrp.org/search?q={q}",
+        "g:\"{q}\" (site:occrp.org OR site:icij.org OR site:bellingcat.com OR site:theguardian.com)"
+      ]
+    },
+    {
+      "label": "Phone number",
+      "prompt": "Phone number (any format):",
+      "type": "phone",
+      "links": [
+        "g:\"{alt}\" OR \"{national}\" OR \"{intl}\" OR \"{e164}\"",
+        "g:\"{alt}\" OR \"{national}\" OR \"{e164}\" (scam OR fraud OR spam)",
+        "g:\"{alt}\" OR \"{national}\" OR \"{intl}\" (site:facebook.com OR site:linkedin.com OR site:instagram.com OR site:t.me)"
+      ],
+      "note": "Include the country code (e.g. +44 20 7946 0000) for numbers outside a country pack."
+    },
+    {
+      "label": "Vessel (name, IMO or MMSI)",
+      "prompt": "Vessel name, IMO or MMSI number:",
+      "links": [
+        "https://www.marinetraffic.com/en/ais/index/search/all/keyword:{q}",
+        "https://www.vesselfinder.com/vessels?name={q}",
+        "https://www.equasis.org/",
+        "g:\"{q}\" (vessel OR ship OR IMO)"
+      ],
+      "note": "Equasis needs a free account."
+    },
+    {
+      "label": "Aircraft (registration)",
+      "prompt": "Aircraft registration (e.g. G-ABCD, N12345):",
+      "transform": [
+        "upper"
+      ],
+      "links": [
+        "https://www.flightradar24.com/data/aircraft/{q}",
+        "https://globe.adsbexchange.com/?reg={q}",
+        "g:\"{q}\" aircraft"
+      ]
+    },
+    {
+      "label": "EU institutions, lobbying & tenders",
+      "prompt": "Person or organization name:",
+      "links": [
+        "https://transparency-register.europa.eu/",
+        "https://ted.europa.eu/",
+        "https://e-justice.europa.eu/topics/registers-business-insolvency-land/business-registers-search-company-eu_en",
+        "g:\"{q}\" site:europa.eu"
+      ],
+      "note": "e-Justice searches business registers across EU member states."
+    },
+    {
+      "label": "Crypto address",
+      "prompt": "Wallet address or transaction hash:",
+      "links": [
+        "https://www.blockchain.com/explorer/search?search={q}",
+        "https://etherscan.io/search?f=0&q={q}",
+        "https://tronscan.org/#/address/{q}",
+        "g:\"{q}\""
+      ]
+    }
+  ],
+  "bookmarks": [
+    {
+      "name": "Sanctions & Watchlists",
+      "children": [
+        {
+          "name": "OpenSanctions",
+          "url": "https://www.opensanctions.org/"
+        },
+        {
+          "name": "OFAC Sanctions List Search (US)",
+          "url": "https://sanctionssearch.ofac.treas.gov/"
+        },
+        {
+          "name": "UN Security Council Consolidated List",
+          "url": "https://main.un.org/securitycouncil/en/content/un-sc-consolidated-list"
+        },
+        {
+          "name": "EU Sanctions Map",
+          "url": "https://www.sanctionsmap.eu/"
+        },
+        {
+          "name": "UK Sanctions List",
+          "url": "https://www.gov.uk/government/publications/the-uk-sanctions-list"
+        },
+        {
+          "name": "World Bank Debarred Firms",
+          "url": "https://www.worldbank.org/en/projects-operations/procurement/debarred-firms"
+        },
+        {
+          "name": "Interpol Red Notices",
+          "url": "https://www.interpol.int/How-we-work/Notices/Red-Notices/View-Red-Notices"
+        }
+      ]
+    },
+    {
+      "name": "Companies & Leaks",
+      "children": [
+        {
+          "name": "OpenCorporates",
+          "url": "https://opencorporates.com/"
+        },
+        {
+          "name": "GLEIF LEI Search",
+          "url": "https://search.gleif.org/"
+        },
+        {
+          "name": "ICIJ Offshore Leaks",
+          "url": "https://offshoreleaks.icij.org/"
+        },
+        {
+          "name": "OCCRP Aleph",
+          "url": "https://aleph.occrp.org/"
+        }
+      ]
+    },
+    {
+      "name": "Transport",
+      "children": [
+        {
+          "name": "MarineTraffic",
+          "url": "https://www.marinetraffic.com/"
+        },
+        {
+          "name": "VesselFinder",
+          "url": "https://www.vesselfinder.com/"
+        },
+        {
+          "name": "Equasis (ship safety records)",
+          "url": "https://www.equasis.org/"
+        },
+        {
+          "name": "Flightradar24",
+          "url": "https://www.flightradar24.com/"
+        },
+        {
+          "name": "ADS-B Exchange",
+          "url": "https://globe.adsbexchange.com/"
+        },
+        {
+          "name": "OpenSky Network",
+          "url": "https://opensky-network.org/"
+        }
+      ]
+    },
+    {
+      "name": "European Union",
+      "children": [
+        {
+          "name": "EU Transparency Register (lobbying)",
+          "url": "https://transparency-register.europa.eu/"
+        },
+        {
+          "name": "TED (EU public tenders)",
+          "url": "https://ted.europa.eu/"
+        },
+        {
+          "name": "e-Justice: Business Registers Across the EU",
+          "url": "https://e-justice.europa.eu/topics/registers-business-insolvency-land/business-registers-search-company-eu_en"
+        },
+        {
+          "name": "EUIPO eSearch (EU trade marks)",
+          "url": "https://euipo.europa.eu/eSearch/"
+        },
+        {
+          "name": "EU Sanctions Map",
+          "url": "https://www.sanctionsmap.eu/"
+        }
+      ]
+    },
+    {
+      "name": "Law",
+      "children": [
+        {
+          "name": "WorldLII",
+          "url": "https://www.worldlii.org/"
+        },
+        {
+          "name": "CommonLII",
+          "url": "https://www.commonlii.org/"
+        }
+      ]
+    }
+  ]
+}

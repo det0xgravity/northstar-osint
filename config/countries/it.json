@@ -1,0 +1,143 @@
+{
+  "code": "IT",
+  "name": "Italy",
+  "phone_region": "IT",
+  "searches": [
+    {
+      "label": "Person",
+      "prompt": "Full name:",
+      "links": [
+        "g:\"{q}\" (site:italgiure.giustizia.it OR site:giustizia.it)",
+        "g:\"{q}\" (necrologio OR necrologie OR \"è mancato\")",
+        "g:\"{q}\" site:it.linkedin.com",
+        "g:\"{q}\" (site:corriere.it OR site:repubblica.it OR site:ansa.it OR site:ilsole24ore.com OR site:lastampa.it)",
+        "https://www.paginebianche.it/"
+      ]
+    },
+    {
+      "label": "Business / organization",
+      "prompt": "Company name or partita IVA:",
+      "links": [
+        "https://www.registroimprese.it/",
+        "https://opencorporates.com/companies/it?q={q}",
+        "https://www.gazzettaufficiale.it/",
+        "https://dati.anticorruzione.it/",
+        "https://www.uibm.gov.it/",
+        "g:\"{q}\" (truffa OR frode OR fallimento OR denuncia)"
+      ]
+    },
+    {
+      "label": "Phone number",
+      "prompt": "Phone number (any format):",
+      "type": "phone",
+      "links": [
+        "g:\"{alt}\" OR \"{national}\" OR \"{intl}\" OR \"{e164}\"",
+        "g:\"{alt}\" OR \"{national}\" OR \"{e164}\" (scam OR fraud OR spam)",
+        "g:\"{alt}\" OR \"{national}\" OR \"{intl}\" (site:facebook.com OR site:linkedin.com OR site:subito.it OR site:tellows.it)",
+        "https://www.paginebianche.it/"
+      ]
+    },
+    {
+      "label": "Address / property",
+      "prompt": "Address or postcode:",
+      "links": [
+        "https://www.google.com/maps/search/?api=1&query={q}",
+        "https://www.openstreetmap.org/search?query={q}",
+        "g:\"{q}\""
+      ]
+    },
+    {
+      "label": "Courts & legal",
+      "prompt": "Name, company or case:",
+      "links": [
+        "https://www.italgiure.giustizia.it/sncass/",
+        "g:\"{q}\" site:giustizia.it"
+      ]
+    },
+    {
+      "label": "Financial & regulatory check",
+      "prompt": "Person or firm name:",
+      "links": [
+        "https://www.consob.it/",
+        "g:\"{q}\" site:consob.it (oscuramento OR avvertenza OR abusivo)",
+        "https://www.organismo-am.it/",
+        "https://www.bancaditalia.it/"
+      ]
+    },
+    {
+      "label": "Vehicle (licence plate)",
+      "prompt": "Licence plate (targa):",
+      "transform": [
+        "alnum",
+        "upper"
+      ],
+      "links": [
+        "https://www.ilportaledellautomobilista.it/",
+        "g:\"{q}\" targa"
+      ]
+    },
+    {
+      "label": "Aircraft",
+      "prompt": "Registration (e.g. I-ABCD):",
+      "transform": [
+        "upper"
+      ],
+      "links": [
+        "https://www.flightradar24.com/data/aircraft/{q}",
+        "g:\"{q}\" aircraft"
+      ]
+    }
+  ],
+  "bookmarks": [
+    {
+      "name": "Imprese & Finanza",
+      "children": [
+        {
+          "name": "Registro Imprese",
+          "url": "https://www.registroimprese.it/"
+        },
+        {
+          "name": "Gazzetta Ufficiale",
+          "url": "https://www.gazzettaufficiale.it/"
+        },
+        {
+          "name": "ANAC Open Data (public contracts)",
+          "url": "https://dati.anticorruzione.it/"
+        },
+        {
+          "name": "UIBM (trade marks)",
+          "url": "https://www.uibm.gov.it/"
+        },
+        {
+          "name": "CONSOB",
+          "url": "https://www.consob.it/"
+        },
+        {
+          "name": "OAM (agents and brokers)",
+          "url": "https://www.organismo-am.it/"
+        },
+        {
+          "name": "Banca d'Italia",
+          "url": "https://www.bancaditalia.it/"
+        }
+      ]
+    },
+    {
+      "name": "Giustizia & Persone",
+      "children": [
+        {
+          "name": "Italgiure (Cassazione)",
+          "url": "https://www.italgiure.giustizia.it/sncass/"
+        },
+        {
+          "name": "Pagine Bianche",
+          "url": "https://www.paginebianche.it/"
+        },
+        {
+          "name": "Portale dell'Automobilista",
+          "url": "https://www.ilportaledellautomobilista.it/"
+        }
+      ]
+    }
+  ]
+}

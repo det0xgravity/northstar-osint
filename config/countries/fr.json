@@ -1,0 +1,186 @@
+{
+  "code": "FR",
+  "name": "France",
+  "phone_region": "FR",
+  "searches": [
+    {
+      "label": "Person",
+      "prompt": "Full name:",
+      "links": [
+        "https://annuaire-entreprises.data.gouv.fr/rechercher?terme={q}",
+        "https://www.pappers.fr/recherche?q={q}",
+        "https://www.courdecassation.fr/recherche-judilibre?search_api_fulltext={q}",
+        "g:\"{q}\" (\"avis de décès\" OR obsèques)",
+        "g:\"{q}\" site:fr.linkedin.com",
+        "g:\"{q}\" (site:lemonde.fr OR site:lefigaro.fr OR site:liberation.fr OR site:francetvinfo.fr OR site:leparisien.fr)",
+        "https://www.pagesjaunes.fr/pagesblanches"
+      ]
+    },
+    {
+      "label": "Business / organization",
+      "prompt": "Company name or SIREN:",
+      "links": [
+        "https://annuaire-entreprises.data.gouv.fr/rechercher?terme={q}",
+        "https://www.pappers.fr/recherche?q={q}",
+        "https://www.infogreffe.fr/",
+        "https://www.bodacc.fr/",
+        "https://data.inpi.fr/",
+        "https://opencorporates.com/companies/fr?q={q}",
+        "https://www.boamp.fr/",
+        "g:\"{q}\" (arnaque OR escroquerie OR plainte OR liquidation)"
+      ]
+    },
+    {
+      "label": "Phone number",
+      "prompt": "Phone number (any format):",
+      "type": "phone",
+      "links": [
+        "g:\"{alt}\" OR \"{national}\" OR \"{intl}\" OR \"{e164}\"",
+        "g:\"{alt}\" OR \"{national}\" OR \"{e164}\" (scam OR fraud OR spam)",
+        "g:\"{alt}\" OR \"{national}\" OR \"{intl}\" (site:facebook.com OR site:linkedin.com OR site:leboncoin.fr OR site:tellows.fr)",
+        "https://www.pagesjaunes.fr/pagesblanches"
+      ]
+    },
+    {
+      "label": "Address / property",
+      "prompt": "Address or postcode:",
+      "links": [
+        "https://www.google.com/maps/search/?api=1&query={q}",
+        "https://www.openstreetmap.org/search?query={q}",
+        "g:\"{q}\"",
+        "https://explore.data.gouv.fr/fr/immobilier",
+        "https://www.cadastre.gouv.fr/",
+        "https://www.geoportail.gouv.fr/"
+      ]
+    },
+    {
+      "label": "Courts & legal",
+      "prompt": "Name, company or case:",
+      "links": [
+        "https://www.courdecassation.fr/recherche-judilibre?search_api_fulltext={q}",
+        "https://www.legifrance.gouv.fr/",
+        "g:\"{q}\" site:legifrance.gouv.fr OR site:courdecassation.fr"
+      ]
+    },
+    {
+      "label": "Financial & regulatory check",
+      "prompt": "Person or firm name:",
+      "links": [
+        "https://www.orias.fr/",
+        "https://www.regafi.fr/",
+        "https://www.amf-france.org/fr/espace-epargnants/proteger-son-epargne/listes-noires-et-mises-en-garde",
+        "https://gels-avoirs.dgtresor.gouv.fr/",
+        "g:\"{q}\" site:amf-france.org"
+      ]
+    },
+    {
+      "label": "Political & lobbying",
+      "prompt": "Person or organization name:",
+      "links": [
+        "https://www.hatvp.fr/le-repertoire/",
+        "https://www.hatvp.fr/consulter-les-declarations/",
+        "g:\"{q}\" site:hatvp.fr"
+      ]
+    },
+    {
+      "label": "Aircraft",
+      "prompt": "Registration (e.g. F-GABC):",
+      "transform": [
+        "upper"
+      ],
+      "links": [
+        "https://www.flightradar24.com/data/aircraft/{q}",
+        "g:\"{q}\" aircraft"
+      ]
+    }
+  ],
+  "bookmarks": [
+    {
+      "name": "Entreprises & Finance",
+      "children": [
+        {
+          "name": "Annuaire des Entreprises",
+          "url": "https://annuaire-entreprises.data.gouv.fr/"
+        },
+        {
+          "name": "Pappers",
+          "url": "https://www.pappers.fr/"
+        },
+        {
+          "name": "Infogreffe",
+          "url": "https://www.infogreffe.fr/"
+        },
+        {
+          "name": "BODACC",
+          "url": "https://www.bodacc.fr/"
+        },
+        {
+          "name": "INPI Data",
+          "url": "https://data.inpi.fr/"
+        },
+        {
+          "name": "ORIAS (intermediaries)",
+          "url": "https://www.orias.fr/"
+        },
+        {
+          "name": "REGAFI (financial firms)",
+          "url": "https://www.regafi.fr/"
+        },
+        {
+          "name": "AMF Blacklists",
+          "url": "https://www.amf-france.org/fr/espace-epargnants/proteger-son-epargne/listes-noires-et-mises-en-garde"
+        },
+        {
+          "name": "Registre national des gels",
+          "url": "https://gels-avoirs.dgtresor.gouv.fr/"
+        },
+        {
+          "name": "BOAMP (public tenders)",
+          "url": "https://www.boamp.fr/"
+        }
+      ]
+    },
+    {
+      "name": "Justice & Politique",
+      "children": [
+        {
+          "name": "Judilibre (court decisions)",
+          "url": "https://www.courdecassation.fr/recherche-judilibre"
+        },
+        {
+          "name": "Légifrance",
+          "url": "https://www.legifrance.gouv.fr/"
+        },
+        {
+          "name": "HATVP Lobbying Register",
+          "url": "https://www.hatvp.fr/le-repertoire/"
+        },
+        {
+          "name": "HATVP Declarations",
+          "url": "https://www.hatvp.fr/consulter-les-declarations/"
+        }
+      ]
+    },
+    {
+      "name": "Immobilier & Annuaires",
+      "children": [
+        {
+          "name": "DVF (property sales)",
+          "url": "https://explore.data.gouv.fr/fr/immobilier"
+        },
+        {
+          "name": "Cadastre",
+          "url": "https://www.cadastre.gouv.fr/"
+        },
+        {
+          "name": "Géoportail",
+          "url": "https://www.geoportail.gouv.fr/"
+        },
+        {
+          "name": "Pages Blanches",
+          "url": "https://www.pagesjaunes.fr/pagesblanches"
+        }
+      ]
+    }
+  ]
+}

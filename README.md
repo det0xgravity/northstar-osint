@@ -1,6 +1,6 @@
 # northstar-osint
 
-**A modular, open-source OSINT workstation builder for Linux and Apple Silicon — with first-class Canadian public-records coverage.**
+**A modular, open-source OSINT workstation builder for Linux and Apple Silicon — with country-specific public-records searches for 17 countries.**
 
 northstar-osint turns a fresh Debian, Ubuntu, Kali, Parrot or macOS install into a ready-to-work investigation machine: current open-source tools, simple point-and-click menus, browser hardening and bookmarks applied by policy, per-case output folders with an audit trail, and optional support for running as a Proxmox/Kasm Workspaces template.
 
@@ -24,9 +24,9 @@ Most OSINT build scripts are a long list of commands that break silently when on
 
 | | |
 |---|---|
-| **Menus** | `northstar` main menu plus `ns-username`, `ns-domain`, `ns-media`, `ns-metadata`, `ns-image` and `ns-canada`. Dialogs use zenity on Linux and native dialogs on macOS. |
+| **Menus** | `northstar` main menu plus `ns-username`, `ns-domain`, `ns-media`, `ns-metadata`, `ns-image` and `ns-country`. Dialogs use zenity on Linux and native dialogs on macOS. |
 | **Cases & audit trail** | Results are saved under `~/Northstar/Cases/<case>/`, and every action is logged with a timestamp to that case's `audit.log`. |
-| **Canada** | A dedicated search menu (people, businesses, phones, property, financial/regulatory, political, vessels, aircraft, VINs, call signs) plus 50+ curated Canadian registry bookmarks. |
+| **Countries** | `ns-country`: people, business, phone, property, courts, financial/regulatory, political and transport searches tailored to each country's public records: Canada, the US, UK, Ireland, Australia, New Zealand, Germany, France, the Netherlands, Spain, Italy, Singapore, Malaysia, the Philippines, Thailand, Indonesia and Vietnam, plus an International pack (sanctions, leaks, vessels, aircraft, crypto). Phone analysis for every country, and 250+ curated registry bookmarks. Adding a country is one JSON file. |
 | **Browsers** | Firefox, Brave, Tor Browser and Mullvad Browser. OSINT extensions and a managed bookmarks folder are delivered through **browser policy**, so they apply to every profile and every clone. |
 | **Recon** | Pipelines for subdomain enumeration → DNS resolution → live-host probing → screenshots, plus WHOIS/DNS, crawling, archives and lookalike domains. |
 | **Media** | Video/audio/playlists with platform metadata preserved, galleries, Instagram, live-stream recording, Wayback captures. |
@@ -77,7 +77,7 @@ ns-update                                # pull the latest version and upgrade e
 | `media` | yt-dlp, gallery-dl, instaloader, streamlink, ffmpeg, exiftool, mediainfo, mat2, internetarchive, xeuledoc |
 | `frameworks` | SpiderFoot, recon-ng, changedetection.io, search-that-hash, name-that-hash |
 | `browsers` | Firefox, Brave, Tor Browser, Mullvad Browser + extension and bookmark policies |
-| `canada` | Phone-number analysis for the Canada menu (the bookmarks come with `browsers`) |
+| `countries` | Phone-number analysis for the country menus (the country bookmarks come with `browsers`) |
 | `desktop` | App-menu launchers, GNOME dock favourites, macOS `Northstar.app` |
 | `extras` | KeePassXC, Flameshot (bound to Print Screen on GNOME), OBS Studio |
 | `vm` | QEMU guest agent, xrdp, clone-safe identity, `ns-seal` *(Linux only)* |
@@ -93,7 +93,7 @@ northstar                # main menu
 ├── Media download       # ns-media
 ├── Metadata             # ns-metadata
 ├── Image analysis       # ns-image
-├── Canada search        # ns-canada
+├── Country search       # ns-country
 ├── Switch / create case
 ├── Open case folder
 └── Update northstar     # ns-update
@@ -110,7 +110,7 @@ Before you start, pick **Switch / create case** and give the investigation a nam
 ├── audit.log                         # timestamp  case  tool  target  command
 ├── username/jdoe_20261026-101500/    # one folder per search
 ├── domain/example.com_20261026-102210/
-└── canada/...
+└── united-kingdom/...                # country searches, by country
 ```
 
 Secrets you type into a menu, such as session cookies, are redacted from `audit.log`.
@@ -120,7 +120,7 @@ Secrets you type into a menu, such as session cookies, are redacted from `audit.
 - [Installation](docs/INSTALL.md): per-platform notes, options, uninstalling
 - [Modules](docs/MODULES.md): every tool installed, with upstream links
 - [Menus](docs/MENUS.md): what each menu option runs and produces
-- [Canada](docs/CANADA.md): the Canadian toolkit and resource list
+- [Countries](docs/COUNTRIES.md): country searches, the resource list, and how to add a country
 - [Kasm & Proxmox](docs/KASM.md): running northstar as a brokered VM and building templates
 - [Troubleshooting](docs/TROUBLESHOOTING.md)
 - [Contributing](CONTRIBUTING.md) · [Changelog](CHANGELOG.md)
@@ -130,7 +130,7 @@ Secrets you type into a menu, such as session cookies, are redacted from `audit.
 northstar-osint collects **publicly available** information. You are responsible for how you use it:
 
 - Only investigate where you have a lawful basis and proper authorization.
-- Respect the terms of service of the sites you query, and the privacy laws that apply to you (in Canada, PIPEDA and provincial equivalents).
+- Respect the terms of service of the sites you query, and the privacy laws that apply to you (GDPR in the EU and UK, PIPEDA in Canada, and so on).
 - Use sock-puppet accounts and a separated environment (such as a VM) for investigative browsing. Never use your personal accounts.
 - Don't use this toolkit to stalk, harass or dox anyone.
 

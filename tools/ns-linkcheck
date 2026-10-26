@@ -1,24 +1,34 @@
 #!/usr/bin/env bash
-# ns-linkcheck — check every bookmark URL and list the ones needing attention.
-# Usage: ns-linkcheck [bookmarks.json]
+# ns-linkcheck — check bookmark and country-search URLs and list the ones
+# needing attention.
+# Usage: ns-linkcheck [file.json ...]   (default: bookmarks + every country pack)
 NS_HOME="${NS_HOME:-$HOME/.local/share/northstar}"
-J="${1:-$NS_HOME/config/bookmarks.json}"
 UA="Mozilla/5.0 (X11; Linux x86_64; rv:140.0) Gecko/20100101 Firefox/140.0"
 
-[ -f "$J" ] || { echo "Bookmarks file not found: $J"; exit 1; }
+if [ $# -eq 0 ]; then
+  set -- "$NS_HOME/config/bookmarks.json" "$NS_HOME"/config/countries/*.json
+fi
 command -v jq >/dev/null || { echo "jq is required"; exit 1; }
 
 bad=0; warn=0; total=0
-while IFS= read -r url; do
-  total=$((total+1))
-  code=$(curl -sL -o /dev/null -w '%{http_code}' -A "$UA" --max-time 15 "$url")
-  case "$code" in
-    2*|3*) ;;
-    401|403|405|429) echo "  check manually ($code — likely blocks scripts): $url"; warn=$((warn+1)) ;;
-    *)               echo "  DEAD? ($code): $url"; bad=$((bad+1)) ;;
-  esac
-done <<EOF
-$(jq -r '.. | .url? // empty' "$J")
-EOF
+for J in "$@"; do
+  [ -f "$J" ] || { echo "Not found: $J"; continue; }
+  echo "== $(basename "$J")"
+  # Bookmark URLs, plus search links that are plain URLs ({placeholders} filled
+  # with a sample value; Google searches are skipped)
+  while IFS= read -r url; do
+    [ -n "$url" ] || continue
+    total=$((total+1))
+    code=$(curl -sL -o /dev/null -w '%{http_code}' -A "$UA" --max-time 15 "$url")
+    case "$code" in
+      2*|3*) ;;
+      401|403|405|429) echo "  check manually ($code — likely blocks scripts): $url"; warn=$((warn+1)) ;;
+      *)               echo "  DEAD? ($code): $url"; bad=$((bad+1)) ;;
+    esac
+  done <<LINKS
+$(jq -r '(.. | .url? // empty), (.searches[]?.links[]? | select(startswith("http")))' "$J" \
+    | sed 's/{[a-z0-9]*}/test/g' | sort -u)
+LINKS
+done
 echo "$total links checked: $bad possibly dead, $warn need a manual check."
 [ $bad -eq 0 ]

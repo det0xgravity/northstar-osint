@@ -29,8 +29,9 @@ jobs:
 
       - name: Python and JSON
         run: |
-          python3 -m py_compile lib/gen_policies.py
+          python3 -m py_compile lib/gen_policies.py lib/ns_country.py
           python3 -m json.tool config/bookmarks.json > /dev/null
+          python3 lib/ns_country.py validate
 
       - name: Installer smoke test
         run: ./install.sh --list

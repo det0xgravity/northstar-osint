@@ -1,0 +1,149 @@
+{
+  "code": "NL",
+  "name": "Netherlands",
+  "phone_region": "NL",
+  "searches": [
+    {
+      "label": "Person",
+      "prompt": "Full name:",
+      "links": [
+        "g:\"{q}\" site:uitspraken.rechtspraak.nl",
+        "https://insolventies.rechtspraak.nl/",
+        "g:\"{q}\" site:mensenlinq.nl",
+        "g:\"{q}\" site:nl.linkedin.com",
+        "g:\"{q}\" (site:nos.nl OR site:nrc.nl OR site:volkskrant.nl OR site:telegraaf.nl OR site:ad.nl)"
+      ]
+    },
+    {
+      "label": "Business / organization",
+      "prompt": "Company name or KvK number:",
+      "links": [
+        "https://www.kvk.nl/zoeken/?source=all&q={q}",
+        "https://opencorporates.com/companies/nl?q={q}",
+        "https://www.officielebekendmakingen.nl/",
+        "https://www.tenderned.nl/",
+        "g:\"{q}\" (oplichting OR fraude OR faillissement OR klacht)"
+      ]
+    },
+    {
+      "label": "Phone number",
+      "prompt": "Phone number (any format):",
+      "type": "phone",
+      "links": [
+        "g:\"{alt}\" OR \"{national}\" OR \"{intl}\" OR \"{e164}\"",
+        "g:\"{alt}\" OR \"{national}\" OR \"{e164}\" (scam OR fraud OR spam)",
+        "g:\"{alt}\" OR \"{national}\" OR \"{intl}\" (site:facebook.com OR site:linkedin.com OR site:marktplaats.nl OR site:tellows.nl)"
+      ]
+    },
+    {
+      "label": "Address / property",
+      "prompt": "Address or postcode:",
+      "links": [
+        "https://www.google.com/maps/search/?api=1&query={q}",
+        "https://www.openstreetmap.org/search?query={q}",
+        "g:\"{q}\"",
+        "https://www.wozwaardeloket.nl/",
+        "https://www.kadaster.nl/"
+      ]
+    },
+    {
+      "label": "Courts & legal",
+      "prompt": "Name, company or case:",
+      "links": [
+        "https://uitspraken.rechtspraak.nl/",
+        "https://insolventies.rechtspraak.nl/",
+        "g:\"{q}\" site:rechtspraak.nl"
+      ]
+    },
+    {
+      "label": "Financial & regulatory check",
+      "prompt": "Person or firm name:",
+      "links": [
+        "https://www.afm.nl/nl-nl/sector/registers",
+        "https://www.dnb.nl/openbaar-register/",
+        "g:\"{q}\" site:afm.nl (waarschuwing OR waarschuwt)"
+      ]
+    },
+    {
+      "label": "Vehicle (licence plate)",
+      "prompt": "Licence plate (kenteken):",
+      "transform": [
+        "alnum",
+        "upper"
+      ],
+      "links": [
+        "https://ovi.rdw.nl/",
+        "g:\"{q}\" kenteken"
+      ],
+      "note": "RDW's vehicle check can't be pre-filled: paste the plate from your clipboard."
+    },
+    {
+      "label": "Aircraft",
+      "prompt": "Registration (e.g. PH-ABC):",
+      "transform": [
+        "upper"
+      ],
+      "links": [
+        "https://www.flightradar24.com/data/aircraft/{q}",
+        "g:\"{q}\" aircraft"
+      ]
+    }
+  ],
+  "bookmarks": [
+    {
+      "name": "Bedrijven & Financiën",
+      "children": [
+        {
+          "name": "KvK Handelsregister",
+          "url": "https://www.kvk.nl/zoeken/"
+        },
+        {
+          "name": "AFM Registers",
+          "url": "https://www.afm.nl/nl-nl/sector/registers"
+        },
+        {
+          "name": "DNB Public Register",
+          "url": "https://www.dnb.nl/openbaar-register/"
+        },
+        {
+          "name": "Officiële Bekendmakingen",
+          "url": "https://www.officielebekendmakingen.nl/"
+        },
+        {
+          "name": "TenderNed",
+          "url": "https://www.tenderned.nl/"
+        }
+      ]
+    },
+    {
+      "name": "Rechtspraak",
+      "children": [
+        {
+          "name": "Uitspraken (court decisions)",
+          "url": "https://uitspraken.rechtspraak.nl/"
+        },
+        {
+          "name": "Insolventieregister",
+          "url": "https://insolventies.rechtspraak.nl/"
+        }
+      ]
+    },
+    {
+      "name": "Vastgoed & Voertuigen",
+      "children": [
+        {
+          "name": "WOZ-waardeloket",
+          "url": "https://www.wozwaardeloket.nl/"
+        },
+        {
+          "name": "Kadaster",
+          "url": "https://www.kadaster.nl/"
+        },
+        {
+          "name": "RDW Vehicle Check",
+          "url": "https://ovi.rdw.nl/"
+        }
+      ]
+    }
+  ]
+}
