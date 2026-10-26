@@ -1,0 +1,121 @@
+#!/usr/bin/env bash
+# ns-watch — watch public pages (profiles, channel previews, fundraising or
+# missing-person posts) for changes: proof of life and new activity. Each change
+# is kept as a snapshot and a diff in the case's watch/ folder and logged in
+# audit.log. Optional scheduled checks run every few hours in the background.
+# shellcheck source=../lib/ui.sh
+. "${NS_HOME:-$HOME/.local/share/northstar}/lib/ui.sh"
+
+case_dir=$(ns_case_dir)
+unit=northstar-watch
+plist="$HOME/Library/LaunchAgents/org.northstar.watch.plist"
+
+schedule_on() {   # $1 = hours
+  local secs=$(( $1 * 3600 ))
+  if ui_mac; then
+    mkdir -p "$(dirname "$plist")"
+    cat > "$plist" <<EOF
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0"><dict>
+  <key>Label</key><string>org.northstar.watch</string>
+  <key>ProgramArguments</key><array><string>$NS_BIN/ns-watch</string><string>--scheduled</string></array>
+  <key>StartInterval</key><integer>$secs</integer>
+  <key>StandardOutPath</key><string>$NS_CONF/watch.log</string>
+  <key>StandardErrorPath</key><string>$NS_CONF/watch.log</string>
+</dict></plist>
+EOF
+    launchctl unload "$plist" >/dev/null 2>&1
+    launchctl load "$plist"
+  else
+    local d="$HOME/.config/systemd/user"
+    mkdir -p "$d"
+    printf '[Unit]\nDescription=northstar page monitoring\n\n[Service]\nType=oneshot\nExecStart=%s --scheduled\n' \
+      "$NS_BIN/ns-watch" > "$d/$unit.service"
+    printf '[Unit]\nDescription=northstar page monitoring every %s hours\n\n[Timer]\nOnBootSec=10min\nOnUnitActiveSec=%sh\nPersistent=true\n\n[Install]\nWantedBy=timers.target\n' \
+      "$1" "$1" > "$d/$unit.timer"
+    systemctl --user daemon-reload && systemctl --user enable --now "$unit.timer" >/dev/null 2>&1
+  fi
+}
+
+schedule_off() {
+  if ui_mac; then
+    launchctl unload "$plist" >/dev/null 2>&1; rm -f "$plist"
+  else
+    systemctl --user disable --now "$unit.timer" >/dev/null 2>&1
+    rm -f "$HOME/.config/systemd/user/$unit.timer" "$HOME/.config/systemd/user/$unit.service"
+    systemctl --user daemon-reload >/dev/null 2>&1
+  fi
+}
+
+# Background run from the timer: check every open case, notify on changes.
+if [ "${1:-}" = "--scheduled" ]; then
+  out=$(ns_watch check-all "$NS_DATA" 2>&1); rc=$?
+  printf '%s %s\n%s\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "scheduled check" "$out" >> "$NS_CONF/watch.log"
+  [ "$rc" -eq 10 ] && ui_notify "Watched pages changed: $(printf '%s\n' "$out" | grep -c CHANGED) (see Page monitoring)"
+  exit 0
+fi
+
+choice=$(ui_list "Page monitoring: case $(ns_case)" \
+  "Watch a page" \
+  "Check watched pages now" \
+  "Recent changes" \
+  "List watched pages" \
+  "Stop watching a page" \
+  "Scheduled checks (on/off)" \
+  "Open the watch folder") || exit 0
+
+case "$choice" in
+  "Watch a page")
+    url=$(ui_entry "Address of the public page to watch (profile, t.me/s/<channel>, post):") || exit 0
+    label=$(ui_entry "A short label (optional):") || label=""
+    r=$(ns_watch add "$case_dir" "$url" "$label")
+    printf '%s\n' "$r"
+    if ui_question "$r
+
+Record the baseline now?"; then
+      ns_watch check "$case_dir"
+    fi ;;
+
+  "Check watched pages now")
+    r=$(ns_watch check "$case_dir"); rc=$?
+    ns_audit ns-watch "check" "manual check of $(printf '%s\n' "$r" | grep -c .) pages"
+    printf '%s\n' "$r"
+    if [ "$rc" -eq 10 ]; then ui_info "Changes found:
+
+$r"; else ui_info "$r"; fi ;;
+
+  "Recent changes")
+    r=$(ns_watch changes "$case_dir"); printf '%s\n' "$r"; ui_info "$r" ;;
+
+  "List watched pages")
+    r=$(ns_watch list "$case_dir"); printf '%s\n' "$r"; ui_info "$r" ;;
+
+  "Stop watching"*)
+    items=()
+    while IFS= read -r l; do
+      case "$l" in W[0-9]*) items+=("$l") ;; esac
+    done <<LIST
+$(ns_watch list "$case_dir")
+LIST
+    [ ${#items[@]} -gt 0 ] || { ui_info "No pages watched in this case."; exit 0; }
+    pick=$(ui_list "Stop watching which page?" "${items[@]}") || exit 0
+    r=$(ns_watch remove "$case_dir" "${pick%% *}"); ui_notify "$r" ;;
+
+  "Scheduled checks"*)
+    pick=$(ui_list "Check every open case's watched pages in the background" \
+      "Every 3 hours" "Every 6 hours" "Every 12 hours" "Every 24 hours" "Turn scheduled checks off") || exit 0
+    case "$pick" in
+      "Turn"*) schedule_off; ns_audit ns-watch "schedule" "off"; ui_notify "Scheduled checks are off" ;;
+      *) h=$(printf '%s' "$pick" | tr -dc 0-9)
+         if schedule_on "$h"; then
+           ns_audit ns-watch "schedule" "every $h hours"
+           ui_info "Watched pages are checked every $h hours while you're logged in. Changes show a notification and are logged in each case's watch/changes.log."
+         else
+           ui_error "Couldn't set up the scheduled check."
+         fi ;;
+    esac ;;
+
+  "Open the watch folder")
+    mkdir -p "$case_dir/watch"; ui_reveal "$case_dir/watch" ;;
+esac

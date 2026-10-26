@@ -4,6 +4,14 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project uses
 [Semantic Versioning](https://semver.org/).
 
+## [0.21.0] - 2026-10-26
+
+### Added
+- `ns-watch` (main menu: Page monitoring): watch public pages for changes as
+  proof of life or new activity. Text snapshots and diffs per change in the
+  case's `watch/` folder, `changes.log`, audit-log entries, and optional
+  scheduled checks (systemd user timer or launchd agent) with notifications.
+
 ## [0.20.0] - 2026-10-26
 
 ### Added

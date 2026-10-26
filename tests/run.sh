@@ -19,7 +19,7 @@ H="$W/home"; mkdir -p "$H/lib" "$H/bin" "$H/config" "$W/data" "$W/conf"
 cp "$R/lib/ui.sh" "$R/lib/ns_country.py" "$H/lib/"
 cp "$R/config/ctf-categories.txt" "$H/config/"
 cp -R "$R/config/countries" "$H/config/"
-for e in breach darkweb evidence doctor missing; do ln -s "$R/lib/ns_$e.py" "$H/bin/ns_$e"; done
+for e in breach darkweb evidence doctor missing watch; do ln -s "$R/lib/ns_$e.py" "$H/bin/ns_$e"; done
 ln -s "$R/lib/ns_case.py" "$H/bin/ns_casework"
 export NS_HOME="$H" NS_DATA="$W/data" XDG_CONFIG_HOME="$W/xdg" NS_UI=script NS_UI_ANSWERS="$W/answers"
 export PATH="$H/bin:$PATH"
@@ -154,6 +154,25 @@ PATH="$G:$PATH" menu ns-image "Find the same photo" "no"
 check "whole-case search runs on the case folder" "grep -q 'ns_photomatch groups $CASE \\.' '$W/out.txt'"
 PATH="$G:$PATH" menu ns-image "Find the same photo" "yes" "$W/photo.jpg"
 check "one-photo search copies the photo in first" "grep -q 'ns_photomatch find searched_photo.jpg $CASE' '$W/out.txt'"
+
+section "Page monitoring"
+menu ns-watch "Watch a page" "https://example.org/profile" "Profile" "no"
+check "watch added to the case" "grep -q 'https://example.org/profile' '$CASE/watch/watches.json'"
+menu ns-watch "Watch a page" "file:///etc/passwd" "" "no"
+check "non-web addresses refused" "! grep -q 'file://' '$CASE/watch/watches.json'"
+python3 - "$R/lib/ns_watch.py" "$CASE" > "$W/watch.txt" 2>&1 <<'PYEOF2'
+import importlib.util, sys
+spec = importlib.util.spec_from_file_location("w", sys.argv[1]); w = importlib.util.module_from_spec(spec); spec.loader.exec_module(w)
+page = ["Profile\nLast post: hello"]
+w.page_text = lambda url: page[0]
+w.cmd_check(sys.argv[2]); w.cmd_check(sys.argv[2])
+page[0] += "\nNew post: safe in Kingston"
+print("rc", w.cmd_check(sys.argv[2]))
+PYEOF2
+check "first check is a baseline, unchanged page is quiet" "grep -q 'baseline recorded' '$W/watch.txt' && grep -q 'no change' '$W/watch.txt'"
+check "a change is detected with its new line" "grep -q 'rc 10' '$W/watch.txt' && grep -q 'safe in Kingston' '$CASE/watch/changes.log'"
+check "snapshot and diff kept" "[ \"\$(ls '$CASE'/watch/W001/*.txt | wc -l)\" -eq 2 ] && ls '$CASE'/watch/W001/*.diff >/dev/null"
+check "audit log chain intact" "python3 '$R/lib/ns_evidence.py' audit-verify '$CASE/audit.log' | grep -q ' 0 BROKEN'"
 
 section "Installer module selection"
 I="$W/inst"; mkdir -p "$I/modules" "$I/bin" "$I/home"

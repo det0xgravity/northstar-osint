@@ -106,6 +106,7 @@ northstar                # main menu
 ├── Video verification   # ns-video
 ├── Photo geolocation    # ns-geo
 ├── Face comparison (within this case)   # ns-face
+├── Page monitoring      # ns-watch
 ├── Country search       # ns-country
 ├── Breach data          # ns-breach
 ├── Dark web             # ns-darkweb

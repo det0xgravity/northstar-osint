@@ -14,6 +14,7 @@ ns-media|Media Download|video-x-generic|Collect video, images, galleries and str
 ns-archive|Capture Web Pages|document-save|Evidence-grade page captures: single-file copy, screenshot, headers, Wayback
 ns-video|Video Verification|video-x-generic|Keyframes for reverse search, offline transcript and translation
 ns-geo|Photo Geolocation|find-location|Where was this photo taken? Clues, local AI estimate, shadows, OSM search
+ns-watch|Page Monitoring|appointment-new|Watch public pages for changes: proof of life, new posts, snapshots and diffs
 ns-face|Face Comparison|avatar-default|Compare a reference face with photos already in the case (local, safeguarded)
 ns-metadata|Metadata|document-properties|View, export and strip file metadata
 ns-image|Image Analysis|image-x-generic|Reverse image search and EXIF/GPS

@@ -19,6 +19,7 @@ while true; do
     "Video verification" \
     "Photo geolocation" \
     "Face comparison (within this case)" \
+    "Page monitoring (proof of life)" \
     "Country search" \
     "Breach data" \
     "Dark web" \
@@ -43,6 +44,7 @@ while true; do
     "Video verification")      ns-video ;;
     "Photo geolocation")       ns-geo ;;
     "Face comparison"*)        ns-face ;;
+    "Page monitoring"*)        ns-watch ;;
     "Country search")          ns-country ;;
     "Breach data")             ns-breach ;;
     "Dark web")                ns-darkweb ;;

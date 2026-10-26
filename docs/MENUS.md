@@ -128,6 +128,20 @@ Face comparison **within the active case only**: a reference face (for example a
 
 Accuracy drops for small, blurred or angled faces, children, large age gaps, and differs between demographic groups. A score is a lead for human review and independent corroboration, never an identification on its own. Faces are biometric data: you need a lawful basis to process them, and images of minors only with a law-enforcement partner or equivalent authority.
 
+## ns-watch
+
+Page monitoring: watch public pages (a subject's profile, a `t.me/s/<channel>` preview, a fundraising or missing-person post) for changes, as proof of life or new activity. Each page's visible text is compared with the last snapshot. Pages that need a login or render entirely in JavaScript can't be watched this way.
+
+| Option | What it does |
+|---|---|
+| Watch a page | Adds the address to the case and records a baseline |
+| Check watched pages now | Checks this case's pages; changes are shown with their new lines |
+| Recent changes | The last 20 changes in this case |
+| List / Stop watching | Manage the case's watched pages |
+| Scheduled checks | Every 3, 6, 12 or 24 hours while you're logged in (a systemd user timer on Linux, a launchd agent on macOS), across every open case, with a desktop notification on change. Closed cases are skipped |
+
+Everything is kept in the case's `watch/` folder: `watches.json`, a text snapshot and a diff for every change under `watch/<ID>/` (UTC file names), and `changes.log`. Every baseline and change is also written to the hash-chained `audit.log`. Checks come from your own connection, so keep the number of watched pages and the frequency modest.
+
 ## ns-metadata
 
 | Option | Runs | Output |

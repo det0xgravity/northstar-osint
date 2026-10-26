@@ -37,7 +37,7 @@ TOOLS = {
     "shell": ["zsh", "fzf", "eza", "ranger", "pay-respects"],
     "northstar": ["northstar", "ns-country", "ns-breach", "ns-darkweb", "ns-evidence", "ns-case",
                   "ns-archive", "ns-video", "ns-telegram", "ns_breach", "ns_darkweb", "ns_evidence",
-                  "ns_casework"],
+                  "ns_casework", "ns-watch", "ns_watch", "ns_missing"],
 }
 NO_VERSION = {"northstar"}            # GUI menus: presence only
 
