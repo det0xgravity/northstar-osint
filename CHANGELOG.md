@@ -4,6 +4,13 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project uses
 [Semantic Versioning](https://semver.org/).
 
+## [0.4.4] - 2026-10-26
+
+### Fixed
+- SpiderFoot's web UI returned "Error" (HTTP 500) unless it was started from
+  its own folder, because it loads its page templates from the current
+  directory. The `spiderfoot` command now switches there first.
+
 ## [0.4.3] - 2026-10-26
 
 ### Fixed
