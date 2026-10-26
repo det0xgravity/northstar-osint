@@ -52,14 +52,18 @@ while IFS=$'\t' read -r kind val; do
   esac
 done < <(pack run "$code" "$choice" "$q")
 
-ui_open ${urls[@]+"${urls[@]}"}
 out=$(ns_outdir "$dir" "$clip")
 printf 'country\t%s\nsearch\t%s\nquery\t%s\n' "$code" "$choice" "$clip" > "$out/query.txt"
 [ -n "$info" ] && printf '%s' "$info" > "$out/details.txt"
 printf '%s\n' ${urls[@]+"${urls[@]}"} > "$out/links.txt"
 ns_audit "ns-country:$code:$what" "$clip" "${#urls[@]} searches opened in browser"
 ui_clip "$clip"
+# Dialog first: once the browser opens it covers any dialog shown after it
 ui_info "${info:+$info
-}Searches are open in your browser.
+}Click OK to open ${#urls[@]} searches in your browser.
 
-\"$clip\" is on your clipboard - paste it (Ctrl/Cmd+V) into any registry page that opened without a search."
+\"$clip\" is on your clipboard - paste it (Ctrl/Cmd+V) into any registry page that opens without a search.${info:+
+
+These details are saved in the case folder (details.txt).}"
+ui_open ${urls[@]+"${urls[@]}"}
+ui_notify "\"$clip\" is on your clipboard"

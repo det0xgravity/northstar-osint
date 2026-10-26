@@ -39,12 +39,14 @@ case "$choice" in
   gps=$(exiftool -n -p '$GPSLatitude,$GPSLongitude' "$f" 2>/dev/null)
   urls=("https://lens.google.com/" "https://yandex.com/images/" "https://tineye.com/" "https://fotoforensics.com/")
   [ -n "$gps" ] && urls=("https://www.google.com/maps/search/?api=1&query=$gps" "${urls[@]}")
+  # Dialog first: once the browser opens it covers any dialog shown after it
+  ui_info "${gps:+GPS found: $gps (it will open in Maps)
+
+}Click OK to open the reverse-search pages and the case folder. Drag the image from the folder into each page.
+
+The EXIF report and a SHA-256 hash of the original are saved in the case folder."
   ui_open "${urls[@]}"
   ui_reveal "$out"     # opened even from the main menu: you drag the image from here
-  ui_info "${gps:+GPS found: $gps (opened in Maps)
-
-}Reverse-search pages are open. Drag the image from the case folder into each one.
-
-A SHA-256 hash of the original was saved with the EXIF report."
+  ui_notify "Drag $base from the case folder into the search pages"
   ns_finish "$out" ;;
 esac

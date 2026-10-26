@@ -122,6 +122,17 @@ ui_clip() {
   return 0
 }
 
+# ui_notify "Message" — a desktop notification. Notifications are drawn above
+# all windows, unlike dialogs, which a browser opening a moment later covers.
+ui_notify() {
+  if ui_mac; then
+    osascript -e "display notification \"$(_as_q "$1")\" with title \"$NS_TITLE\"" >/dev/null 2>&1
+  elif ns_cmd notify-send; then
+    notify-send -a "$NS_TITLE" "$NS_TITLE" "$1" >/dev/null 2>&1
+  fi
+  return 0
+}
+
 ui_reveal() {
   if ui_mac; then open "$1"; else xdg-open "$1" >/dev/null 2>&1 & fi
 }

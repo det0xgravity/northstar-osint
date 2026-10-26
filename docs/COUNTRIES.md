@@ -8,7 +8,7 @@ There are 17 countries plus an International pack, with 144 search types and 268
 
 1. Pick a country. The one you used last is at the top of the list. You can also go straight to one: `ns-country GB`.
 2. Pick a search type and type your query.
-3. `ns-country` opens, in your browser:
+3. A dialog shows any analysis (for phone numbers) and the query, which is now on your clipboard. Click OK, and `ns-country` opens, in your browser:
    - **targeted Google searches** that can always be pre-filled (court decisions, obituaries, news, regulator sites, complaints);
    - **registries pre-filled with your query** where the registry allows it (Companies House, ABN Lookup, KvK, Annuaire des Entreprises, the FAA register and others);
    - **registry search pages** for the rest. Many government registries are single-page apps or session-based forms that can't be pre-filled, so your query is **copied to the clipboard**: paste it with Ctrl/Cmd+V.

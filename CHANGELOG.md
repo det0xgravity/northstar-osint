@@ -4,6 +4,18 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project uses
 [Semantic Versioning](https://semver.org/).
 
+## [0.4.6] - 2026-10-26
+
+### Fixed
+- The "copied to clipboard" dialog in Country search and Image analysis
+  opened behind the browser, and the menu waited on it. The dialog now comes
+  first, and the browser opens when you click OK.
+
+### Added
+- Desktop notifications (shown above all windows) confirm what's on the
+  clipboard after the browser opens: Country search, Username and Email
+  search, Image analysis. `libnotify-bin` is added to the core packages.
+
 ## [0.4.5] - 2026-10-26
 
 ### Changed

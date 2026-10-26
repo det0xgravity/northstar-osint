@@ -28,6 +28,7 @@ Username*)
   ui_clip "$u"
   ui_open "https://whatsmyname.app/" "$(ns_google "\"$u\"")"
   echo "Username copied to clipboard for WhatsMyName."
+  ui_notify "\"$u\" is on your clipboard: paste it into WhatsMyName"
   ns_finish "$out" ;;
 
 Email*)
@@ -40,6 +41,7 @@ Email*)
   ui_open "https://haveibeenpwned.com/" "https://epieos.com/" "https://intelx.io/" \
           "$(ns_google "\"$e\"")"
   echo "Email copied to clipboard for the breach/lookup sites."
+  ui_notify "\"$e\" is on your clipboard: paste it into the breach and lookup sites"
   ns_finish "$out" ;;
 
 Google*)
