@@ -91,17 +91,31 @@ ui_dir() {
 }
 
 # --- browser, clipboard, files -------------------------------------------------------
+# _ui_detach CMD...  Starts a GUI program in its own session, so it survives
+# the menu's terminal closing (which would otherwise kill it with SIGHUP).
+_ui_detach() {
+  if ns_cmd setsid; then
+    setsid -f "$@" >/dev/null 2>&1 </dev/null
+  else
+    # same as setsid -f: the child detaches before this call returns
+    python3 -c 'import os, sys
+if os.fork() == 0:
+    os.setsid()
+    os.execvp(sys.argv[1], sys.argv[1:])' "$@" >/dev/null 2>&1 </dev/null
+  fi
+}
+
 # ui_open URL...   Opens all URLs as tabs (Firefox preferred).
 ui_open() {
   [ $# -gt 0 ] || return 0
   if ui_mac; then
     if [ -d "/Applications/Firefox.app" ]; then open -a Firefox "$@"; else open "$@"; fi
   elif ns_cmd firefox; then
-    firefox "$@" >/dev/null 2>&1 &
+    _ui_detach firefox "$@"
   elif ns_cmd firefox-esr; then
-    firefox-esr "$@" >/dev/null 2>&1 &
+    _ui_detach firefox-esr "$@"
   else
-    local u; for u in "$@"; do xdg-open "$u" >/dev/null 2>&1 & done
+    local u; for u in "$@"; do _ui_detach xdg-open "$u"; done
   fi
 }
 
@@ -134,7 +148,7 @@ ui_notify() {
 }
 
 ui_reveal() {
-  if ui_mac; then open "$1"; else xdg-open "$1" >/dev/null 2>&1 & fi
+  if ui_mac; then open "$1"; else _ui_detach xdg-open "$1"; fi
 }
 
 # --- helpers ---------------------------------------------------------------------

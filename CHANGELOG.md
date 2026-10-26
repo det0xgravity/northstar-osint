@@ -4,6 +4,15 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project uses
 [Semantic Versioning](https://semver.org/).
 
+## [0.5.1] - 2026-10-26
+
+### Fixed
+- Country search opened no browser when started from its own launcher: since
+  0.4.6 the browser is launched last, and the menu's terminal closed straight
+  away and took the starting browser with it (SIGHUP). The browser and file
+  manager now start in their own session (`setsid`), independent of the
+  terminal.
+
 ## [0.5.0] - 2026-10-26
 
 ### Added
