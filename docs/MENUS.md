@@ -142,6 +142,7 @@ Accuracy drops for small, blurred or angled faces, children, large age gaps, and
 | Option | What happens |
 |---|---|
 | Reverse search an image URL | Opens Google Lens, Yandex, Bing and TinEye with the URL; saves a copy and its EXIF |
+| Find the same photo across this case | Perceptual hashing (pHash + dHash, local): finds every picture that appears more than once in the case, or every copy of one photo, even resized, recompressed, converted or lightly edited. Repeated photos across accounts often show the accounts are connected. Heavy crops and mirroring defeat it | `same_photos.html` (side-by-side groups), `same_photos.csv` |
 | Read the text in images (OCR) | Tesseract on one or more images, in every installed language. Text goes to `<image>.txt`. On Debian, add languages with e.g. `sudo apt install tesseract-ocr-fra` |
 | Analyze a local image | Copies the image to the case, saves its EXIF and a SHA-256 hash, opens Maps if GPS is present, and opens reverse-search pages ready for drag-and-drop |
 

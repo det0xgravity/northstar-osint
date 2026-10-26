@@ -32,6 +32,7 @@ TOOLS = {
     "darkweb": ["tor", "torsocks"],
     "geo": ["ns_geo", "shadowfinder"],
     "face": ["ns_face"],
+    "images": ["ns_photomatch"],
     "extras": ["keepassxc", "flameshot"],
     "shell": ["zsh", "fzf", "eza", "ranger", "pay-respects"],
     "northstar": ["northstar", "ns-country", "ns-breach", "ns-darkweb", "ns-evidence", "ns-case",

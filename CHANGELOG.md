@@ -4,6 +4,14 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project uses
 [Semantic Versioning](https://semver.org/).
 
+## [0.20.0] - 2026-10-26
+
+### Added
+- Image analysis: "Find the same photo across this case": perceptual hashing
+  (pHash + dHash with imagehash, local) groups every repeated picture, or
+  finds every copy of one photo, through resizing, recompression, format
+  changes and light edits. Review sheet and CSV; sealed.
+
 ## [0.19.0] - 2026-10-26
 
 ### Added

@@ -6,7 +6,8 @@
 choice=$(ui_list "Image analysis" \
   "Reverse search an image URL (Google Lens, Yandex, Bing, TinEye)" \
   "Analyze a local image (EXIF, GPS, then reverse search)" \
-  "Read the text in images (OCR)") || exit 0
+  "Read the text in images (OCR)" \
+  "Find the same photo across this case (perceptual hash)") || exit 0
 
 case "$choice" in
 "Reverse search an image URL"*)
@@ -38,6 +39,27 @@ This contacts the image's server from YOUR IP address (Tor isn't running). The r
       ns_audit image-download "$u" "copy downloaded${via:+ via Tor}"
     fi
   fi
+  ns_finish "$out" ;;
+
+"Find the same photo"*)
+  ns_cmd ns_photomatch || { ui_error "The same-photo finder isn't installed: ./install.sh --only media"; exit 1; }
+  case_dir=$(ns_case_dir)
+  if ui_question "Look for one particular photo?
+
+Yes: choose a photo and find every copy of it in the case.
+No: find every photo that appears more than once in the case."; then
+    p=$(ui_files "Choose the photo to look for") || exit 0
+    p=$(printf '%s\n' "$p" | head -1)
+    [ -f "$p" ] || exit 0
+    out=$(ns_outdir same-photo "$(basename "$p")")
+    cp -p "$p" "$out/searched_$(basename "$p")"
+    ns_run "$out" ns_photomatch find "searched_$(basename "$p")" "$case_dir" .
+  else
+    out=$(ns_outdir same-photo "whole-case")
+    ns_run "$out" ns_photomatch groups "$case_dir" .
+  fi
+  ns_seal_result "$out" >/dev/null
+  [ -s "$out/same_photos.html" ] && ui_reveal "$out/same_photos.html"
   ns_finish "$out" ;;
 
 "Read the text"*)

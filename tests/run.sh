@@ -148,6 +148,13 @@ check "variants generated" "grep -qx 'jane.doe' '$vd/usernames.txt' && grep -qx 
 check "top usernames passed to Sherlock" "grep -q 'sherlock janedoe jane.doe' '$vd/console.log'"
 check "emails checked with holehe" "[ \"\$(grep -c '^holehe ' '$vd/console.log')\" -eq 10 ]"
 
+section "Same-photo finder (stubbed engine)"
+printf '#!/bin/sh\necho "ns_photomatch $*"; printf "<html>" > same_photos.html\n' > "$G/ns_photomatch"; chmod +x "$G/ns_photomatch"
+PATH="$G:$PATH" menu ns-image "Find the same photo" "no"
+check "whole-case search runs on the case folder" "grep -q 'ns_photomatch groups $CASE \\.' '$W/out.txt'"
+PATH="$G:$PATH" menu ns-image "Find the same photo" "yes" "$W/photo.jpg"
+check "one-photo search copies the photo in first" "grep -q 'ns_photomatch find searched_photo.jpg $CASE' '$W/out.txt'"
+
 section "Installer module selection"
 I="$W/inst"; mkdir -p "$I/modules" "$I/bin" "$I/home"
 cp "$R/install.sh" "$I/" && cp -R "$R/lib" "$I/"
