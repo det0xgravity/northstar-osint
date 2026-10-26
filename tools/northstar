@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+# northstar — main menu for all northstar-osint tools.
+# shellcheck source=../lib/ui.sh
+. "${NS_HOME:-$HOME/.local/share/northstar}/lib/ui.sh"
+
+export NS_FROM_MAIN=1
+
+while true; do
+  case_name=$(ns_case)
+  choice=$(ui_list "Active case: $case_name" \
+    "Username & email" \
+    "Domain & infrastructure" \
+    "Media download" \
+    "Metadata" \
+    "Image analysis" \
+    "Canada search" \
+    "Switch / create case  (current: $case_name)" \
+    "Open case folder" \
+    "Update northstar") || break
+
+  case "$choice" in
+    "Username & email")        ns-username ;;
+    "Domain & infrastructure") ns-domain ;;
+    "Media download")          ns-media ;;
+    "Metadata")                ns-metadata ;;
+    "Image analysis")          ns-image ;;
+    "Canada search")           ns-canada ;;
+    "Switch / create case"*)
+      new=$(ui_entry "Case name (letters, numbers, dashes):" "$case_name") || continue
+      ns_set_case "$new"
+      ns_audit northstar "$(ns_case)" "case activated"
+      ui_info "Active case: $(ns_case)
+Results will be saved under:
+$NS_DATA/Cases/$(ns_case)" ;;
+    "Open case folder")        ui_reveal "$(ns_case_dir)" ;;
+    "Update northstar")        ns-update ;;
+  esac
+done

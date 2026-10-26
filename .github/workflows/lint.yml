@@ -1,0 +1,36 @@
+name: Lint
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install shellcheck
+        run: sudo apt-get update -q && sudo apt-get install -y -q shellcheck
+
+      - name: shellcheck
+        run: shellcheck -x -S warning install.sh lib/common.sh lib/ui.sh modules/*.sh tools/*
+
+      - name: Bash syntax
+        run: for f in install.sh lib/*.sh modules/*.sh tools/*; do bash -n "$f"; done
+
+      - name: Bash 3.2 compatibility scan (macOS)
+        run: |
+          if grep -nE 'declare -A|local -A|mapfile|readarray|\$\{[A-Za-z_]+(,,|\^\^)|&>>' \
+               install.sh lib/*.sh modules/*.sh tools/*; then
+            echo "::error::Bash 4+ construct found — northstar must run on macOS Bash 3.2"
+            exit 1
+          fi
+
+      - name: Python and JSON
+        run: |
+          python3 -m py_compile lib/gen_policies.py
+          python3 -m json.tool config/bookmarks.json > /dev/null
+
+      - name: Installer smoke test
+        run: ./install.sh --list

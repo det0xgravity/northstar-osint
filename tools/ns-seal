@@ -1,0 +1,57 @@
+#!/usr/bin/env bash
+# ns-seal — prepare a CLONE of your master VM to become a Proxmox template.
+# Removes machine identity, SSH host keys, browser history and per-user traces,
+# then shuts down. Never run this on the master itself. Linux only.
+
+if [ "$(id -u)" -ne 0 ]; then
+  echo "Run with sudo:  sudo ns-seal"; exit 1
+fi
+
+U="${SUDO_USER:-}"
+[ -n "$U" ] || { echo "Run via sudo from your normal account so ns-seal knows whose profile to clean."; exit 1; }
+H=$(getent passwd "$U" | cut -d: -f6)
+
+cat <<EOF
+This will seal $(hostname) for templating:
+  - clear browser history, cookies and sessions for $U (settings and extensions are kept)
+  - clear shell history, recent files and thumbnails
+  - reset machine-id, SSH host keys and DHCP leases
+  - shut the VM down
+EOF
+printf 'Also delete all case data in %s/Northstar/Cases? [y/N] ' "$H"
+read -r wipe
+printf 'Seal and shut down now? [y/N] '
+read -r go
+case "$go" in [Yy]*) ;; *) echo "Cancelled."; exit 0 ;; esac
+
+# Browsers: Firefox / ESR profiles (keep prefs + extensions)
+find "$H/.mozilla/firefox" "$H/.config/mozilla/firefox" -maxdepth 2 \
+  \( -name 'places.sqlite*' -o -name 'cookies.sqlite*' -o -name 'formhistory.sqlite' \
+     -o -name 'sessionstore.jsonlz4' -o -name 'sessionstore-backups' \) \
+  -exec rm -rf {} + 2>/dev/null
+rm -rf "$H/.cache/mozilla" 2>/dev/null
+# Brave / Chromium
+for b in "$H/.config/BraveSoftware/Brave-Browser" "$H/.config/chromium"; do
+  [ -d "$b" ] || continue
+  find "$b" -maxdepth 2 \( -name 'History*' -o -name 'Cookies*' -o -name 'Sessions' \
+       -o -name 'Current Session' -o -name 'Last Session' \) -exec rm -rf {} + 2>/dev/null
+done
+
+# Per-user traces
+rm -rf "$H/.bash_history" "$H/.zsh_history" "$H/.python_history" \
+       "$H/.local/share/recently-used.xbel" "$H/.xsession-errors"* "$H/.cache/thumbnails" 2>/dev/null
+case "$wipe" in [Yy]*) rm -rf "$H/Northstar/Cases/"* && echo "Case data removed." ;; esac
+
+# Machine identity
+rm -f /etc/ssh/ssh_host_* 2>/dev/null
+truncate -s 0 /etc/machine-id
+rm -f /var/lib/dbus/machine-id && ln -s /etc/machine-id /var/lib/dbus/machine-id
+rm -f /var/lib/dhcp/*.leases /var/lib/NetworkManager/*.lease 2>/dev/null
+
+# Logs and caches
+journalctl --rotate >/dev/null 2>&1 && journalctl --vacuum-time=1s >/dev/null 2>&1
+apt-get clean
+
+echo "Sealed. Shutting down — convert the VM to a template once it is off."
+sync
+shutdown -h now

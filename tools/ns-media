@@ -1,0 +1,67 @@
+#!/usr/bin/env bash
+# ns-media — collect video, audio, image galleries and live streams, keeping
+# the platform's own metadata alongside every file.
+# shellcheck source=../lib/ui.sh
+. "${NS_HOME:-$HOME/.local/share/northstar}/lib/ui.sh"
+
+choice=$(ui_list "Media download" \
+  "Video (best quality + metadata, subtitles, thumbnail)" \
+  "Audio only (MP3)" \
+  "Whole channel or playlist" \
+  "Image gallery / social media post (gallery-dl)" \
+  "Instagram profile (instaloader)" \
+  "Record a live stream (streamlink)" \
+  "Save a page to the Internet Archive (Wayback)") || exit 0
+
+url=$(ui_entry "URL (or Instagram username):") || exit 0
+host=$(printf '%s' "$url" | sed -E 's#^[a-zA-Z]+://##; s#/.*$##')
+
+YTDLP_META=(--write-info-json --write-description --write-thumbnail
+            --write-subs --write-auto-subs --sub-langs "en.*"
+            --no-overwrites --restrict-filenames)
+
+case "$choice" in
+Video*)
+  out=$(ns_outdir media "$host")
+  ns_run "$out" yt-dlp "${YTDLP_META[@]}" -o "%(uploader)s_%(title).80s_[%(id)s].%(ext)s" "$url"
+  ns_finish "$out" ;;
+
+Audio*)
+  out=$(ns_outdir media "$host")
+  ns_run "$out" yt-dlp -x --audio-format mp3 --write-info-json \
+                       -o "%(uploader)s_%(title).80s_[%(id)s].%(ext)s" "$url"
+  ns_finish "$out" ;;
+
+"Whole channel"*)
+  out=$(ns_outdir media "$host")
+  ns_run "$out" yt-dlp "${YTDLP_META[@]}" --yes-playlist --download-archive archive.txt \
+                       -o "%(playlist_title|uploader)s/%(upload_date)s_%(title).80s_[%(id)s].%(ext)s" "$url"
+  ns_finish "$out" ;;
+
+"Image gallery"*)
+  out=$(ns_outdir gallery "$host")
+  ns_run "$out" gallery-dl --write-metadata -d . "$url"
+  ns_finish "$out" ;;
+
+Instagram*)
+  user="${url#@}"; user="${user%/}"; user="${user##*/}"
+  out=$(ns_outdir instagram "$user")
+  ns_run "$out" instaloader --dirname-pattern="{target}" --no-compress-json "$user"
+  echo "Tip: logged-out access is heavily rate-limited — use 'instaloader --login <puppet>' once."
+  ns_finish "$out" ;;
+
+"Record a live stream"*)
+  out=$(ns_outdir stream "$host")
+  echo "Recording — press Ctrl+C to stop."
+  ns_run "$out" streamlink -o "stream_{time:%Y%m%d-%H%M%S}.ts" "$url" best
+  ns_finish "$out" ;;
+
+"Save a page"*)
+  out=$(ns_outdir archive "$host")
+  ns_audit wayback "$url" "save request"
+  echo "Requesting a Wayback Machine capture…"
+  loc=$(curl -s -o /dev/null -w '%{redirect_url}' -A "northstar-osint" "https://web.archive.org/save/$url")
+  echo "${loc:-Submitted — check https://web.archive.org/web/*/$url}" | tee "$out/wayback.txt"
+  ui_open "https://web.archive.org/web/*/$url" "https://archive.ph/?url=$(ns_enc "$url")"
+  ns_finish "$out" ;;
+esac

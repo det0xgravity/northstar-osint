@@ -1,0 +1,15 @@
+# Firefox add-ons installed by policy. One addons.mozilla.org slug per line —
+# the part of the URL after /addon/. GUIDs are looked up automatically.
+#
+# Never add extensions to Tor Browser or Mullvad Browser: they rely on every
+# user looking identical, and extensions make you stand out.
+
+ublock-origin               # content and tracker blocking
+multi-account-containers    # one container per persona
+single-file                 # save complete pages as one HTML file
+keepassxc-browser           # persona credentials from KeePassXC
+search_by_image             # reverse image search across engines
+wayback-machine_new         # archive / view history of a page
+mitaka                      # pivot on IPs, domains, hashes, emails
+shodan-addon                # host exposure for the current site
+user-agent-string-switcher  # change apparent browser/platform

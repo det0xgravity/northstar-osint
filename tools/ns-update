@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+# ns-update — pull the latest northstar-osint and upgrade every installed tool.
+CONF="${XDG_CONFIG_HOME:-$HOME/.config}/northstar"
+repo=$(cat "$CONF/repo_path" 2>/dev/null)
+
+if [ -z "$repo" ] || [ ! -x "$repo/install.sh" ]; then
+  echo "Can't find the northstar-osint checkout (expected path in $CONF/repo_path)."
+  echo "Clone it again and run ./install.sh from there."
+  exit 1
+fi
+
+if [ -d "$repo/.git" ]; then
+  echo "Updating northstar-osint in $repo…"
+  git -C "$repo" pull --ff-only || echo "git pull failed — continuing with the current version."
+fi
+
+"$repo/install.sh" --update --yes "$@"
+status=$?
+if [ "${NS_FROM_MAIN:-0}" != 1 ] && [ -t 0 ]; then
+  printf '\nPress Enter to close… '; read -r _
+fi
+exit $status

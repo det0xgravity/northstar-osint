@@ -1,0 +1,50 @@
+#!/usr/bin/env bash
+# ns-image — reverse image search and location clues from image metadata.
+# shellcheck source=../lib/ui.sh
+. "${NS_HOME:-$HOME/.local/share/northstar}/lib/ui.sh"
+
+choice=$(ui_list "Image analysis" \
+  "Reverse search an image URL (Google Lens, Yandex, Bing, TinEye)" \
+  "Analyze a local image (EXIF, GPS, then reverse search)") || exit 0
+
+case "$choice" in
+"Reverse search an image URL"*)
+  u=$(ui_entry "Direct image URL:") || exit 0
+  e=$(ns_enc "$u")
+  out=$(ns_outdir image "$(printf '%s' "$u" | sed -E 's#^[a-zA-Z]+://##; s#/.*$##')")
+  echo "$u" > "$out/source_url.txt"
+  ns_audit reverse-image "$u" "lens, yandex, bing, tineye"
+  ui_open "https://lens.google.com/uploadbyurl?url=$e" \
+          "https://yandex.com/images/search?rpt=imageview&url=$e" \
+          "https://www.bing.com/images/search?view=detailv2&iss=sbi&q=imgurl:$e" \
+          "https://tineye.com/search?url=$e"
+  if ns_cmd curl && ns_cmd exiftool; then
+    curl -fsSL -A "Mozilla/5.0" "$u" -o "$out/image" 2>/dev/null &&
+      exiftool -a -G1 -s "$out/image" > "$out/image.exif.txt" &&
+      echo "  Downloaded copy + EXIF saved (most platforms strip EXIF on upload)."
+  fi
+  ns_finish "$out" ;;
+
+"Analyze a local image"*)
+  f=$(ui_files "Choose an image") || exit 0
+  f=$(printf '%s\n' "$f" | head -1)
+  [ -f "$f" ] || exit 0
+  base=$(basename "$f")
+  out=$(ns_outdir image "$base")
+  cp "$f" "$out/"
+  ns_audit exiftool "$base" "exiftool -a -G1 -s"
+  exiftool -a -G1 -s "$f" | tee "$out/$base.exif.txt" | \
+    grep -iE 'Make|Model|DateTimeOriginal|GPS|Software|Artist|Owner|Serial' || true
+  if ns_cmd sha256sum; then sha256sum "$f" > "$out/$base.sha256"; else shasum -a 256 "$f" > "$out/$base.sha256"; fi
+  gps=$(exiftool -n -p '$GPSLatitude,$GPSLongitude' "$f" 2>/dev/null)
+  urls=("https://lens.google.com/" "https://yandex.com/images/" "https://tineye.com/" "https://fotoforensics.com/")
+  [ -n "$gps" ] && urls=("https://www.google.com/maps/search/?api=1&query=$gps" "${urls[@]}")
+  ui_open "${urls[@]}"
+  ui_reveal "$out"
+  ui_info "${gps:+GPS found: $gps (opened in Maps)
+
+}Reverse-search pages are open. Drag the image from the case folder into each one.
+
+A SHA-256 hash of the original was saved with the EXIF report."
+  ns_finish "$out" ;;
+esac

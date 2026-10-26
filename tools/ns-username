@@ -1,0 +1,56 @@
+#!/usr/bin/env bash
+# ns-username — account discovery by username or email address.
+# shellcheck source=../lib/ui.sh
+. "${NS_HOME:-$HOME/.local/share/northstar}/lib/ui.sh"
+
+choice=$(ui_list "Username & email" \
+  "Username search (sherlock, maigret, socialscan, blackbird)" \
+  "Email search (holehe, socialscan, h8mail)" \
+  "Google account from email (GHunt — run 'ghunt login' once first)" \
+  "Instagram profile details (toutatis — needs a session ID)") || exit 0
+
+case "$choice" in
+Username*)
+  u=$(ui_entry "Username (without @):") || exit 0
+  u="${u#@}"
+  out=$(ns_outdir username "$u")
+  ns_run "$out" sherlock "$u" --print-found --output "$out/sherlock.txt"
+  ns_run "$out" maigret "$u" --html --folderoutput "$out/maigret"
+  ns_run "$out" socialscan "$u"
+  ns_run "$out" blackbird --username "$u"
+  ui_clip "$u"
+  ui_open "https://whatsmyname.app/" "$(ns_google "\"$u\"")"
+  echo "Username copied to clipboard for WhatsMyName."
+  ns_finish "$out" ;;
+
+Email*)
+  e=$(ui_entry "Email address:") || exit 0
+  out=$(ns_outdir email "$e")
+  ns_run "$out" holehe "$e" --only-used
+  ns_run "$out" socialscan "$e"
+  ns_run "$out" h8mail -t "$e" -o "$out/h8mail.csv"
+  ui_clip "$e"
+  ui_open "https://haveibeenpwned.com/" "https://epieos.com/" "https://intelx.io/" \
+          "$(ns_google "\"$e\"")"
+  echo "Email copied to clipboard for the breach/lookup sites."
+  ns_finish "$out" ;;
+
+Google*)
+  e=$(ui_entry "Gmail / Google account email:") || exit 0
+  out=$(ns_outdir ghunt "$e")
+  ns_run "$out" ghunt email "$e" --json "$out/ghunt.json"
+  ns_finish "$out" ;;
+
+Instagram*)
+  u=$(ui_entry "Instagram username:") || exit 0
+  sid=$(ui_entry "Instagram sessionid cookie (from a sock-puppet login):") || exit 0
+  out=$(ns_outdir instagram "$u")
+  if ns_cmd toutatis; then
+    # Run directly (not via ns_run) so the session cookie never reaches the audit log
+    ns_audit toutatis "$u" "toutatis -u $u -s <redacted>"
+    ( cd "$out" && toutatis -u "$u" -s "$sid" ) 2>&1 | tee -a "$out/console.log"
+  else
+    echo "  [skip] toutatis is not installed"
+  fi
+  ns_finish "$out" ;;
+esac

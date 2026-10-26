@@ -1,0 +1,99 @@
+# Modules
+
+Every tool is installed from its official source. Each project keeps its own license; northstar-osint only automates installing them.
+
+## core *(always installed)*
+
+System packages (git, curl, jq, Python, pipx, Go, whois, dig, zenity, clipboard tools, flatpak) and the northstar runtime: menu tools, the UI library, configuration and PATH setup.
+
+## username
+
+| Tool | Command | Purpose |
+|---|---|---|
+| [Sherlock](https://github.com/sherlock-project/sherlock) | `sherlock` | Username across hundreds of sites |
+| [Maigret](https://github.com/soxoj/maigret) | `maigret` | Username search with profile parsing and HTML reports |
+| [socialscan](https://github.com/iojw/socialscan) | `socialscan` | Username/email availability on major platforms |
+| [holehe](https://github.com/megadose/holehe) | `holehe` | Which sites an email is registered on |
+| [h8mail](https://github.com/khast3x/h8mail) | `h8mail` | Breach lookups (most sources need API keys) |
+| [GHunt](https://github.com/mxrch/GHunt) | `ghunt` | Google account intelligence (run `ghunt login` once) |
+| [Toutatis](https://github.com/megadose/toutatis) | `toutatis` | Instagram account details (needs a session ID) |
+| [Blackbird](https://github.com/p1ngul1n0/blackbird) | `blackbird` | Username/email search using WhatsMyName data |
+
+## domain
+
+| Tool | Command | Purpose |
+|---|---|---|
+| [subfinder](https://github.com/projectdiscovery/subfinder) | `subfinder` | Passive subdomain enumeration |
+| [dnsx](https://github.com/projectdiscovery/dnsx) | `dnsx` | Fast DNS resolution |
+| [httpx](https://github.com/projectdiscovery/httpx) | `httpx` | Live-host probing, titles, technologies |
+| [katana](https://github.com/projectdiscovery/katana) | `katana` | Web crawler |
+| [gowitness](https://github.com/sensepost/gowitness) | `gowitness` | Website screenshots (uses Chromium/Chrome) |
+| [Amass](https://github.com/owasp-amass/amass) | `amass` | Attack-surface mapping |
+| [theHarvester](https://github.com/laramies/theHarvester) | `theHarvester` | Emails, hosts and names from public sources |
+| [waymore](https://github.com/xnl-h4ck3r/waymore) | `waymore` | URLs from Wayback, Common Crawl, URLScan, OTX |
+| [dnstwist](https://github.com/elceef/dnstwist) | `dnstwist` | Lookalike / typosquat domains |
+| [Shodan CLI](https://github.com/achillean/shodan-python) | `shodan` | Shodan queries (needs an API key) |
+| [Censys CLI](https://github.com/censys/censys-python) | `censys` | Censys search (needs API credentials) |
+
+## media
+
+| Tool | Command | Purpose |
+|---|---|---|
+| [yt-dlp](https://github.com/yt-dlp/yt-dlp) | `yt-dlp` | Video/audio from thousands of sites |
+| [gallery-dl](https://github.com/mikf/gallery-dl) | `gallery-dl` | Image galleries and social posts |
+| [Instaloader](https://github.com/instaloader/instaloader) | `instaloader` | Instagram profiles, posts, stories |
+| [Streamlink](https://github.com/streamlink/streamlink) | `streamlink` | Record live streams |
+| [ExifTool](https://exiftool.org/) | `exiftool` | Read/write metadata in almost any file |
+| [MediaInfo](https://mediaarea.net/en/MediaInfo) | `mediainfo` | Technical media metadata |
+| [mat2](https://0xacab.org/jvoisin/mat2) | `mat2` | Metadata removal (Linux) |
+| [FFmpeg](https://ffmpeg.org/) | `ffmpeg` | Media processing (used by yt-dlp) |
+| [internetarchive](https://github.com/jjjake/internetarchive) | `ia` | Search and download from archive.org |
+| [xeuledoc](https://github.com/Malfrats/xeuledoc) | `xeuledoc` | Public Google document metadata |
+
+## frameworks
+
+| Tool | Command | Purpose |
+|---|---|---|
+| [SpiderFoot](https://github.com/smicallef/spiderfoot) | `spiderfoot` | Automated multi-source recon (`spiderfoot -l 127.0.0.1:5001` for the web UI) |
+| [recon-ng](https://github.com/lanmaster53/recon-ng) | `recon-ng` | Modular recon framework |
+| [changedetection.io](https://github.com/dgtlmoon/changedetection.io) | `changedetection.io` | Watch pages for changes (`changedetection.io -d ~/Northstar/changedetection -p 5000`) |
+| [search-that-hash](https://github.com/HashPals/Search-That-Hash) | `sth` | Look up hashes in public databases |
+| [name-that-hash](https://github.com/HashPals/Name-That-Hash) | `nth` | Identify hash types |
+
+## browsers
+
+| Browser | Purpose |
+|---|---|
+| Firefox / Firefox ESR | Main investigation browser, with OSINT extensions and bookmarks by policy |
+| [Brave](https://brave.com) | Chromium-based alternative, with bookmarks by policy |
+| [Tor Browser](https://www.torproject.org) | Anonymity and .onion access (Flatpak launcher on Linux; skipped on arm64 Linux) |
+| [Mullvad Browser](https://mullvad.net/browser) | Tor Browser's anti-fingerprinting without the Tor network (skipped on arm64 Linux) |
+
+On arm64 Linux, such as a VM on Apple Silicon, Tor Browser and Mullvad Browser aren't installed because there are no stable builds yet. See [INSTALL.md](INSTALL.md#running-in-a-vm-on-apple-silicon).
+
+**Extensions** (Firefox, from `config/firefox-extensions.txt`): uBlock Origin, Multi-Account Containers, SingleFile, KeePassXC-Browser, Search by Image, Wayback Machine, Mitaka, Shodan, User-Agent Switcher and Manager.
+
+**Policy also sets:** bookmarks toolbar always visible, telemetry and studies off, Firefox's password saving off (use KeePassXC).
+
+> Don't add extensions to Tor Browser or Mullvad Browser. They protect you by making every user look identical, and each extension makes you more unique.
+
+## canada
+
+Creates a private Python environment with Google's [libphonenumber](https://github.com/daviddrysdale/python-phonenumbers) for the phone analysis in `ns-canada`. See [CANADA.md](CANADA.md).
+
+## desktop
+
+- **Linux**: `.desktop` launchers for every menu in `~/.local/share/applications` (they show up in any desktop's app menu), plus GNOME dock favourites.
+- **macOS**: `~/Applications/Northstar.app`.
+
+## extras
+
+| Tool | Purpose |
+|---|---|
+| [KeePassXC](https://keepassxc.org) | Store sock-puppet credentials inside the workstation |
+| [Flameshot](https://flameshot.org) | Annotated screenshots, bound to Print Screen on GNOME |
+| [OBS Studio](https://obsproject.com) | Screen recording |
+
+## vm *(Linux only)*
+
+Guest tools for the detected hypervisor (QEMU guest agent and SPICE agent on Proxmox/UTM, open-vm-tools on VMware, a Parallels Tools reminder on Parallels), xrdp with the correct desktop session, a polkit rule that removes the colour-profile prompt over RDP, a first-boot service that regenerates SSH host keys on clones, and `ns-seal`. See [KASM.md](KASM.md).

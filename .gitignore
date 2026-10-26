@@ -1,0 +1,11 @@
+# Never commit investigation output or personal configuration
+Cases/
+*.log
+bookmarks.local.json
+
+# Editor / OS clutter
+.DS_Store
+*.swp
+.vscode/
+.idea/
+__pycache__/

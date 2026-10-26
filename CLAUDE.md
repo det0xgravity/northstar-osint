@@ -1,0 +1,80 @@
+# CLAUDE.md — northstar-osint
+
+Context for Claude Code sessions working on this repository.
+
+## What this is
+
+A modular, MIT-licensed OSINT workstation builder for Debian 13, Ubuntu 24.04,
+Kali, Parrot and macOS on Apple Silicon. It's original work: never copy code,
+templates or assets from OSINT books, courses or paid products, and don't add
+references to them.
+
+## Layout
+
+- `install.sh`: entry point. Parses flags, detects the platform, sources every
+  `modules/*.sh`, runs the selected modules through `ns_step`.
+- `lib/common.sh`: installer helpers (`ns_apt`, `ns_brew`, `ns_cask`,
+  `ns_flatpak`, `ns_pipx`, `ns_go`, `ns_go_ensure`, `ns_git_venv`,
+  `ns_gh_release`, `ns_register`, platform detection).
+- `lib/ui.sh`: runtime library for menu tools (`ui_*` dialogs via zenity or
+  osascript, `ns_outdir`, `ns_run`, `ns_audit`, `ns_finish`, case handling).
+- `lib/gen_policies.py`: builds Firefox/Brave policy JSON and a bookmarks export.
+- `modules/NN-name.sh`: one module each; it registers with
+  `ns_register name "desc" "linux macos" mod_name`.
+- `tools/`: menu tools installed to `~/.local/share/northstar/bin`.
+- `config/bookmarks.json`, `config/firefox-extensions.txt`: data, not code.
+- `docs/`: user documentation. Keep it in sync with behaviour changes.
+
+## Hard rules
+
+- **Bash 3.2 compatible everywhere** (macOS ships 3.2): no `declare -A`,
+  `mapfile`/`readarray`, `${var,,}`/`${var^^}`, `&>>`. Guard empty-array
+  expansion under `set -u`.
+- Module functions **return** non-zero on failure and never `exit`. One broken
+  tool must not stop the install.
+- Never remove Debian's `EXTERNALLY-MANAGED` file. Python tools go through pipx
+  (`ns_pipx <command> [spec]`) or private venvs (`ns_git_venv`).
+- Install only from official sources. Don't vendor third-party binaries.
+- Menu tools must log through `ns_run`/`ns_audit`, and must never write secrets
+  (cookies, API keys, passwords) to `audit.log`.
+- The installer must run as a normal user; it calls sudo itself.
+
+## Checks to run before committing
+
+```bash
+shellcheck -x -S warning install.sh lib/common.sh lib/ui.sh modules/*.sh tools/*
+for f in install.sh lib/*.sh modules/*.sh tools/*; do bash -n "$f"; done
+grep -nE 'declare -A|local -A|mapfile|readarray|\$\{[A-Za-z_]+(,,|\^\^)|&>>' install.sh lib/*.sh modules/*.sh tools/*
+python3 -m py_compile lib/gen_policies.py && python3 -m json.tool config/bookmarks.json >/dev/null
+./install.sh --list
+```
+
+CI (`.github/workflows/lint.yml`) runs the same checks.
+
+## Status
+
+v0.2.0 adds arm64 VM guest support, the Amass v5 CLI and bookmark fixes. It has
+passed lint and logic checks, but no full install has been run on real hardware
+yet. The first end-to-end runs should be on a fresh Debian 13 GNOME VM snapshot,
+on x86_64 (Proxmox) and on arm64 (UTM on Apple Silicon).
+
+## Open work
+
+1. **Amass v5 returns little without API keys.** A passive `amass enum` against
+   a real domain (Oct 2026, v5.1.3) stored only the seed name. Check whether
+   that's expected without `datasources.yaml` keys before relying on it. The
+   engine listens on `:4000` on all interfaces and ignores `-dir` for storage.
+2. **Re-check arm64 Tor/Mullvad.** Tor Browser 16.0 stable is expected to ship
+   aarch64 Linux builds. When it does (and Flathub builds aarch64), remove the
+   skip in `modules/50-browsers.sh` and the notes in `docs/`.
+3. **Bookmarks to check by hand.** `ns-linkcheck` can't verify sites that block
+   scripts (403): Quebec registry, CanLII, lobbycanada, LAC Collection Search,
+   LSO, CNO, PEO, FSRA, CIRA, SecurityTrails, Censys, Epieos. GEDS returned 503
+   and archive.ph didn't connect during the check; both are probably fine.
+
+## Publishing
+
+- Repo: https://github.com/det0xgravity/northstar-osint (created private;
+  make it public once CI is green and the README reads well).
+- Commit as `det0xgravity <170262817+det0xgravity@users.noreply.github.com>`
+  (set in this repo's local git config), never a personal address.

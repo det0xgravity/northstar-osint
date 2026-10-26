@@ -1,0 +1,86 @@
+#!/usr/bin/env bash
+# ns-domain — domain, DNS and web infrastructure reconnaissance.
+# shellcheck source=../lib/ui.sh
+. "${NS_HOME:-$HOME/.local/share/northstar}/lib/ui.sh"
+
+choice=$(ui_list "Domain & infrastructure" \
+  "Full subdomain recon (subfinder > dnsx > httpx > gowitness)" \
+  "WHOIS & DNS records" \
+  "Emails & hosts (theHarvester)" \
+  "Passive enumeration (amass)" \
+  "Crawl a site (katana)" \
+  "Archived URLs (waymore)" \
+  "Lookalike / typosquat domains (dnstwist)" \
+  "Screenshot a list of URLs (gowitness)") || exit 0
+
+if [ "${choice#Screenshot}" = "$choice" ]; then
+  d=$(ui_entry "Domain (e.g. example.com):") || exit 0
+  d=$(ns_lower "$d" | sed -E 's#^[a-z]+://##; s#/.*$##; s#^www\.##')
+  [ -n "$d" ] || exit 0
+fi
+
+case "$choice" in
+"Full subdomain recon"*)
+  out=$(ns_outdir domain "$d")
+  ns_run "$out" subfinder -d "$d" -all -silent -o subdomains.txt
+  [ -s "$out/subdomains.txt" ] || echo "$d" > "$out/subdomains.txt"
+  echo "  $(wc -l < "$out/subdomains.txt" | tr -d ' ') subdomains"
+  ns_run "$out" dnsx -l subdomains.txt -silent -a -resp -o resolved.txt
+  ns_run "$out" httpx -l subdomains.txt -silent -title -status-code -tech-detect \
+                      -follow-redirects -o live.txt
+  if [ -s "$out/live.txt" ]; then
+    cut -d' ' -f1 "$out/live.txt" > "$out/live_urls.txt"
+    echo "  $(wc -l < "$out/live_urls.txt" | tr -d ' ') live web hosts"
+    ns_run "$out" gowitness scan file -f live_urls.txt -s screenshots --write-jsonl
+  fi
+  ns_finish "$out" ;;
+
+"WHOIS & DNS"*)
+  out=$(ns_outdir domain "$d")
+  ns_run "$out" whois "$d" > /dev/null
+  cp "$out/console.log" "$out/whois.txt" 2>/dev/null
+  for t in A AAAA MX NS TXT SOA CAA; do
+    printf '%-5s ' "$t"; dig +short "$t" "$d" | tr '\n' ' '; echo
+  done | tee "$out/dns.txt"
+  ns_audit dig "$d" "dig +short A AAAA MX NS TXT SOA CAA $d"
+  ui_open "https://crt.sh/?q=$(ns_enc "%.$d")" "https://urlscan.io/search/#$(ns_enc "domain:$d")" \
+          "https://viewdns.info/reverseip/?host=$(ns_enc "$d")&t=1"
+  ns_finish "$out" ;;
+
+"Emails & hosts"*)
+  out=$(ns_outdir domain "$d")
+  ns_run "$out" theHarvester -d "$d" -b all -f theharvester
+  ns_finish "$out" ;;
+
+"Passive enumeration"*)
+  out=$(ns_outdir domain "$d")
+  # Amass v5 is passive by default and stores findings in its engine's own
+  # database (it ignores -dir for that); 'amass subs' exports the names.
+  ns_run "$out" amass enum -d "$d" -nocolor
+  ns_run "$out" amass subs -names -nocolor -d "$d" -o amass.txt
+  ns_finish "$out" ;;
+
+"Crawl a site"*)
+  out=$(ns_outdir crawl "$d")
+  ns_run "$out" katana -u "https://$d" -d 3 -jc -silent -o crawl.txt
+  ns_finish "$out" ;;
+
+"Archived URLs"*)
+  out=$(ns_outdir archive "$d")
+  ns_run "$out" waymore -i "$d" -mode U -oU archived_urls.txt
+  ns_finish "$out" ;;
+
+"Lookalike"*)
+  out=$(ns_outdir lookalike "$d")
+  ns_run "$out" dnstwist --registered --format csv --output lookalikes.csv "$d"
+  ns_finish "$out" ;;
+
+"Screenshot"*)
+  f=$(ui_files "Text file with one URL per line") || exit 0
+  f=$(printf '%s\n' "$f" | head -1)
+  [ -f "$f" ] || exit 0
+  out=$(ns_outdir screenshots "$(basename "$f")")
+  cp "$f" "$out/urls.txt"
+  ns_run "$out" gowitness scan file -f urls.txt -s screenshots --write-jsonl
+  ns_finish "$out" ;;
+esac
