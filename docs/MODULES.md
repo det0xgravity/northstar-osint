@@ -29,7 +29,7 @@ System packages (git, curl, jq, Python, pipx, Go, whois, dig, zenity, clipboard 
 | [katana](https://github.com/projectdiscovery/katana) | `katana` | Web crawler |
 | [gowitness](https://github.com/sensepost/gowitness) | `gowitness` | Website screenshots (uses Chromium/Chrome) |
 | [Amass](https://github.com/owasp-amass/amass) | `amass` | Attack-surface mapping |
-| [theHarvester](https://github.com/laramies/theHarvester) | `theHarvester` | Emails, hosts and names from public sources |
+| [theHarvester](https://github.com/laramies/theHarvester) | `theHarvester` | Emails, hosts and names from public sources. Release 4.11.1 on Python 3.12–3.13 (Debian 13, Ubuntu 24.04, Kali), the latest version on Python 3.14+ |
 | [waymore](https://github.com/xnl-h4ck3r/waymore) | `waymore` | URLs from Wayback, Common Crawl, URLScan, OTX |
 | [dnstwist](https://github.com/elceef/dnstwist) | `dnstwist` | Lookalike / typosquat domains |
 | [Shodan CLI](https://github.com/achillean/shodan-python) | `shodan` | Shodan queries (needs an API key) |
@@ -54,7 +54,7 @@ System packages (git, curl, jq, Python, pipx, Go, whois, dig, zenity, clipboard 
 
 | Tool | Command | Purpose |
 |---|---|---|
-| [SpiderFoot](https://github.com/smicallef/spiderfoot) | `spiderfoot` | Automated multi-source recon (`spiderfoot -l 127.0.0.1:5001` for the web UI) |
+| [SpiderFoot](https://github.com/smicallef/spiderfoot) | `spiderfoot` | Automated multi-source recon (`spiderfoot -l 127.0.0.1:5001` for the web UI). Unmaintained since 2023, so northstar installs it with newer dependencies than it asks for |
 | [recon-ng](https://github.com/lanmaster53/recon-ng) | `recon-ng` | Modular recon framework |
 | [changedetection.io](https://github.com/dgtlmoon/changedetection.io) | `changedetection.io` | Watch pages for changes (`changedetection.io -d ~/Northstar/changedetection -p 5000`) |
 | [search-that-hash](https://github.com/HashPals/Search-That-Hash) | `sth` | Look up hashes in public databases |
@@ -92,7 +92,7 @@ Creates a private Python environment with Google's [libphonenumber](https://gith
 |---|---|
 | [KeePassXC](https://keepassxc.org) | Store sock-puppet credentials inside the workstation |
 | [Flameshot](https://flameshot.org) | Annotated screenshots, bound to Print Screen on GNOME |
-| [OBS Studio](https://obsproject.com) | Screen recording |
+| [OBS Studio](https://obsproject.com) | Screen recording (Flatpak; Debian's package on arm64 Linux) |
 
 ## vm *(Linux only)*
 

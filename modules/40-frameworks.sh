@@ -6,7 +6,11 @@ ns_register frameworks "Frameworks (SpiderFoot, recon-ng, changedetection.io)" "
 
 mod_frameworks() {
   local rc=0
-  ns_git_venv spiderfoot https://github.com/smicallef/spiderfoot sf.py requirements.txt || rc=1
+  # SpiderFoot's last release (2023) caps lxml, cryptography and others below
+  # versions that support Python 3.12+. Lift the caps, except secure<0.4: the
+  # web UI breaks with secure 1.x.
+  ns_git_venv spiderfoot https://github.com/smicallef/spiderfoot sf.py requirements.txt "" \
+    '/^secure/!s/,<[^[:space:]]+//' || rc=1
   ns_git_venv recon-ng   https://github.com/lanmaster53/recon-ng  recon-ng REQUIREMENTS || rc=1
   ns_pipx changedetection.io || rc=1
   ns_pipx sth search-that-hash || rc=1

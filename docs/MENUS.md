@@ -29,7 +29,7 @@ The search term is copied to your clipboard for the web services that open.
 |---|---|---|
 | Full subdomain recon | subfinder → dnsx → httpx (titles, status, tech) → gowitness screenshots | `subdomains.txt`, `resolved.txt`, `live.txt`, `live_urls.txt`, `screenshots/` |
 | WHOIS & DNS records | whois, dig for A/AAAA/MX/NS/TXT/SOA/CAA; opens crt.sh, URLScan, ViewDNS reverse IP | `whois.txt`, `dns.txt` |
-| Emails & hosts | theHarvester across all passive sources (sources that need an API key you haven't configured are skipped with a note) | `theharvester.json` / `.xml` / `.jsonl` |
+| Emails & hosts | theHarvester across all passive sources (sources that need an API key you haven't configured are skipped with a note) | `theharvester.json` / `.xml` (plus `.jsonl` with theHarvester 5 on Python 3.14+) |
 | Passive enumeration | `amass enum` (passive by default in Amass v5), then `amass subs -names` | `amass.txt` (every name Amass's database holds for the domain, including earlier runs) |
 | Crawl a site | katana, depth 3, with JavaScript parsing | `crawl.txt` |
 | Archived URLs | waymore | `archived_urls.txt` |

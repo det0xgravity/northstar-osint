@@ -29,7 +29,11 @@ mod_extras() {
     ns_cask keepassxc flameshot obs || rc=1
   else
     ns_apt keepassxc flameshot || rc=1
-    ns_flatpak com.obsproject.Studio || rc=1
+    if [ "$NS_ARCH" = "arm64" ]; then
+      ns_apt obs-studio || rc=1               # Flathub builds OBS for x86_64 only
+    else
+      ns_flatpak com.obsproject.Studio || rc=1
+    fi
     ns_flameshot_printkey || rc=1
   fi
   return $rc

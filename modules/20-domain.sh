@@ -29,7 +29,11 @@ mod_domain() {
     ns_gh_release owasp-amass/amass amass "linux.*${NS_ARCH}.*(tar\\.gz|zip)$" || rc=1
   fi
 
-  ns_pipx theHarvester git+https://github.com/laramies/theHarvester.git || rc=1
+  # theHarvester's main branch needs Python 3.14+. 4.11.1 is the last release
+  # for 3.12-3.13 (Debian 13, Ubuntu 24.04, Kali). It isn't on PyPI.
+  local harv_ref=""
+  python3 -c 'import sys; sys.exit(sys.version_info < (3, 14))' || harv_ref="@4.11.1"
+  ns_pipx theHarvester "git+https://github.com/laramies/theHarvester.git$harv_ref" || rc=1
   ns_pipx waymore      git+https://github.com/xnl-h4ck3r/waymore.git    || rc=1
   ns_pipx dnstwist     "dnstwist[full]"                                 || rc=1
   ns_pipx shodan                                                        || rc=1

@@ -71,6 +71,11 @@ on x86_64 (Proxmox) and on arm64 (UTM on Apple Silicon).
    scripts (403): Quebec registry, CanLII, lobbycanada, LAC Collection Search,
    LSO, CNO, PEO, FSRA, CIRA, SecurityTrails, Censys, Epieos. GEDS returned 503
    and archive.ph didn't connect during the check; both are probably fine.
+4. **Pinned workarounds to revisit.** theHarvester is pinned to 4.11.1 on
+   Python < 3.14 (`modules/20-domain.sh`); drop the pin once supported distros
+   ship 3.14. SpiderFoot is unmaintained (last commit Nov 2023) and installed
+   with lifted version caps (`modules/40-frameworks.sh`); if it breaks, look for
+   a maintained fork or drop it.
 
 ## Publishing
 

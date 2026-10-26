@@ -4,6 +4,23 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project uses
 [Semantic Versioning](https://semver.org/).
 
+## [0.3.1] - 2026-10-26
+
+Fixes from the first real install (Debian 13 arm64, UTM).
+
+### Fixed
+- theHarvester: its main branch now needs Python 3.14+, so on older Pythons
+  northstar installs release 4.11.1 (Python 3.12+).
+- SpiderFoot: its 2023 requirements cap lxml, cryptography and others below
+  versions that support Python 3.12+. The caps are lifted (except
+  `secure<0.4`, which the web UI needs).
+- OBS Studio on arm64 Linux comes from the distribution's packages, since
+  Flathub builds it for x86_64 only.
+
+### Changed
+- When a pipx, pip or Go install fails, the last lines of its output are
+  printed (and so saved in `install.log`) instead of only "failed".
+
 ## [0.3.0] - 2026-10-26
 
 ### Added

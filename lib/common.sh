@@ -5,7 +5,7 @@
 #  Sourced by install.sh and every module. Bash 3.2 compatible (macOS).
 # =============================================================================
 
-NS_VERSION="0.3.0"
+NS_VERSION="0.3.1"
 
 NS_HOME="${NS_HOME:-$HOME/.local/share/northstar}"   # tools, venvs, sources
 NS_BIN="$NS_HOME/bin"                                # all northstar binaries
@@ -28,6 +28,8 @@ ns_warn() { printf '    %s[!]%s %s\n' "$C_Y" "$C_0" "$*"; }
 ns_err()  { printf '%s[x]%s %s\n' "$C_R" "$C_0" "$*" >&2; }
 ns_die()  { ns_err "$*"; exit 1; }
 ns_has()  { command -v "$1" >/dev/null 2>&1; }
+# ns_show_tail <file> — print the end of a failed command's output (into the log)
+ns_show_tail() { tail -n 15 "$1" | sed 's/^/        | /'; }
 
 NS_FAILED=()
 ns_step() {
@@ -166,19 +168,26 @@ ns_pipx() {
     ns_info "$cmd ✓"
     return 0
   fi
-  if pipx install "$spec" >/dev/null 2>&1; then
+  local log
+  log=$(mktemp)
+  if pipx install "$spec" >"$log" 2>&1; then
     ns_info "$cmd installed"
+    rm -f "$log"
   else
-    ns_warn "pipx failed: $cmd ($spec)"; return 1
+    ns_warn "pipx failed: $cmd ($spec)"
+    ns_show_tail "$log"; rm -f "$log"
+    return 1
   fi
 }
 
-# ns_git_venv <name> <repo-url> <entry-script> [requirements-file] [cd]
+# ns_git_venv <name> <repo-url> <entry-script> [requirements-file] [cd] [sed-filter]
 # Clones a repo, builds a private venv and writes a wrapper into $NS_BIN.
 # Pass "cd" as the 5th argument for tools that must run from their own folder.
+# A sed -E filter, if given, is applied to the requirements before installing
+# (e.g. to lift version caps that an unmaintained project never updated).
 ns_git_venv() {
-  local name="$1" repo="$2" entry="$3" req="${4:-requirements.txt}" mode="${5:-}"
-  local dir="$NS_SRC/$name" venv="$NS_VENVS/$name"
+  local name="$1" repo="$2" entry="$3" req="${4:-requirements.txt}" mode="${5:-}" filter="${6:-}"
+  local dir="$NS_SRC/$name" venv="$NS_VENVS/$name" reqfile log
   mkdir -p "$NS_SRC" "$NS_VENVS" "$NS_BIN"
   if [ -d "$dir/.git" ]; then
     git -C "$dir" pull -q --ff-only || ns_warn "$name: git pull failed, keeping current copy"
@@ -188,8 +197,18 @@ ns_git_venv() {
   [ -x "$venv/bin/python" ] || python3 -m venv "$venv" || return 1
   "$venv/bin/pip" install -q --upgrade pip >/dev/null 2>&1
   if [ -f "$dir/$req" ]; then
-    "$venv/bin/pip" install -q -r "$dir/$req" >/dev/null 2>&1 \
-      || { ns_warn "$name: some requirements failed to install"; return 1; }
+    reqfile="$dir/$req"
+    if [ -n "$filter" ]; then
+      reqfile="$venv/requirements.northstar.txt"
+      sed -E "$filter" "$dir/$req" > "$reqfile" || return 1
+    fi
+    log=$(mktemp)
+    if ! "$venv/bin/pip" install -q -r "$reqfile" >"$log" 2>&1; then
+      ns_warn "$name: some requirements failed to install"
+      ns_show_tail "$log"; rm -f "$log"
+      return 1
+    fi
+    rm -f "$log"
   fi
   {
     echo '#!/usr/bin/env bash'
@@ -229,10 +248,15 @@ ns_go() {
   local name
   name=$(basename "${1%@*}")
   if [ "$NS_UPDATE" != 1 ] && [ -x "$NS_BIN/$name" ]; then ns_info "$name ✓"; return 0; fi
-  if GOBIN="$NS_BIN" go install "$1" >/dev/null 2>&1; then
+  local log
+  log=$(mktemp)
+  if GOBIN="$NS_BIN" go install "$1" >"$log" 2>&1; then
     ns_info "$name installed"
+    rm -f "$log"
   else
-    ns_warn "go install failed: $1"; return 1
+    ns_warn "go install failed: $1"
+    ns_show_tail "$log"; rm -f "$log"
+    return 1
   fi
 }
 
