@@ -4,6 +4,12 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project uses
 [Semantic Versioning](https://semver.org/).
 
+## [0.4.5] - 2026-10-26
+
+### Changed
+- In VMs, pressing Super on its own no longer opens GNOME's overview. The
+  host's ⌘ or Windows key reaches the guest as Super whenever you switch apps.
+
 ## [0.4.4] - 2026-10-26
 
 ### Fixed

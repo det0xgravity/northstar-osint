@@ -52,11 +52,12 @@ subprocess.check_call(["gsettings", "set", "org.gnome.shell", "favorite-apps", s
 PY
 }
 
-# GNOME opens the Activities overview at every login, and its top-left hot
-# corner reopens it whenever the pointer brushes that corner, which in a VM
-# window happens on the way to the host's toolbar. Skip the login overview
+# GNOME opens the Activities overview at every login, from its top-left hot
+# corner, and on a lone Super key press. In a VM the pointer crosses that
+# corner on its way to the host's toolbar, and the host's Cmd/Windows key
+# reaches the guest as Super whenever you switch apps. Skip the login overview
 # (Debian's packaged "No overview at start-up" extension) and, in VMs only,
-# turn the hot corner off.
+# turn off the hot corner and the Super-key trigger.
 ns_gnome_tweaks() {
   ns_in_gnome_session || return 0
   local ext="no-overview@fthx" virt=""
@@ -79,6 +80,8 @@ PY
   if [ -n "$virt" ] && [ "$virt" != none ]; then
     gsettings set org.gnome.desktop.interface enable-hot-corners false \
       && ns_info "Top-left hot corner off (VM) — re-enable in Settings → Multitasking"
+    gsettings set org.gnome.mutter overlay-key '' \
+      && ns_info "Super/Cmd key alone no longer opens the overview (VM) — undo: gsettings reset org.gnome.mutter overlay-key"
   fi
 }
 

@@ -82,7 +82,14 @@ That's expected: neither has a stable arm64 Linux build yet. See [INSTALL.md](IN
 Its next dialog has probably opened behind another window: GNOME doesn't let a new window jump in front of the one you're using. Press Alt+Tab to find it. Since v0.4.3, tools started from the main menu no longer open the file manager by themselves, so this mostly happens after *Image analysis*, which opens the folder so you can drag the image into the search pages. Use **Open latest results** in the main menu to see what a search produced.
 
 **The Activities overview keeps opening**
-northstar turns off the top-left hot corner in VMs and the overview at login. To change either back: **Settings → Multitasking → Hot Corner**, or run `gnome-extensions disable no-overview@fthx`. The overview also opens when you press the Super (Windows/⌘) key. In UTM, that key goes to the VM while it has keyboard focus.
+northstar stops the overview opening at login, and in VMs also turns off the two usual triggers: the top-left hot corner, and pressing the Super key on its own. The Super trigger matters because the host's ⌘ or Windows key reaches the VM as Super whenever you switch apps. To check or apply these by hand:
+
+```bash
+gsettings set org.gnome.desktop.interface enable-hot-corners false
+gsettings set org.gnome.mutter overlay-key ''
+```
+
+To undo them: **Settings → Multitasking → Hot Corner**, `gsettings reset org.gnome.mutter overlay-key`, and `gnome-extensions disable no-overview@fthx`. You can still open the overview with the dots at the top left, or Super+S.
 
 **Black screen when connecting over RDP**
 You're probably still logged in on the Proxmox console. Log out there first, since GNOME allows one session per user. Also check that `~/.xsession` names your desktop session.
