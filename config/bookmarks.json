@@ -108,6 +108,39 @@
     ]
   },
   {
+    "name": "Social Platforms",
+    "children": [
+      {
+        "name": "TGStat (Telegram channels and posts)",
+        "url": "https://tgstat.com/"
+      },
+      {
+        "name": "Telemetr (Telegram analytics)",
+        "url": "https://telemetr.io/"
+      },
+      {
+        "name": "Telegram API apps (research account credentials)",
+        "url": "https://my.telegram.org/apps"
+      },
+      {
+        "name": "Arctic Shift (Reddit archive search)",
+        "url": "https://arctic-shift.photon-reddit.com/"
+      },
+      {
+        "name": "Bluesky search",
+        "url": "https://bsky.app/search"
+      },
+      {
+        "name": "ClearSky (Bluesky handles, blocks, lists)",
+        "url": "https://clearsky.app/"
+      },
+      {
+        "name": "Social Blade (account statistics)",
+        "url": "https://socialblade.com/"
+      }
+    ]
+  },
+  {
     "name": "Geolocation",
     "children": [
       {

@@ -9,6 +9,7 @@ while true; do
   case_name=$(ns_case)
   choice=$(ui_list "Active case: $case_name" \
     "Username & email" \
+    "Telegram" \
     "Domain & infrastructure" \
     "Media download" \
     "Capture web pages" \
@@ -27,6 +28,7 @@ while true; do
 
   case "$choice" in
     "Username & email")        ns-username ;;
+    "Telegram")                ns-telegram ;;
     "Domain & infrastructure") ns-domain ;;
     "Media download")          ns-media ;;
     "Capture web pages")       ns-archive ;;

@@ -4,6 +4,21 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project uses
 [Semantic Versioning](https://semver.org/).
 
+## [0.13.0] - 2026-10-26
+
+Phase 4b of the review: Telegram.
+
+### Added
+- `ns-telegram` (main menu: Telegram): collect public channels (posts,
+  metadata, forward sources, dataset and forward network) with
+  telegram-tracker, one or a list; channel search via TGStat and web search;
+  one-time login with credentials kept out of the audit log.
+- `social` module: telegram-tracker, installed through uv with its own
+  Python 3.14 (it needs a newer Python than Debian 13 ships).
+- "Social Platforms" bookmark folder: TGStat, Telemetr, Arctic Shift (Reddit),
+  Bluesky search, ClearSky, Social Blade.
+- `ns-seal` removes the Telegram session.
+
 ## [0.12.0] - 2026-10-26
 
 Phase 4a of the review: video verification and OCR.

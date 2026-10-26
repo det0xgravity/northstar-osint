@@ -24,6 +24,19 @@ The hub. Besides opening each menu, it lets you:
 
 The search term is copied to your clipboard for the web services that open.
 
+## ns-telegram
+
+Telegram research with [telegram-tracker](https://github.com/estebanpdl/telegram-tracker), using a Telegram **research** account:
+
+| Option | What it does | Output |
+|---|---|---|
+| Log in to Telegram | One-time login in the terminal: an API ID and hash from my.telegram.org/apps, the phone number and Telegram's code. Saved by telegram-tracker in `~/.telegram_tracker`, never in the audit log | |
+| Collect a public channel | Posts, channel metadata and forward sources, optionally since a date; then builds a dataset and a forward network. Opens the channel's web preview and TGStat page | `data/` (JSON, CSV, network files) |
+| Collect a list of channels | The same for every channel in a text file (`name`, `@name` or t.me links) | `channels.txt`, `data/` |
+| Search for channels | Opens TGStat and Google searches of t.me with your words on the clipboard | |
+
+Collecting is read-only, but it uses your account: Telegram rate-limits heavy collection. `ns-seal` removes the Telegram session from template clones.
+
 ## ns-domain
 
 | Option | Runs | Output |
