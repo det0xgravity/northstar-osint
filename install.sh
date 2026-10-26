@@ -27,6 +27,7 @@ Usage: ./install.sh [options]
   --skip a,b,c     Install everything except these modules
   --update         Upgrade tools that are already installed
   --yes            Don't ask for confirmation
+  --version        Print the version and exit
   -h, --help       Show this help
 
 Examples:
@@ -47,6 +48,9 @@ while [ $# -gt 0 ]; do
     --skip=*)  SKIP="${1#*=}" ;;
     --update)  NS_UPDATE=1 ;;
     --yes|-y)  ASSUME_YES=1 ;;
+    --version)
+      printf 'northstar-osint %s%s\n' "$NS_VERSION" "$(git -C "$NS_REPO" describe --always --dirty 2>/dev/null | sed 's/^/ (/; s/$/)/')"
+      exit 0 ;;
     -h|--help) usage; exit 0 ;;
     *) ns_err "Unknown option: $1"; usage; exit 1 ;;
   esac

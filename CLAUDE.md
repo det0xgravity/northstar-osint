@@ -55,7 +55,7 @@ references to them.
 shellcheck -x -S warning install.sh lib/common.sh lib/ui.sh modules/*.sh tools/*
 for f in install.sh lib/*.sh modules/*.sh tools/*; do bash -n "$f"; done
 grep -nE 'declare -A|local -A|mapfile|readarray|\$\{[A-Za-z_]+(,,|\^\^)|&>>' install.sh lib/*.sh modules/*.sh tools/*
-python3 -m py_compile lib/gen_policies.py lib/ns_country.py && python3 -m json.tool config/bookmarks.json >/dev/null
+python3 -m py_compile lib/*.py && python3 -m json.tool config/bookmarks.json >/dev/null
 python3 lib/ns_country.py validate
 ./install.sh --list
 ```
@@ -64,10 +64,11 @@ CI (`.github/workflows/lint.yml`) runs the same checks.
 
 ## Status
 
-v0.4.3. First real install passed on 2026-10-26: Debian 13 GNOME, arm64, in a
-UTM (QEMU) VM on Apple Silicon. All modules completed, and the username menu
-works end to end. Still untested: x86_64 (Proxmox/Kasm, Tor/Mullvad Flatpaks),
-Ubuntu, Kali, Parrot, macOS, and the country menus on real hardware.
+First real install passed on 2026-10-26: Debian 13 GNOME, arm64, in a UTM
+(QEMU) VM on Apple Silicon. The maintainer has since tested the username menu,
+SpiderFoot, Country search, the GNOME tweaks, the wallpaper and the zsh setup
+there. Still untested: x86_64 (Proxmox/Kasm, Tor/Mullvad Flatpaks), Ubuntu,
+Kali, Parrot, macOS. See CHANGELOG.md for the current version.
 
 ## Open work
 

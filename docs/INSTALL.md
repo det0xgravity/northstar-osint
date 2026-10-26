@@ -62,7 +62,7 @@ Install the guest from its ISO, log in to the desktop, then run `./install.sh` f
 | Parallels Desktop | `parallels` | Tells you to install Parallels Tools: **Actions → Install Parallels Tools** |
 | Proxmox / KVM | `kvm` | Installs `qemu-guest-agent` and `spice-vdagent` (see [KASM.md](KASM.md)) |
 
-xrdp, the SSH host-key service and `ns-seal` are set up in every case. If you don't plan to connect over RDP or clone the VM, you can skip the module: `./install.sh --skip vm`.
+xrdp (only inside a VM: it listens on the network), the SSH and xrdp key-regeneration services, and `ns-seal` are set up. If you don't plan to connect over RDP or clone the VM, you can skip the module: `./install.sh --skip vm`.
 
 In UTM, choose the **QEMU** backend ("Virtualize", not "Apple Virtualization") if you want clipboard sharing with the Mac.
 
@@ -91,7 +91,7 @@ The installer records the modules you chose **not** to install in `~/.config/nor
 | `~/.local/share/northstar/src` | Git checkouts of tools installed from source |
 | `~/.local/share/northstar/go` | Go toolchain, only if the system Go was too old |
 | `~/.local/pipx`, `~/.local/bin` | pipx-managed tools |
-| `~/.config/northstar` | Active case, installed module list, install log |
+| `~/.config/northstar` | Active case, skipped-module list, install log, API keys (`keys.env`, readable only by you) |
 | `~/Northstar/Cases` | Your investigation output and audit logs |
 | `~/Northstar/northstar-bookmarks.html` | Bookmarks export for importing into other browsers |
 | `/etc/firefox*/policies/policies.json` | Firefox policy (Linux) |
@@ -116,12 +116,20 @@ This pulls the latest northstar-osint, upgrades pipx tools, reinstalls Go tools 
 ## Uninstalling
 
 ```bash
-pipx uninstall-all                                   # removes ALL pipx tools, including non-northstar ones
+# northstar's pipx tools (this leaves any pipx tools of your own alone)
+for p in sherlock-project maigret socialscan holehe ghunt toutatis theHarvester waymore dnstwist shodan \
+         yt-dlp gallery-dl instaloader streamlink internetarchive changedetection.io search-that-hash \
+         name-that-hash; do pipx uninstall "$p"; done
 rm -rf ~/.local/share/northstar ~/.config/northstar
 rm -f ~/.local/bin/northstar ~/.local/bin/ns-*
 rm -f ~/.local/share/applications/northstar.desktop ~/.local/share/applications/ns-*.desktop
 sudo rm -f /etc/firefox/policies/policies.json /etc/firefox-esr/policies/policies.json \
-           /etc/brave/policies/managed/northstar.json /usr/local/sbin/ns-seal
+           /etc/brave/policies/managed/northstar.json /usr/local/sbin/ns-seal \
+           /etc/polkit-1/rules.d/45-northstar-xrdp-colord.rules
+sudo systemctl disable --now northstar-ssh-hostkeys northstar-xrdp-keys 2>/dev/null
+sudo rm -f /etc/systemd/system/northstar-ssh-hostkeys.service /etc/systemd/system/northstar-xrdp-keys.service
+rm -f ~/.config/autostart/org.flameshot.Flameshot.desktop ~/.xsession
+rm -rf ~/.local/share/fonts/MesloLGS-NF
 # Remove the line tagged "northstar-osint" from ~/.bashrc / ~/.zshrc / ~/.profile
 # shell module: chsh -s /bin/bash; rm -rf ~/.oh-my-zsh ~/.p10k.zsh; mv ~/.zshrc.pre-northstar ~/.zshrc (if it exists)
 ```

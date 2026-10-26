@@ -5,7 +5,7 @@
 #  Sourced by install.sh and every module. Bash 3.2 compatible (macOS).
 # =============================================================================
 
-NS_VERSION="0.8.2"
+NS_VERSION="0.9.0"
 
 NS_HOME="${NS_HOME:-$HOME/.local/share/northstar}"   # tools, venvs, sources
 NS_BIN="$NS_HOME/bin"                                # all northstar binaries
@@ -228,16 +228,26 @@ ns_go_minor() {
   go env GOVERSION 2>/dev/null | sed -E 's/^go1\.([0-9]+).*/\1/' | grep -E '^[0-9]+$' || echo 0
 }
 
+# ns_sha256 <file>   prints the file's SHA-256 (Linux sha256sum or macOS shasum)
+ns_sha256() {
+  if ns_has sha256sum; then sha256sum "$1" | cut -d' ' -f1; else shasum -a 256 "$1" | cut -d' ' -f1; fi
+}
+
 ns_go_ensure() {
   [ "$(ns_go_minor)" -ge 22 ] && return 0
   if ns_is_macos; then ns_brew go; return $?; fi
-  local ver os="linux" tmp
-  ver=$(curl -fsSL 'https://go.dev/VERSION?m=text' | head -1) || return 1
+  local ver file sum tmp
+  # go.dev publishes each release's SHA-256: verify before replacing anything
+  ver=$(curl -fsSL 'https://go.dev/dl/?mode=json' | jq -r '.[0].version') || return 1
+  file="${ver}.linux-${NS_ARCH}.tar.gz"
+  sum=$(curl -fsSL 'https://go.dev/dl/?mode=json' | jq -r --arg f "$file" '.[0].files[] | select(.filename == $f) | .sha256')
+  [ -n "$sum" ] || { ns_warn "No checksum published for $file"; return 1; }
   ns_info "System Go is missing or too old — installing $ver to $NS_HOME/go"
   tmp=$(mktemp -d)
-  curl -fsSL "https://go.dev/dl/${ver}.${os}-${NS_ARCH}.tar.gz" -o "$tmp/go.tgz" || { rm -rf "$tmp"; return 1; }
-  rm -rf "$NS_HOME/go" && mkdir -p "$NS_HOME"
-  tar -C "$NS_HOME" -xzf "$tmp/go.tgz"
+  curl -fsSL "https://go.dev/dl/$file" -o "$tmp/go.tgz" || { rm -rf "$tmp"; return 1; }
+  [ "$(ns_sha256 "$tmp/go.tgz")" = "$sum" ] || { ns_warn "Go download failed its checksum: not installed"; rm -rf "$tmp"; return 1; }
+  tar -C "$tmp" -xzf "$tmp/go.tgz" || { rm -rf "$tmp"; return 1; }
+  mkdir -p "$NS_HOME" && rm -rf "$NS_HOME/go" && mv "$tmp/go" "$NS_HOME/go"
   rm -rf "$tmp"
   hash -r
   [ "$(ns_go_minor)" -ge 22 ]
@@ -263,15 +273,25 @@ ns_go() {
 # --- GitHub release binaries ---------------------------------------------------------
 # ns_gh_release <owner/repo> <binary-name> <asset-regex>
 # Downloads the newest release asset matching the regex and installs the binary.
+# When the release publishes a checksums file, the download must match it.
 ns_gh_release() {
-  local repo="$1" bin="$2" rx="$3" url tmp f
+  local repo="$1" bin="$2" rx="$3" json url sums tmp f name want
   if [ "$NS_UPDATE" != 1 ] && [ -x "$NS_BIN/$bin" ]; then ns_info "$bin ✓"; return 0; fi
-  url=$(curl -fsSL "https://api.github.com/repos/$repo/releases/latest" \
-        | jq -r --arg rx "$rx" '.assets[] | select(.name | test($rx; "i")) | .browser_download_url' \
-        | head -1)
+  json=$(curl -fsSL ${GITHUB_TOKEN:+-H "Authorization: Bearer $GITHUB_TOKEN"} \
+         "https://api.github.com/repos/$repo/releases/latest") || { ns_warn "$bin: GitHub API unavailable (rate limit?)"; return 1; }
+  url=$(printf '%s' "$json" | jq -r --arg rx "$rx" '.assets[] | select(.name | test($rx; "i")) | .browser_download_url' | head -1)
+  sums=$(printf '%s' "$json" | jq -r '.assets[] | select(.name | test("(checksums?|sha256sums?)(\\.txt)?$"; "i")) | .browser_download_url' | head -1)
   [ -n "$url" ] || { ns_warn "$bin: no release asset matched /$rx/"; return 1; }
   tmp=$(mktemp -d)
   curl -fsSL "$url" -o "$tmp/asset" || { rm -rf "$tmp"; return 1; }
+  if [ -n "$sums" ]; then
+    name=${url##*/}
+    want=$(curl -fsSL "$sums" | awk -v n="$name" '{ f=$2; sub(/^\*/, "", f) } f == n { print $1; exit }')
+    if [ -z "$want" ] || [ "$(ns_sha256 "$tmp/asset")" != "$want" ]; then
+      ns_warn "$bin: download doesn't match the release's published checksum — not installed"
+      rm -rf "$tmp"; return 1
+    fi
+  fi
   case "$url" in
     *.zip)            (cd "$tmp" && unzip -q asset) ;;
     *.tar.gz|*.tgz)   tar -C "$tmp" -xzf "$tmp/asset" ;;

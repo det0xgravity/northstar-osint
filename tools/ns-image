@@ -18,10 +18,24 @@ case "$choice" in
           "https://yandex.com/images/search?rpt=imageview&url=$e" \
           "https://www.bing.com/images/search?view=detailv2&iss=sbi&q=imgurl:$e" \
           "https://tineye.com/search?url=$e"
+  # Downloading a copy contacts the image's server directly. Use Tor when it's
+  # running; otherwise ask, since the server would see your own IP address.
   if ns_cmd curl && ns_cmd exiftool; then
-    curl -fsSL -A "Mozilla/5.0" "$u" -o "$out/image" 2>/dev/null &&
-      exiftool -a -G1 -s "$out/image" > "$out/image.exif.txt" &&
-      echo "  Downloaded copy + EXIF saved (most platforms strip EXIF on upload)."
+    via=""
+    if ns_cmd ns_darkweb && ns_darkweb check >/dev/null 2>&1; then
+      via="--socks5-hostname ${NS_TOR_SOCKS:-127.0.0.1:9050}"
+    elif ! ui_question "Also download a copy of the image to check its EXIF data?
+
+This contacts the image's server from YOUR IP address (Tor isn't running). The reverse searches above don't."; then
+      via="skip"
+    fi
+    if [ "$via" != skip ]; then
+      # shellcheck disable=SC2086  # $via is empty or two words on purpose
+      curl -fsSL $via -A "Mozilla/5.0" -- "$u" -o "$out/image" 2>/dev/null &&
+        exiftool -a -G1 -s "$out/image" > "$out/image.exif.txt" &&
+        echo "  Downloaded copy + EXIF saved${via:+ (via Tor)} (most platforms strip EXIF on upload)."
+      ns_audit image-download "$u" "copy downloaded${via:+ via Tor}"
+    fi
   fi
   ns_finish "$out" ;;
 

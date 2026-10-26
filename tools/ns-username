@@ -5,7 +5,7 @@
 
 choice=$(ui_list "Username & email" \
   "Username search (sherlock, maigret, socialscan, blackbird)" \
-  "Email search (holehe, socialscan, h8mail)" \
+  "Email search (holehe, socialscan)" \
   "Google account from email (GHunt — run 'ghunt login' once first)" \
   "Instagram profile details (toutatis — needs a session ID)") || exit 0
 
@@ -36,7 +36,6 @@ Email*)
   out=$(ns_outdir email "$e")
   ns_run "$out" holehe "$e" --only-used
   ns_run "$out" socialscan "$e"
-  ns_run "$out" h8mail -t "$e" -o "$out/h8mail.csv"
   ui_clip "$e"
   ui_open "https://haveibeenpwned.com/" "https://epieos.com/" "https://intelx.io/" \
           "$(ns_google "\"$e\"")"
@@ -52,10 +51,12 @@ Google*)
 
 Instagram*)
   u=$(ui_entry "Instagram username:") || exit 0
-  sid=$(ui_entry "Instagram sessionid cookie (from a sock-puppet login):") || exit 0
+  sid=$(ui_secret "Instagram sessionid cookie from a sock-puppet login (input is hidden):") || exit 0
   out=$(ns_outdir instagram "$u")
   if ns_cmd toutatis; then
-    # Run directly (not via ns_run) so the session cookie never reaches the audit log
+    # Run directly (not via ns_run) so the session cookie never reaches the audit
+    # log. toutatis only takes it as an argument, so other processes on this
+    # machine could see it in `ps` while it runs: use a throwaway puppet account.
     ns_audit toutatis "$u" "toutatis -u $u -s <redacted>"
     ( cd "$out" && toutatis -u "$u" -s "$sid" ) 2>&1 | tee -a "$out/console.log"
   else

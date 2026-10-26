@@ -101,7 +101,9 @@ def cmd_fetch(url):
     text = "\n".join(line.strip() for line in re.sub(r"[ \t]+", " ", text).splitlines() if line.strip())
     links = sorted(set(urllib.parse.urljoin(url, h) for h in re.findall(r'href=["\']([^"\'#]+)', page, re.I)))
     onions = sorted(set(ONION.findall(page)))
-    with open("page.html", "wb") as fh:          # the document as received (it never loads anything)
+    # Saved as .txt so a double-click opens it in a text editor: opened in a
+    # browser it would load the page's trackers from the investigator's own IP
+    with open("page.html.txt", "wb") as fh:
         fh.write(body)
     with open("page.txt", "w", encoding="utf-8") as fh:
         fh.write(text + "\n")
@@ -116,7 +118,8 @@ def cmd_fetch(url):
     print(f"{len(links)} links, {len(onions)} distinct onion addresses mentioned")
     print("\n--- first lines of text ---")
     print("\n".join(text.splitlines()[:25]))
-    print("\nSaved: page.txt, page.html, links.txt, onion_addresses.txt, headers.txt, metadata.json")
+    print("\nSaved: page.txt, page.html.txt (source; don't open it in a browser), links.txt,")
+    print("       onion_addresses.txt, headers.txt, metadata.json")
     return 0
 
 

@@ -9,9 +9,10 @@ mod_username() {
   ns_pipx maigret                      || rc=1
   ns_pipx socialscan                   || rc=1
   ns_pipx holehe                       || rc=1
-  ns_pipx h8mail                       || rc=1
   ns_pipx ghunt                        || rc=1
   ns_pipx toutatis                     || rc=1
-  ns_git_venv blackbird https://github.com/p1ngul1n0/blackbird blackbird.py requirements.txt cd || rc=1
+  ns_git_venv blackbird https://github.com/antoniaci/blackbird blackbird.py requirements.txt cd || rc=1
+  # Retired: unmaintained since 2022 (ns-breach covers breach lookups now)
+  [ -x "$HOME/.local/bin/h8mail" ] && pipx uninstall h8mail >/dev/null 2>&1
   return $rc
 }

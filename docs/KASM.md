@@ -43,7 +43,7 @@ master VM ──(full clone)──▶ clone ──(sudo ns-seal)──▶ shut d
 
 1. Update the master: `ns-update`, then reboot and test.
 2. In Proxmox: **Clone → Full clone** of the master, with a new ID and a dated name (e.g. `northstar-tpl-2026-11`).
-3. Boot the clone and run `sudo ns-seal`. It clears browser history and cookies (keeping settings and extensions), shell history, recent files, machine-id, SSH host keys and DHCP leases, optionally wipes case data, then shuts down.
+3. Boot the clone and run `sudo ns-seal`. It clears browser history, cookies and saved logins (keeping settings and extensions), API keys and logged-in tool sessions (GHunt, instaloader, Censys, Shodan), shell history, recent files, machine-id, SSH and xrdp keys and DHCP leases, optionally wipes case data, then shuts down. Each clone regenerates its SSH and xrdp keys on first boot.
 4. Convert the clone to a template, in the resource pool your Kasm autoscale user can access.
 5. Point your Kasm Server Pool's Proxmox provider at the new template name.
 

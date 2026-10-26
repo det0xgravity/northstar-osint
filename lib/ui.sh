@@ -196,24 +196,26 @@ ns_case() {
   printf '%s\n' "${c:-general}"
 }
 
+# Case data is private: folders are created mode 700 (only you can read them)
 ns_case_dir() {
   local d
   d="$NS_DATA/Cases/$(ns_case)"
-  mkdir -p "$d"
+  ( umask 077; mkdir -p "$d" )
+  chmod 700 "$NS_DATA" "$NS_DATA/Cases" "$d" 2>/dev/null
   printf '%s\n' "$d"
 }
 
 ns_set_case() {
   mkdir -p "$NS_CONF"
   ns_slug "$1" > "$NS_CONF/active_case"
-  mkdir -p "$NS_DATA/Cases/$(ns_case)"
+  ( umask 077; mkdir -p "$NS_DATA/Cases/$(ns_case)" )
 }
 
 # ns_outdir <kind> <target>   -> creates and prints a timestamped result folder
 ns_outdir() {
   local d
   d="$(ns_case_dir)/$1/$(ns_slug "$2")_$(date +%Y%m%d-%H%M%S)"
-  mkdir -p "$d"
+  ( umask 077; mkdir -p "$d" )
   printf '%s\n' "$d"
 }
 

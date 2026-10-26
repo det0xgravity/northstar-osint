@@ -4,7 +4,7 @@
 ns_register domain "Domain & infrastructure recon (subfinder, httpx, amass…)" "linux macos" mod_domain
 
 mod_domain() {
-  local rc=0
+  local rc=0 os
 
   # Headless Chromium for gowitness screenshots
   case "$NS_PLATFORM" in
@@ -37,6 +37,11 @@ mod_domain() {
   ns_pipx waymore      git+https://github.com/xnl-h4ck3r/waymore.git    || rc=1
   ns_pipx dnstwist     "dnstwist[full]"                                 || rc=1
   ns_pipx shodan                                                        || rc=1
-  ns_pipx censys                                                        || rc=1
+  # Censys's new Platform CLI (cencli, command "censys"). The old censys-python
+  # CLI used the legacy Search API, deprecated in September 2026; remove it
+  # first since both install a "censys" command.
+  [ -x "$HOME/.local/bin/censys" ] && pipx uninstall censys >/dev/null 2>&1
+  if ns_is_macos; then os=darwin; else os=linux; fi
+  ns_gh_release censys/cencli censys "${os}_${NS_ARCH}\\.tar\\.gz$" || rc=1
   return $rc
 }

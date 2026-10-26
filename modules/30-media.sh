@@ -15,6 +15,7 @@ mod_media() {
   ns_pipx instaloader     || rc=1
   ns_pipx streamlink      || rc=1
   ns_pipx ia internetarchive || rc=1
-  ns_pipx xeuledoc        || rc=1
+  # Retired: xeuledoc is unmaintained since 2021 (use "ghunt drive <id>")
+  [ -x "$HOME/.local/bin/xeuledoc" ] && pipx uninstall xeuledoc >/dev/null 2>&1
   return $rc
 }

@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # ns-seal — prepare a CLONE of your master VM to become a Proxmox template.
-# Removes machine identity, SSH host keys, browser history and per-user traces,
-# then shuts down. Never run this on the master itself. Linux only.
+# Removes machine identity (machine-id, SSH and xrdp keys), browser history,
+# saved logins, API keys and tool sessions, and per-user traces, then shuts
+# down. Never run this on the master itself. Linux only.
 
 if [ "$(id -u)" -ne 0 ]; then
   echo "Run with sudo:  sudo ns-seal"; exit 1
@@ -13,9 +14,10 @@ H=$(getent passwd "$U" | cut -d: -f6)
 
 cat <<EOF
 This will seal $(hostname) for templating:
-  - clear browser history, cookies and sessions for $U (settings and extensions are kept)
+  - clear browser history, cookies, sessions and SAVED LOGINS for $U (settings and extensions are kept)
+  - remove API keys (ns-keys) and logged-in tool sessions (GHunt, instaloader, Censys, Shodan)
   - clear shell history, recent files and thumbnails
-  - reset machine-id, SSH host keys and DHCP leases
+  - reset machine-id, SSH host keys, xrdp keys and DHCP leases (regenerated on first boot)
   - shut the VM down
 EOF
 printf 'Also delete all case data in %s/Northstar/Cases? [y/N] ' "$H"
@@ -27,15 +29,21 @@ case "$go" in [Yy]*) ;; *) echo "Cancelled."; exit 0 ;; esac
 # Browsers: Firefox / ESR profiles (keep prefs + extensions)
 find "$H/.mozilla/firefox" "$H/.config/mozilla/firefox" -maxdepth 2 \
   \( -name 'places.sqlite*' -o -name 'cookies.sqlite*' -o -name 'formhistory.sqlite' \
-     -o -name 'sessionstore.jsonlz4' -o -name 'sessionstore-backups' \) \
+     -o -name 'sessionstore.jsonlz4' -o -name 'sessionstore-backups' \
+     -o -name 'logins*.json' -o -name 'key4.db' -o -name 'storage' -o -name 'webappsstore.sqlite*' \) \
   -exec rm -rf {} + 2>/dev/null
 rm -rf "$H/.cache/mozilla" 2>/dev/null
 # Brave / Chromium
 for b in "$H/.config/BraveSoftware/Brave-Browser" "$H/.config/chromium"; do
   [ -d "$b" ] || continue
   find "$b" -maxdepth 2 \( -name 'History*' -o -name 'Cookies*' -o -name 'Sessions' \
-       -o -name 'Current Session' -o -name 'Last Session' \) -exec rm -rf {} + 2>/dev/null
+       -o -name 'Current Session' -o -name 'Last Session' -o -name 'Login Data*' \
+       -o -name 'Web Data*' -o -name 'Local Storage' -o -name 'IndexedDB' \) -exec rm -rf {} + 2>/dev/null
 done
+
+# Credentials: API keys and logged-in tool sessions must never reach every clone
+rm -f "$H/.config/northstar/keys.env" "$H/.config/northstar/last_result" "$H/.config/northstar/last_country"
+rm -rf "$H/.malfrats" "$H/.config/instaloader" "$H/.config/cencli" "$H/.shodan" "$H/.config/shodan" 2>/dev/null
 
 # Per-user traces
 rm -rf "$H/.bash_history" "$H/.zsh_history" "$H/.python_history" \
@@ -44,6 +52,7 @@ case "$wipe" in [Yy]*) rm -rf "$H/Northstar/Cases/"* && echo "Case data removed.
 
 # Machine identity
 rm -f /etc/ssh/ssh_host_* 2>/dev/null
+rm -f /etc/xrdp/rsakeys.ini 2>/dev/null       # northstar-xrdp-keys.service regenerates it and the TLS cert
 truncate -s 0 /etc/machine-id
 rm -f /var/lib/dbus/machine-id && ln -s /etc/machine-id /var/lib/dbus/machine-id
 rm -f /var/lib/dhcp/*.leases /var/lib/NetworkManager/*.lease 2>/dev/null

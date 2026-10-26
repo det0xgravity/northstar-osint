@@ -18,7 +18,7 @@ The hub. Besides opening each menu, it lets you:
 | Option | Runs | Output |
 |---|---|---|
 | Username search | sherlock, maigret (HTML report), socialscan, blackbird; opens WhatsMyName and a Google search | `sherlock.txt`, `maigret/`, `blackbird/` (CSV, JSON), `console.log` |
-| Email search | holehe (registered sites only), socialscan, h8mail; opens HIBP, Epieos, IntelX | `h8mail.csv`, `console.log` |
+| Email search | holehe (registered sites only), socialscan; opens HIBP, Epieos, IntelX. For breach data use **Breach data** (`ns-breach`) | `console.log` |
 | Google account | `ghunt email` | `ghunt.json` |
 | Instagram profile details | toutatis (session ID **redacted** from the audit log) | `console.log` |
 
@@ -29,7 +29,7 @@ The search term is copied to your clipboard for the web services that open.
 | Option | Runs | Output |
 |---|---|---|
 | Full subdomain recon | subfinder → dnsx → httpx (titles, status, tech) → gowitness screenshots | `subdomains.txt`, `resolved.txt`, `live.txt`, `live_urls.txt`, `screenshots/` |
-| WHOIS & DNS records | whois, dig for A/AAAA/MX/NS/TXT/SOA/CAA; opens crt.sh, URLScan, ViewDNS reverse IP | `whois.txt`, `dns.txt` |
+| WHOIS, RDAP & DNS records | whois, RDAP (registrar, dates, nameservers, status: RDAP replaced WHOIS for generic TLDs in 2025), dig for A/AAAA/MX/NS/TXT/SOA/CAA; opens crt.sh, URLScan, ViewDNS reverse IP and the RDAP web client | `whois.txt`, `rdap.json`, `rdap.txt`, `dns.txt` |
 | Emails & hosts | theHarvester across all passive sources (sources that need an API key you haven't configured are skipped with a note) | `theharvester.json` / `.xml` (plus `.jsonl` with theHarvester 5 on Python 3.14+) |
 | Passive enumeration | `amass enum` (passive by default in Amass v5), then `amass subs -names` | `amass.txt` (every name Amass's database holds for the domain, including earlier runs) |
 | Crawl a site | katana, depth 3, with JavaScript parsing | `crawl.txt` |
@@ -37,7 +37,7 @@ The search term is copied to your clipboard for the web services that open.
 | Lookalike domains | dnstwist, registered only | `lookalikes.csv` |
 | Screenshot a URL list | gowitness on a text file you choose | `screenshots/` |
 
-You can paste a full URL as the domain. The scheme, path and `www.` are stripped automatically.
+You can paste a full URL as the domain. The scheme, path and `www.` are stripped automatically, and anything that isn't a valid domain name is refused.
 
 ## ns-media
 
@@ -49,7 +49,9 @@ You can paste a full URL as the domain. The scheme, path and `www.` are stripped
 | Image gallery | gallery-dl with metadata | Works with most social platforms |
 | Instagram profile | instaloader | Use `instaloader --login <puppet>` once to avoid rate limits |
 | Record a live stream | streamlink, best quality | Ctrl+C to stop |
-| Save to the Internet Archive | Requests a Wayback capture; opens Wayback and archive.today | `wayback.txt` holds the capture URL |
+| Save to the Internet Archive | Requests a Wayback capture; opens Wayback and archive.today | `wayback.txt` records the URL, the UTC time and the result: the capture URL, or why it failed (e.g. rate-limited) |
+
+Addresses must start with `http://` or `https://`, so nothing typed in can be mistaken for a command-line option.
 
 ## ns-metadata
 

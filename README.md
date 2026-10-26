@@ -24,14 +24,14 @@ Most OSINT build scripts are a long list of commands that break silently when on
 
 | | |
 |---|---|
-| **Menus** | `northstar` main menu plus `ns-username`, `ns-domain`, `ns-media`, `ns-metadata`, `ns-image` and `ns-country`. Dialogs use zenity on Linux and native dialogs on macOS. |
-| **Cases & audit trail** | Results are saved under `~/Northstar/Cases/<case>/`, and every action is logged with a timestamp to that case's `audit.log`. |
+| **Menus** | `northstar` main menu plus `ns-username`, `ns-domain`, `ns-media`, `ns-metadata`, `ns-image`, `ns-country`, `ns-breach`, `ns-darkweb` and `ns-keys`. Dialogs use zenity on Linux and native dialogs on macOS. |
+| **Cases & audit trail** | Results are saved under `~/Northstar/Cases/<case>/` (private: only your account can read it), and every action is logged with a timestamp to that case's `audit.log`. |
 | **Countries** | `ns-country`: people, business, phone, property, courts, financial/regulatory, political and transport searches tailored to each country's public records: Canada, the US, UK, Ireland, Australia, New Zealand, Germany, France, the Netherlands, Spain, Italy, Singapore, Malaysia, the Philippines, Thailand, Indonesia and Vietnam, plus an International pack (sanctions, leaks, vessels, aircraft, crypto). Phone analysis for every country, and 250+ curated registry bookmarks. Adding a country is one JSON file. |
 | **Browsers** | Firefox, Brave, Tor Browser and Mullvad Browser. OSINT extensions and a managed bookmarks folder are delivered through **browser policy**, so they apply to every profile and every clone. |
 | **Breach & dark web** | `ns-breach`: breach and infostealer exposure by email, username, domain or phone (free sources plus HIBP, Intelligence X, DeHashed and LeakCheck with your keys), and a private password exposure check. `ns-darkweb`: Tor, onion search, text-only capture of onion pages, ransomware leak-site claims. API keys are stored privately and never logged. |
 | **Recon** | Pipelines for subdomain enumeration → DNS resolution → live-host probing → screenshots, plus WHOIS/DNS, crawling, archives and lookalike domains. |
 | **Media** | Video/audio/playlists with platform metadata preserved, galleries, Instagram, live-stream recording, Wayback captures. |
-| **VM-ready** | QEMU guest agent, xrdp with the right desktop session, clone-safe SSH host keys, and `ns-seal` to prepare a template. |
+| **VM-ready** | Guest tools for the detected hypervisor, xrdp with the right desktop session (VMs only), clone-safe SSH and xrdp keys, and `ns-seal`, which strips history, saved logins, API keys and tool sessions before you make a template. |
 
 ## Supported platforms
 
@@ -73,9 +73,9 @@ ns-update                                # pull the latest version and upgrade e
 | Module | What it adds |
 |---|---|
 | `core` | Base packages, pipx, Go, the northstar runtime and menus *(always installed)* |
-| `username` | sherlock, maigret, socialscan, holehe, h8mail, GHunt, toutatis, blackbird |
-| `domain` | subfinder, dnsx, httpx, katana, gowitness, amass, theHarvester, waymore, dnstwist, Shodan & Censys CLIs |
-| `media` | yt-dlp, gallery-dl, instaloader, streamlink, ffmpeg, exiftool, mediainfo, mat2, internetarchive, xeuledoc |
+| `username` | sherlock, maigret, socialscan, holehe, GHunt, toutatis, blackbird |
+| `domain` | subfinder, dnsx, httpx, katana, gowitness, amass, theHarvester, waymore, dnstwist, Shodan & Censys Platform CLIs |
+| `media` | yt-dlp, gallery-dl, instaloader, streamlink, ffmpeg, exiftool, mediainfo, mat2, internetarchive |
 | `frameworks` | SpiderFoot, recon-ng, changedetection.io, search-that-hash, name-that-hash |
 | `browsers` | Firefox, Brave, Tor Browser, Mullvad Browser + extension and bookmark policies |
 | `darkweb` | Tor client service and torsocks for `ns-darkweb` |

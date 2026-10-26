@@ -58,7 +58,7 @@ In KeePassXC: **Settings → Browser Integration → Enable**, tick Firefox, the
 **gowitness produces no screenshots**
 It needs Chromium (Linux) or Google Chrome (macOS). On macOS: `brew install --cask google-chrome`.
 
-**theHarvester / h8mail / Shodan / Censys return little**
+**theHarvester / Shodan / Censys return little**
 Many sources need API keys. Each tool's own documentation explains where its key file lives.
 
 **amass leaves a process running**

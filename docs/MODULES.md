@@ -14,10 +14,9 @@ System packages (git, curl, jq, Python, pipx, Go, whois, dig, zenity, clipboard 
 | [Maigret](https://github.com/soxoj/maigret) | `maigret` | Username search with profile parsing and HTML reports |
 | [socialscan](https://github.com/iojw/socialscan) | `socialscan` | Username/email availability on major platforms |
 | [holehe](https://github.com/megadose/holehe) | `holehe` | Which sites an email is registered on |
-| [h8mail](https://github.com/khast3x/h8mail) | `h8mail` | Breach lookups (most sources need API keys) |
 | [GHunt](https://github.com/mxrch/GHunt) | `ghunt` | Google account intelligence (run `ghunt login` once) |
 | [Toutatis](https://github.com/megadose/toutatis) | `toutatis` | Instagram account details (needs a session ID) |
-| [Blackbird](https://github.com/p1ngul1n0/blackbird) | `blackbird` | Username/email search using WhatsMyName data |
+| [Blackbird](https://github.com/antoniaci/blackbird) | `blackbird` | Username/email search using WhatsMyName data |
 
 ## domain
 
@@ -33,7 +32,7 @@ System packages (git, curl, jq, Python, pipx, Go, whois, dig, zenity, clipboard 
 | [waymore](https://github.com/xnl-h4ck3r/waymore) | `waymore` | URLs from Wayback, Common Crawl, URLScan, OTX |
 | [dnstwist](https://github.com/elceef/dnstwist) | `dnstwist` | Lookalike / typosquat domains |
 | [Shodan CLI](https://github.com/achillean/shodan-python) | `shodan` | Shodan queries (needs an API key) |
-| [Censys CLI](https://github.com/censys/censys-python) | `censys` | Censys search (needs API credentials) |
+| [Censys Platform CLI](https://github.com/censys/cencli) | `censys` | Censys Platform search. Run `censys config auth add` once with a personal access token. (Replaces the old censys-python CLI, whose legacy Search API was deprecated in September 2026) |
 
 ## media
 
@@ -48,7 +47,6 @@ System packages (git, curl, jq, Python, pipx, Go, whois, dig, zenity, clipboard 
 | [mat2](https://0xacab.org/jvoisin/mat2) | `mat2` | Metadata removal (Linux) |
 | [FFmpeg](https://ffmpeg.org/) | `ffmpeg` | Media processing (used by yt-dlp) |
 | [internetarchive](https://github.com/jjjake/internetarchive) | `ia` | Search and download from archive.org |
-| [xeuledoc](https://github.com/Malfrats/xeuledoc) | `xeuledoc` | Public Google document metadata |
 
 ## frameworks
 

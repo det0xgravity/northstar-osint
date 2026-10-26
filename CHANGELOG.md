@@ -4,6 +4,40 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project uses
 [Semantic Versioning](https://semver.org/).
 
+## [0.9.0] - 2026-10-26
+
+Phase 1 of the three-reviewer audit (investigator, OSINT specialist, QC).
+
+### Security
+- `ns-seal` now also removes saved browser logins (Firefox `logins.json` and
+  `key4.db`, Brave `Login Data`), web storage, API keys (`keys.env`) and tool
+  sessions (GHunt, instaloader, Censys, Shodan), and xrdp's keys, which each
+  clone regenerates on first boot (`northstar-xrdp-keys.service`).
+- Dark web page captures are saved as `page.html.txt`, so double-clicking
+  can't open them in a browser and load trackers from your real IP.
+- Case folders are private (mode 700).
+- Pasted URLs and domains are validated, and `--` precedes them on the command
+  line, so input can't be read as an option (for example yt-dlp's `--exec`).
+- The Instagram session ID is typed into a hidden field.
+- Image analysis asks before downloading an image from the target's server,
+  and uses Tor when it's running.
+- Go and GitHub-release downloads are checked against their published
+  SHA-256 checksums. Go is unpacked before the old copy is replaced.
+- xrdp is only set up inside a VM, since it listens on the network.
+
+### Changed
+- Censys: the Platform CLI (`cencli`) replaces censys-python, whose legacy
+  Search API was deprecated in September 2026. The bookmark points at
+  platform.censys.io.
+- WHOIS & DNS adds RDAP (registrar, dates, nameservers, status).
+- "Save a page" records the real Wayback result, including failures and
+  rate limits.
+- Retired unmaintained tools: h8mail (2022) and xeuledoc (2021).
+  Blackbird's repository moved to antoniaci/blackbird.
+- `install.sh --version`.
+- Docs: menus list, uninstall steps (no longer removes your own pipx tools),
+  KASM sealing, INSTALL paths.
+
 ## [0.8.2] - 2026-10-26
 
 ### Fixed

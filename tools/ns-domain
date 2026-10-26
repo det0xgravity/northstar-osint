@@ -5,7 +5,7 @@
 
 choice=$(ui_list "Domain & infrastructure" \
   "Full subdomain recon (subfinder > dnsx > httpx > gowitness)" \
-  "WHOIS & DNS records" \
+  "WHOIS, RDAP & DNS records" \
   "Emails & hosts (theHarvester)" \
   "Passive enumeration (amass)" \
   "Crawl a site (katana)" \
@@ -17,6 +17,10 @@ if [ "${choice#Screenshot}" = "$choice" ]; then
   d=$(ui_entry "Domain (e.g. example.com):") || exit 0
   d=$(ns_lower "$d" | sed -E 's#^[a-z]+://##; s#/.*$##; s#^www\.##')
   [ -n "$d" ] || exit 0
+  # A hostname only: anything else could be read as a command-line option
+  if ! printf '%s' "$d" | grep -Eq '^[a-z0-9]([a-z0-9-]*[a-z0-9])?(\.[a-z0-9]([a-z0-9-]*[a-z0-9])?)+$'; then
+    ui_error "\"$d\" isn't a valid domain name."; exit 1
+  fi
 fi
 
 case "$choice" in
@@ -35,16 +39,27 @@ case "$choice" in
   fi
   ns_finish "$out" ;;
 
-"WHOIS & DNS"*)
+"WHOIS, RDAP & DNS"*)
   out=$(ns_outdir domain "$d")
   ns_run "$out" whois "$d" > /dev/null
   cp "$out/console.log" "$out/whois.txt" 2>/dev/null
+  # RDAP replaced WHOIS for generic TLDs in 2025; it's structured and often fuller
+  if curl -fsSL --max-time 30 "https://rdap.org/domain/$d" -o "$out/rdap.json" 2>/dev/null; then
+    ns_audit rdap "$d" "https://rdap.org/domain/$d"
+    jq -r '"Registrar: " + ([.entities[]? | select(.roles | index("registrar")) | .vcardArray[1][]? | select(.[0]=="fn") | .[3]] | first // "?"),
+           (.events[]? | "\(.eventAction): \(.eventDate)"),
+           "Nameservers: " + ([.nameservers[]?.ldhName] | join(", ")),
+           "Status: " + ((.status // []) | join(", "))' "$out/rdap.json" 2>/dev/null | tee "$out/rdap.txt"
+  else
+    rm -f "$out/rdap.json"; echo "  RDAP: no record found for $d"
+  fi
   for t in A AAAA MX NS TXT SOA CAA; do
     printf '%-5s ' "$t"; dig +short "$t" "$d" | tr '\n' ' '; echo
   done | tee "$out/dns.txt"
   ns_audit dig "$d" "dig +short A AAAA MX NS TXT SOA CAA $d"
   ui_open "https://crt.sh/?q=$(ns_enc "%.$d")" "https://urlscan.io/search/#$(ns_enc "domain:$d")" \
-          "https://viewdns.info/reverseip/?host=$(ns_enc "$d")&t=1"
+          "https://viewdns.info/reverseip/?host=$(ns_enc "$d")&t=1" \
+          "https://client.rdap.org/?type=domain&object=$(ns_enc "$d")"
   ns_finish "$out" ;;
 
 "Emails & hosts"*)

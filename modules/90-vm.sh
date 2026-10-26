@@ -4,12 +4,18 @@
 
 ns_register vm "VM readiness: guest tools, xrdp, clone-safe identity" "linux" mod_vm
 
+# The hypervisor this runs under (kvm, qemu, vmware, …), or "none"
+ns_vm_virt() {
+  local virt=""
+  ns_has systemd-detect-virt && virt=$(systemd-detect-virt --vm 2>/dev/null)
+  printf '%s\n' "${virt:-none}"
+}
+
 # Installs the guest tools that match the hypervisor (Proxmox, UTM, VMware
 # Fusion, Parallels…). Bare metal and unknown hypervisors get no agent.
 ns_vm_guest_tools() {
-  local virt=""
-  ns_has systemd-detect-virt && virt=$(systemd-detect-virt --vm 2>/dev/null)
-  virt="${virt:-none}"
+  local virt
+  virt=$(ns_vm_virt)
   case "$virt" in
     kvm|qemu)
       ns_info "Hypervisor: QEMU/KVM (Proxmox, UTM) — installing guest agent + SPICE agent"
@@ -38,6 +44,12 @@ ns_vm_guest_tools() {
 mod_vm() {
   local rc=0 session
   ns_vm_guest_tools || rc=1
+  # xrdp listens on the network (port 3389): only set it up inside a VM
+  if [ "$(ns_vm_virt)" = none ]; then
+    ns_info "Not a VM: skipping xrdp remote desktop (it would listen on the network)"
+    sudo install -m 755 "$NS_REPO/tools/ns-seal" /usr/local/sbin/ns-seal || rc=1
+    return $rc
+  fi
   ns_apt xrdp || rc=1
   sudo systemctl enable --now xrdp >/dev/null 2>&1 || rc=1
   getent group ssl-cert >/dev/null && sudo usermod -aG ssl-cert xrdp 2>/dev/null
@@ -83,6 +95,24 @@ ExecStart=/usr/bin/ssh-keygen -A
 WantedBy=multi-user.target
 EOF
     sudo systemctl enable northstar-ssh-hostkeys.service >/dev/null 2>&1 || rc=1
+  fi
+  # Clones get fresh xrdp keys too (ns-seal removes rsakeys.ini; the TLS
+  # certificate is Debian's snakeoil one, regenerated alongside)
+  if [ -d /etc/xrdp ]; then
+    sudo tee /etc/systemd/system/northstar-xrdp-keys.service >/dev/null <<'EOF'
+[Unit]
+Description=Regenerate xrdp keys if missing (northstar-osint)
+Before=xrdp.service
+ConditionPathExists=!/etc/xrdp/rsakeys.ini
+
+[Service]
+Type=oneshot
+ExecStart=/bin/sh -c 'xrdp-keygen xrdp auto && chown xrdp /etc/xrdp/rsakeys.ini; make-ssl-cert generate-default-snakeoil --force-overwrite'
+
+[Install]
+WantedBy=multi-user.target
+EOF
+    sudo systemctl enable northstar-xrdp-keys.service >/dev/null 2>&1 || rc=1
   fi
   # ns-seal runs as root, so it lives where sudo's PATH can find it
   sudo install -m 755 "$NS_REPO/tools/ns-seal" /usr/local/sbin/ns-seal || rc=1

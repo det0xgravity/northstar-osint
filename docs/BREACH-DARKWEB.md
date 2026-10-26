@@ -47,7 +47,7 @@ Paid sources need a key from the service. Add them with **API keys** in the main
 |---|---|
 | Check Tor connection | Confirms the local Tor proxy works and shows the exit IP websites see. Offers to start Tor if it isn't running |
 | Search onion services (Ahmia) | Opens [Ahmia](https://ahmia.fi/), a search engine for onion sites, with your query on the clipboard. Ahmia protects its search with an anti-bot token, so northstar doesn't automate it |
-| Fetch an onion page as text | Fetches one page through Tor and saves `page.txt` (readable text), `page.html` (the document as received), `links.txt`, `onion_addresses.txt`, `headers.txt` and `metadata.json` (URL, UTC time, status, size and a SHA-256 hash for your records) |
+| Fetch an onion page as text | Fetches one page through Tor and saves `page.txt` (readable text), `page.html.txt` (the document as received, kept as text so it can't be opened in a browser by accident, where it would load trackers from your real IP), `links.txt`, `onion_addresses.txt`, `headers.txt` and `metadata.json` (URL, UTC time, status, size and a SHA-256 hash for your records) |
 | Ransomware leak-site check | Searches [ransomware.live](https://www.ransomware.live/) for leak-site claims naming an organisation: date, group, victim, country. These are claims by criminal groups and are often unverified. The service allows one search per minute |
 | Open Tor Browser | For visual browsing of onion sites |
 
