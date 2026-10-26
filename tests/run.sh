@@ -23,6 +23,9 @@ for e in breach darkweb evidence doctor missing watch casemap; do ln -s "$R/lib/
 ln -s "$R/lib/ns_case.py" "$H/bin/ns_casework"
 export NS_HOME="$H" NS_DATA="$W/data" XDG_CONFIG_HOME="$W/xdg" NS_UI=script NS_UI_ANSWERS="$W/answers"
 export PATH="$H/bin:$PATH"
+# A throwaway HOME too: ui.sh puts ~/.local/bin ahead of the test stubs, so on a
+# machine with northstar installed the real tools (sherlock…) would run instead
+mkdir -p "$W/userhome"; export HOME="$W/userhome"
 mkdir -p "$XDG_CONFIG_HOME/northstar"
 answers() { printf '%s\n' "$@" > "$NS_UI_ANSWERS"; rm -f "$NS_UI_ANSWERS.pos"; }
 menu() { local t="$1"; shift; answers "$@"; bash "$R/tools/$t" < /dev/null > "$W/out.txt" 2>&1; }

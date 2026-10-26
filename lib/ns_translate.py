@@ -13,9 +13,14 @@ Language pairs without a direct model go through English. Machine translation
 is a lead: have important passages checked by a qualified translator.
 """
 import os
+import platform
 import sys
 
 os.environ.setdefault("ARGOS_DEVICE_TYPE", "cpu")
+# On x86_64, CTranslate2's automatic int8 choice can produce repeated garbage
+# ("mainstremainstre…") on some CPUs; float32 is slower but correct everywhere.
+if platform.machine().lower() in ("x86_64", "amd64"):
+    os.environ.setdefault("ARGOS_COMPUTE_TYPE", "float32")
 import argostranslate.package  # noqa: E402
 import argostranslate.translate  # noqa: E402
 
