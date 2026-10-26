@@ -68,6 +68,10 @@ System packages (git, curl, jq, Python, pipx, Go, whois, dig, zenity, clipboard 
 | [GeoCLIP](https://github.com/VicenteVivan/geo-clip) | AI location estimate from a photo's scene, run locally (private venv with CPU PyTorch; ~2 GB model on first use) |
 | [ShadowFinder](https://github.com/bellingcat/ShadowFinder) | Where on Earth a shadow of a given length occurs at a given time |
 
+## face
+
+OpenCV (private venv) with the OpenCV Zoo [YuNet](https://github.com/opencv/opencv_zoo/tree/main/models/face_detection_yunet) face detector (MIT) and [SFace](https://github.com/opencv/opencv_zoo/tree/main/models/face_recognition_sface) face recogniser (Apache-2.0). The model files are checked against the SHA-256 published in the opencv_zoo repository. Used by `ns-face`.
+
 ## browsers
 
 | Browser | Purpose |

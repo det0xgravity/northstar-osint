@@ -109,6 +109,19 @@ check "bad shadow input refused" "grep -q 'Use numbers' '$W/out.txt'"
 PATH="$G:$PATH" menu ns-geo "Shadow analysis" "1.8" "2.4" "2026-06-01" "12:00:00"
 check "shadow inputs passed to ShadowFinder" "grep -q 'shadowfinder find 1.8 2.4 2026-06-01 12:00:00 --time_format=utc' '$W/out.txt'"
 
+section "Face comparison safeguards (stubbed engine)"
+printf '#!/bin/sh\necho "ns_face $*" > results.csv\n' > "$G/ns_face"; chmod +x "$G/ns_face"
+PATH="$G:$PATH" menu ns-face "no"
+check "declining the safeguards stops it" "[ ! -e '$CASE/face-comparison-basis.txt' ] && ! grep -q 'ns_face ' '$W/out.txt'"
+PATH="$G:$PATH" menu ns-face "yes" "Test lawful basis" "$W/photo.jpg" "no" "$W"
+check "lawful basis recorded" "grep -q 'Test lawful basis' '$CASE/face-comparison-basis.txt'"
+check "folder outside the case refused" "grep -q \"isn't inside case\" '$W/out.txt'"
+PATH="$G:$PATH" menu ns-face "$W/photo.jpg" "yes"
+fd=$(find "$CASE/face" -mindepth 1 -maxdepth 1 -type d | head -1)
+check "reference copied, basis kept with the results, sealed" \
+  "[ -f '$fd/reference_photo.jpg' ] && [ -f '$fd/face-comparison-basis.txt' ] && [ -f '$fd/manifest.sha256' ]"
+check "only the case folder is searched" "grep -q \"ns_face reference_photo.jpg $CASE \" '$fd/results.csv'"
+
 section "Installer module selection"
 I="$W/inst"; mkdir -p "$I/modules" "$I/bin" "$I/home"
 cp "$R/install.sh" "$I/" && cp -R "$R/lib" "$I/"

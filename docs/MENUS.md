@@ -105,6 +105,24 @@ Photo geolocation. **Images never leave your computer.** Only coordinates are lo
 
 GeoCLIP is often right to the country or region, sometimes the city, rarely the street. Treat its candidates as leads, and confirm them with street-level imagery, landmarks and shadows. The first run downloads its model (about 2 GB). Never upload victim photos, especially of minors, to online services; this menu keeps them on your machine.
 
+## ns-face
+
+Face comparison **within the active case only**: a reference face (for example a missing-person poster) against faces in photos you've already collected in the case. It runs locally with OpenCV's YuNet detector (MIT) and SFace recogniser (Apache-2.0). Nothing is uploaded, and no outside or online photos are searched.
+
+**Safeguards:**
+- **Lawful basis first:** the first use in a case asks for its purpose and lawful basis, recorded in `face-comparison-basis.txt` and the audit log.
+- **Case photos only:** a folder outside the case is refused.
+- **Similarity, never identification:** scores are reported in bands, ≥ 0.50 strong, 0.363–0.50 possible, below that unlikely. Faces too small to judge are flagged.
+- **Every run is logged and sealed,** with the reference photo's hash recorded.
+
+| Output | Contents |
+|---|---|
+| `results.html` | The reference face beside every face found, highest similarity first: open it to review |
+| `results.csv` | Image, face number, score, band, quality, detector confidence, position |
+| `crops/` | The aligned face crops that were compared |
+
+Accuracy drops for small, blurred or angled faces, children, large age gaps, and differs between demographic groups. A score is a lead for human review and independent corroboration, never an identification on its own. Faces are biometric data: you need a lawful basis to process them, and images of minors only with a law-enforcement partner or equivalent authority.
+
 ## ns-metadata
 
 | Option | Runs | Output |

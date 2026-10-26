@@ -4,6 +4,20 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project uses
 [Semantic Versioning](https://semver.org/).
 
+## [0.17.0] - 2026-10-26
+
+### Added
+- `ns-face` (main menu: Face comparison (within this case)): compare a
+  reference face with faces in photos already collected in the active case,
+  locally (OpenCV YuNet + SFace). Requires a recorded purpose and lawful basis
+  per case, refuses folders outside the case, reports similarity bands (never
+  "matches"), flags low-quality faces, and writes a review sheet
+  (`results.html`), `results.csv` and face crops; every run is logged and
+  sealed.
+- `face` module: OpenCV in a private venv and the two models, verified
+  against the SHA-256 the opencv_zoo repository publishes.
+- 5 more tests (35 in total).
+
 ## [0.16.0] - 2026-10-26
 
 ### Added

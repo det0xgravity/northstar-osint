@@ -1,0 +1,61 @@
+#!/usr/bin/env bash
+# ns-face — compare a reference face against photos already collected in the
+# active case. Runs locally (OpenCV YuNet + SFace); nothing is uploaded and no
+# outside photos are searched. Needs a recorded lawful basis per case, reports
+# similarity scores (never "matches"), and logs every comparison.
+# shellcheck source=../lib/ui.sh
+. "${NS_HOME:-$HOME/.local/share/northstar}/lib/ui.sh"
+
+case_dir=$(ns_case_dir)
+basis="$case_dir/face-comparison-basis.txt"
+
+ns_cmd ns_face || { ui_error "Face comparison isn't installed: ./install.sh --only face"; exit 1; }
+
+# Once per case: the limits, and a recorded purpose and lawful basis
+if [ ! -s "$basis" ]; then
+  ui_question "Face comparison in case $(ns_case)
+
+It compares a reference face with faces in photos ALREADY in this case. It never searches the internet or outside photos.
+
+- Results are similarity scores, not identifications. Never rely on them alone.
+- Accuracy drops for small, blurred or angled faces, children, large age gaps, and differs between demographic groups.
+- Faces are biometric data: you need a lawful basis to process them.
+- Images of minors: only with a law-enforcement partner or equivalent authority.
+
+Continue?" || exit 0
+  b=$(ui_entry "Purpose and lawful basis for comparing faces in this case:") || exit 0
+  [ -n "$b" ] || exit 0
+  printf 'Recorded (UTC): %s\nOperator: %s\nPurpose and lawful basis: %s\n' \
+    "$(date -u '+%Y-%m-%d %H:%M:%S')" "$(id -un)" "$b" > "$basis"
+  ns_audit ns-face "$(ns_case)" "face comparison enabled; basis: $b"
+fi
+
+ref=$(ui_files "Choose the reference photo (one person, face clearly visible)") || exit 0
+ref=$(printf '%s\n' "$ref" | head -1)
+[ -f "$ref" ] || exit 0
+
+# Where to look: the whole case, or a folder inside it (never outside)
+scope="$case_dir"
+if ! ui_question "Compare against every photo in case $(ns_case)?
+
+Choose No to pick one folder inside the case."; then
+  scope=$(ui_dir "Choose a folder inside $case_dir") || exit 0
+  real_case=$(cd "$case_dir" && pwd -P); real_scope=$(cd "$scope" 2>/dev/null && pwd -P)
+  case "$real_scope" in
+    "$real_case"|"$real_case"/*) ;;
+    *) ui_error "That folder isn't inside case $(ns_case). Face comparison only looks at photos already collected in the case."; exit 1 ;;
+  esac
+fi
+
+base=$(basename "$ref")
+out=$(ns_outdir face "$base")
+cp -p "$ref" "$out/reference_$base"
+printf 'Reference: %s\nSHA-256: %s\nCompared against: %s\n' "$ref" "$(ns_hash_file "$ref")" "$scope" > "$out/source_url.txt"
+cp "$basis" "$out/"
+ns_run "$out" ns_face "reference_$base" "$scope" .
+ns_seal_result "$out" >/dev/null
+ui_info "Done. results.html shows the reference beside every face found, highest similarity first, with each score's band.
+
+Scores are leads for human review, not identifications." || true
+[ -s "$out/results.html" ] && ui_reveal "$out/results.html"
+ns_finish "$out"

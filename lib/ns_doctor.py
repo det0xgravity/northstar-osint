@@ -31,6 +31,7 @@ TOOLS = {
     "frameworks": ["spiderfoot", "recon-ng", "changedetection.io", "sth", "nth"],
     "darkweb": ["tor", "torsocks"],
     "geo": ["ns_geo", "shadowfinder"],
+    "face": ["ns_face"],
     "extras": ["keepassxc", "flameshot"],
     "shell": ["zsh", "fzf", "eza", "ranger", "pay-respects"],
     "northstar": ["northstar", "ns-country", "ns-breach", "ns-darkweb", "ns-evidence", "ns-case",
