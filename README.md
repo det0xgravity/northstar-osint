@@ -28,6 +28,7 @@ Most OSINT build scripts are a long list of commands that break silently when on
 | **Cases & audit trail** | Results are saved under `~/Northstar/Cases/<case>/` (private: only your account can read it), and every action is logged with a timestamp to that case's `audit.log`. |
 | **Countries** | `ns-country`: people, business, phone, property, courts, financial/regulatory, political and transport searches tailored to each country's public records: Canada, the US, UK, Ireland, Australia, New Zealand, Germany, France, the Netherlands, Spain, Italy, Singapore, Malaysia, the Philippines, Thailand, Indonesia and Vietnam, plus an International pack (sanctions, leaks, vessels, aircraft, crypto). Phone analysis for every country, and 250+ curated registry bookmarks. Adding a country is one JSON file. |
 | **Browsers** | Firefox, Brave, Tor Browser and Mullvad Browser. OSINT extensions and a managed bookmarks folder are delivered through **browser policy**, so they apply to every profile and every clone. |
+| **Evidence** | Every result folder is sealed with a SHA-256 manifest and provenance (UTC time, operator, tool versions); `audit.log` is hash-chained so edits show; `ns-evidence` records numbered exhibits (optional OpenTimestamps proof), verifies folders and the log, and exports a case with a checksum. |
 | **Breach & dark web** | `ns-breach`: breach and infostealer exposure by email, username, domain or phone (free sources plus HIBP, Intelligence X, DeHashed and LeakCheck with your keys), and a private password exposure check. `ns-darkweb`: Tor, onion search, text-only capture of onion pages, ransomware leak-site claims. API keys are stored privately and never logged. |
 | **Recon** | Pipelines for subdomain enumeration → DNS resolution → live-host probing → screenshots, plus WHOIS/DNS, crawling, archives and lookalike domains. |
 | **Media** | Video/audio/playlists with platform metadata preserved, galleries, Instagram, live-stream recording, Wayback captures. |
@@ -99,6 +100,7 @@ northstar                # main menu
 ├── Country search       # ns-country
 ├── Breach data          # ns-breach
 ├── Dark web             # ns-darkweb
+├── Evidence & exhibits  # ns-evidence
 ├── API keys             # ns-keys
 ├── Switch / create case
 ├── Open latest results
@@ -128,6 +130,7 @@ Secrets you type into a menu, such as session cookies, are redacted from `audit.
 - [Modules](docs/MODULES.md): every tool installed, with upstream links
 - [Menus](docs/MENUS.md): what each menu option runs and produces
 - [Countries](docs/COUNTRIES.md): country searches, the resource list, and how to add a country
+- [Evidence & exhibits](docs/EVIDENCE.md): manifests, provenance, the tamper-evident audit log, exhibits, export
 - [Breach data & dark web](docs/BREACH-DARKWEB.md): sources, safety rules, API keys, Tor Browser on arm64
 - [Kasm & Proxmox](docs/KASM.md): running northstar as a brokered VM and building templates
 - [Troubleshooting](docs/TROUBLESHOOTING.md)

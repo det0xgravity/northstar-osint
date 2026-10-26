@@ -1,6 +1,6 @@
 # Menus
 
-All menus save their output to `~/Northstar/Cases/<active case>/<kind>/<target>_<timestamp>/` and add a line to the case's `audit.log`. Each result folder also has a `console.log` with everything the tools printed. When a tool you started on its own finishes, its folder opens automatically. From the main menu, use **Open latest results** instead, so the menu stays in front.
+All menus save their output to `~/Northstar/Cases/<active case>/<kind>/<target>_<timestamp>/`, seal it with `manifest.sha256` and `provenance.json`, and add a line to the case's hash-chained `audit.log`. Each result folder also has a `console.log` with everything the tools printed. When a tool you started on its own finishes, its folder opens automatically. From the main menu, use **Open latest results** instead, so the menu stays in front.
 
 Launch everything from `northstar`, or each tool on its own (`ns-domain`, etc.) from a terminal or the applications menu.
 
@@ -83,6 +83,10 @@ Tor connection check, onion search (Ahmia), text-only capture of an onion page, 
 ## ns-keys
 
 Add, check or remove API keys (Have I Been Pwned, Intelligence X, DeHashed, LeakCheck). Keys are typed into a hidden field, stored in `~/.config/northstar/keys.env` (readable only by you), and never logged.
+
+## ns-evidence
+
+Record result folders as numbered exhibits (optional OpenTimestamps proof), verify folders and the audit log's hash chain, list exhibits, and export the case with a SHA-256. Every result folder is sealed automatically when a search finishes. See [EVIDENCE.md](EVIDENCE.md).
 
 ## ns-update
 

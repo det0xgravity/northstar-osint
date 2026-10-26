@@ -4,6 +4,12 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project uses
 [Semantic Versioning](https://semver.org/).
 
+## [0.10.1] - 2026-10-26
+
+### Added
+- `docs/EVIDENCE.md`; ns-evidence launcher and dock entry; Country search
+  results are sealed too and become the "latest results".
+
 ## [0.10.0] - 2026-10-26
 
 Phase 2 of the review: evidence integrity.

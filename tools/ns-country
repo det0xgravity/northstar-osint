@@ -57,6 +57,8 @@ printf 'country\t%s\nsearch\t%s\nquery\t%s\n' "$code" "$choice" "$clip" > "$out/
 [ -n "$info" ] && printf '%s' "$info" > "$out/details.txt"
 printf '%s\n' ${urls[@]+"${urls[@]}"} > "$out/links.txt"
 ns_audit "ns-country:$code:$what" "$clip" "${#urls[@]} searches opened in browser"
+ns_seal_result "$out" >/dev/null
+mkdir -p "$NS_CONF" && printf '%s\n' "$out" > "$NS_CONF/last_result"
 ui_clip "$clip"
 # Dialog first: once the browser opens it covers any dialog shown after it
 ui_info "${info:+$info
