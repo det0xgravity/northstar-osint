@@ -78,6 +78,9 @@ Run `ghunt login` once and follow its prompts.
 **No Tor Browser or Mullvad Browser in an arm64 VM**
 That's expected: neither has a stable arm64 Linux build yet. See [INSTALL.md](INSTALL.md#running-in-a-vm-on-apple-silicon).
 
+**The Activities overview keeps opening**
+northstar turns off the top-left hot corner in VMs and the overview at login. To change either back: **Settings → Multitasking → Hot Corner**, or run `gnome-extensions disable no-overview@fthx`. The overview also opens when you press the Super (Windows/⌘) key. In UTM, that key goes to the VM while it has keyboard focus.
+
 **Black screen when connecting over RDP**
 You're probably still logged in on the Proxmox console. Log out there first, since GNOME allows one session per user. Also check that `~/.xsession` names your desktop session.
 

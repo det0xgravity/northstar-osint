@@ -52,6 +52,36 @@ subprocess.check_call(["gsettings", "set", "org.gnome.shell", "favorite-apps", s
 PY
 }
 
+# GNOME opens the Activities overview at every login, and its top-left hot
+# corner reopens it whenever the pointer brushes that corner, which in a VM
+# window happens on the way to the host's toolbar. Skip the login overview
+# (Debian's packaged "No overview at start-up" extension) and, in VMs only,
+# turn the hot corner off.
+ns_gnome_tweaks() {
+  ns_in_gnome_session || return 0
+  local ext="no-overview@fthx" virt=""
+  if [ ! -d "/usr/share/gnome-shell/extensions/$ext" ]; then
+    ns_apt gnome-shell-extensions-extra >/dev/null 2>&1 \
+      || ns_info "No-overview extension not packaged here — GNOME will still open the overview at login"
+  fi
+  if [ -d "/usr/share/gnome-shell/extensions/$ext" ]; then
+    python3 - "$ext" <<'PY'
+import ast, subprocess, sys
+key = ["org.gnome.shell", "enabled-extensions"]
+raw = subprocess.check_output(["gsettings", "get"] + key, text=True)
+exts = ast.literal_eval(raw.replace("@as ", "").strip())
+if sys.argv[1] not in exts:
+    subprocess.check_call(["gsettings", "set"] + key + [str(exts + [sys.argv[1]])])
+PY
+    ns_info "Login no longer opens the Activities overview (from your next login)"
+  fi
+  ns_has systemd-detect-virt && virt=$(systemd-detect-virt --vm 2>/dev/null)
+  if [ -n "$virt" ] && [ "$virt" != none ]; then
+    gsettings set org.gnome.desktop.interface enable-hot-corners false \
+      && ns_info "Top-left hot corner off (VM) — re-enable in Settings → Multitasking"
+  fi
+}
+
 ns_macos_app() {
   local app="$HOME/Applications/Northstar.app"
   mkdir -p "$HOME/Applications"
@@ -70,5 +100,6 @@ mod_desktop() {
   else
     ns_linux_launchers || return 1
     ns_gnome_dock
+    ns_gnome_tweaks
   fi
 }

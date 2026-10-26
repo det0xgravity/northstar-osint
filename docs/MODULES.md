@@ -83,7 +83,7 @@ Creates a private Python environment with Google's [libphonenumber](https://gith
 
 ## desktop
 
-- **Linux**: `.desktop` launchers for every menu in `~/.local/share/applications` (they show up in any desktop's app menu), plus GNOME dock favourites.
+- **Linux**: `.desktop` launchers for every menu in `~/.local/share/applications` (they show up in any desktop's app menu), plus GNOME dock favourites. On GNOME it also stops the Activities overview from opening at every login (the packaged *No overview at start-up* extension, where the distribution has it). In a VM it turns off the top-left hot corner, which otherwise opens the overview whenever the pointer crosses that corner on its way out of the VM window.
 - **macOS**: `~/Applications/Northstar.app`.
 
 ## extras

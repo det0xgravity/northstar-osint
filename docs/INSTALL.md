@@ -18,7 +18,7 @@ cd northstar-osint
 ./install.sh
 ```
 
-**Run it from a terminal inside your desktop session**, not over SSH. GNOME settings (dock favourites, the Print Screen binding) can only be applied inside a live desktop session. Over SSH, those two steps are skipped with a note, and everything else installs normally. Re-run from the desktop later to apply them.
+**Run it from a terminal inside your desktop session**, not over SSH. GNOME settings (dock favourites, the Print Screen binding, skipping the overview at login, and in VMs the hot corner) can only be applied inside a live desktop session. Over SSH, those steps are skipped with a note, and everything else installs normally. Re-run from the desktop later to apply them.
 
 Per-distribution notes:
 

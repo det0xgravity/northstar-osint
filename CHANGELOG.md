@@ -4,6 +4,14 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project uses
 [Semantic Versioning](https://semver.org/).
 
+## [0.4.2] - 2026-10-26
+
+### Changed
+- GNOME: the Activities overview no longer opens at every login (Debian's
+  packaged "No overview at start-up" extension), and in VMs the top-left hot
+  corner is turned off, since the pointer crosses it on its way out of the VM
+  window.
+
 ## [0.4.1] - 2026-10-26
 
 ### Fixed
