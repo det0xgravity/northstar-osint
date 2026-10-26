@@ -4,6 +4,14 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project uses
 [Semantic Versioning](https://semver.org/).
 
+## [0.23.0] - 2026-10-26
+
+### Added
+- `ns-translate` (main menu: Translate (offline)) and the `translate` module:
+  Argos Translate in a private venv. Translate a passage or text files
+  (posts, transcripts, subtitles) on this computer; language models download
+  once per pair. Results saved with the source text and sealed.
+
 ## [0.22.0] - 2026-10-26
 
 ### Added

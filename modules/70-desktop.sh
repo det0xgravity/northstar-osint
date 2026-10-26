@@ -16,6 +16,7 @@ ns-video|Video Verification|video-x-generic|Keyframes for reverse search, offlin
 ns-geo|Photo Geolocation|find-location|Where was this photo taken? Clues, local AI estimate, shadows, OSM search
 ns-watch|Page Monitoring|appointment-new|Watch public pages for changes: proof of life, new posts, snapshots and diffs
 ns-map|Case Map|find-location|Every coordinate in the case on one map, with GeoJSON and KML exports
+ns-translate|Translate|accessories-dictionary|Offline text translation: posts, transcripts, subtitles, captures
 ns-face|Face Comparison|avatar-default|Compare a reference face with photos already in the case (local, safeguarded)
 ns-metadata|Metadata|document-properties|View, export and strip file metadata
 ns-image|Image Analysis|image-x-generic|Reverse image search and EXIF/GPS

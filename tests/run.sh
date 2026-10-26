@@ -186,6 +186,25 @@ check "map built from places and GeoCLIP estimates" "grep -q '1 sighting, [0-9]*
 check "GeoJSON valid, every point present" "python3 -c 'import json,sys; f=json.load(open(sys.argv[1]))[\"features\"]; assert len(f) >= 3 and any(x[\"properties\"][\"kind\"] == \"sighting\" for x in f)' '$md/case.geojson'"
 check "labels escaped in the map page" "grep -q 'Rideau Centre &lt;b&gt;' '$md/map.html' && ! grep -q 'Rideau Centre <b>' '$md/map.html'"
 
+section "Offline translation (stubbed engine)"
+cat > "$G/ns_translate" <<'STUB'
+#!/bin/sh
+case "$1" in
+  languages) printf 'en\tEnglish *\nes\tSpanish\nfr\tFrench\n' ;;
+  get) echo "Ready." ;;
+  file) tr 'a-z' 'A-Z' < "$4" > "$5" ;;
+esac
+STUB
+chmod +x "$G/ns_translate"
+PATH="$G:$PATH" menu ns-translate "Translate text" "Spanish (es)" "English * (en)" "hola amigo"
+td=$(find "$CASE/translation" -mindepth 1 -maxdepth 1 -type d -name 'es-en_*' | head -1)
+check "text translated and saved with its source" "grep -qx 'hola amigo' '$td/source.txt' && grep -qx 'HOLA AMIGO' '$td/source.en.txt'"
+printf 'uno\n' > "$W/post.srt"
+PATH="$G:$PATH" menu ns-translate "Translate text files" "French (fr)" "English * (en)" "$W/post.srt"
+td=$(find "$CASE/translation" -mindepth 1 -maxdepth 1 -type d -name 'fr-en_*' | head -1)
+check "files copied beside their translation" "[ -f '$td/post.srt' ] && grep -qx 'UNO' '$td/post.en.srt'"
+check "translation result sealed" "[ -f '$td/manifest.sha256' ]"
+
 section "Installer module selection"
 I="$W/inst"; mkdir -p "$I/modules" "$I/bin" "$I/home"
 cp "$R/install.sh" "$I/" && cp -R "$R/lib" "$I/"

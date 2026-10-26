@@ -33,6 +33,7 @@ TOOLS = {
     "geo": ["ns_geo", "shadowfinder"],
     "face": ["ns_face"],
     "images": ["ns_photomatch"],
+    "translate": ["ns_translate"],
     "extras": ["keepassxc", "flameshot"],
     "shell": ["zsh", "fzf", "eza", "ranger", "pay-respects"],
     "northstar": ["northstar", "ns-country", "ns-breach", "ns-darkweb", "ns-evidence", "ns-case",

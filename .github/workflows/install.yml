@@ -42,5 +42,13 @@ jobs:
             test -x "$HOME/.local/share/northstar/bin/ns-country"
             ./install.sh --version'
         working-directory: ${{ github.workspace }}
+      - name: Offline translation installs and translates
+        run: |
+          su ns -c "cd '$GITHUB_WORKSPACE' && ./install.sh --yes --only translate"
+          su ns -c 'export PATH="$HOME/.local/share/northstar/bin:$PATH"
+            set -e
+            ns_translate get es en
+            echo "Hola, estoy bien." | ns_translate text es en | tee /tmp/t.txt
+            grep -qi "fine\|well\|good\|okay" /tmp/t.txt'
       - name: Functional tests
         run: su ns -c "cd '$GITHUB_WORKSPACE' && bash tests/run.sh"

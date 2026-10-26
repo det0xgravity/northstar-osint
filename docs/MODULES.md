@@ -72,6 +72,10 @@ System packages (git, curl, jq, Python, pipx, Go, whois, dig, zenity, clipboard 
 
 OpenCV (private venv) with the OpenCV Zoo [YuNet](https://github.com/opencv/opencv_zoo/tree/main/models/face_detection_yunet) face detector (MIT) and [SFace](https://github.com/opencv/opencv_zoo/tree/main/models/face_recognition_sface) face recogniser (Apache-2.0). The model files are checked against the SHA-256 published in the opencv_zoo repository. Used by `ns-face`.
 
+## translate
+
+[Argos Translate](https://github.com/argosopentech/argos-translate) (MIT) in a private venv (CPU PyTorch on x86_64 Linux), used by `ns-translate`. Language models download from the Argos package index the first time a language pair is used, then everything runs offline.
+
 ## browsers
 
 | Browser | Purpose |

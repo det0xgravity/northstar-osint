@@ -21,6 +21,7 @@ while true; do
     "Face comparison (within this case)" \
     "Page monitoring (proof of life)" \
     "Case map" \
+    "Translate (offline)" \
     "Country search" \
     "Breach data" \
     "Dark web" \
@@ -47,6 +48,7 @@ while true; do
     "Face comparison"*)        ns-face ;;
     "Page monitoring"*)        ns-watch ;;
     "Case map")                ns-map ;;
+    "Translate"*)              ns-translate ;;
     "Country search")          ns-country ;;
     "Breach data")             ns-breach ;;
     "Dark web")                ns-darkweb ;;

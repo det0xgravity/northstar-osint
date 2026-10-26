@@ -154,6 +154,17 @@ Every coordinate in the active case on one map.
 
 **Build the case map** writes `case.geojson` and `case.kml` (open them offline in QGIS or Google Earth Pro), `points.csv`, and `map.html`, an interactive map with a layer for each kind. Opening `map.html` loads Leaflet from unpkg (pinned and integrity-checked) and map tiles from CARTO or OpenStreetMap, so those services see which areas you view; the menu asks first. Address lookups use OpenStreetMap Nominatim and are logged in the audit log. Recorded places are kept in the case's `map/places.csv`.
 
+## ns-translate
+
+Offline text translation with [Argos Translate](https://github.com/argosopentech/argos-translate) (MIT). The text never leaves your computer: only the one-time download of each language model (about 100 MB per pair) uses the internet. Pairs without a direct model go through English.
+
+| Option | What it does |
+|---|---|
+| Translate text | Translates a short passage, shows it and copies it to the clipboard |
+| Translate text files | Posts, transcripts (`ns-video`), subtitles (`.srt`, `.vtt`), captured page text: each file is copied into the result folder beside `<name>.<language>.<ext>` |
+
+Results are saved under `translation/` in the case and sealed. Machine translation is a lead: slang, names and dialect are often wrong, so have anything that matters checked by a qualified translator. For speech, use Video verification, which transcribes and translates the audio.
+
 ## ns-metadata
 
 | Option | Runs | Output |
