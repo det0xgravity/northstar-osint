@@ -4,6 +4,16 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project uses
 [Semantic Versioning](https://semver.org/).
 
+## [0.7.5] - 2026-10-26
+
+### Added
+- zsh plugins: fzf (Ctrl+R history search, Ctrl+T files), z (jump to
+  folders), web-search, urltools, encode64, jsontools, extract, copypath,
+  copyfile, copybuffer and command-not-found (with the `fzf` and
+  `command-not-found` packages). An existing `~/.zshrc` gets the new list only
+  if its plugin line is still the one northstar wrote. The copy plugins use
+  xclip instead of wl-copy, which can hang on GNOME.
+
 ## [0.7.4] - 2026-10-26
 
 ### Changed

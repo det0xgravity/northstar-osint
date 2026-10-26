@@ -96,7 +96,14 @@ Creates a private Python environment with Google's [libphonenumber](https://gith
 | Component | Purpose |
 |---|---|
 | [zsh](https://www.zsh.org) | Becomes your login shell |
-| [Oh My Zsh](https://ohmyz.sh) | zsh framework; plugins `git`, `sudo` (press Esc twice to add sudo), `colored-man-pages` |
+| [Oh My Zsh](https://ohmyz.sh) | zsh framework, with the plugins below |
+| `fzf`, `z` | **Ctrl+R** fuzzy-searches your command history, **Ctrl+T** finds files; `z part-of-name` jumps to a folder you've used before (e.g. `z osint_test`) |
+| `web-search` | `google "jane doe" site:linkedin.com`, `ddg …`, `github …` open the search in your browser |
+| `urltools`, `encode64`, `jsontools` | `urlencode` / `urldecode`; `e64` / `d64` for base64; `pp_json` pretty-prints JSON, `is_json` checks it |
+| `extract` | `x file.zip` (or .tar.gz, .7z, .rar…) unpacks any archive |
+| `copypath`, `copyfile`, `copybuffer` | Copy the current folder's path, a file's contents, or (**Ctrl+O**) the command you're typing, for your notes |
+| `command-not-found` | Tells you which package provides a command that isn't installed |
+| `sudo`, `colored-man-pages`, `git` | **Esc Esc** adds sudo to a command; coloured manuals; git shortcuts |
 | [Powerlevel10k](https://github.com/romkatv/powerlevel10k) | The prompt: its "rainbow" style on one line, with a clock (HH:MM:SS) so terminal screenshots show when each command ran; commands taking 3 s or more also show their duration. Restyle any time with `p10k configure` (northstar never replaces a style you made) |
 | [zsh-autosuggestions](https://github.com/zsh-users/zsh-autosuggestions) | Suggests commands from your history as you type (→ to accept) |
 | [zsh-syntax-highlighting](https://github.com/zsh-users/zsh-syntax-highlighting) | Colours commands as you type, so typos show in red |

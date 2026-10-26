@@ -9,6 +9,16 @@ ns_register shell "zsh + Oh My Zsh + Powerlevel10k prompt and font" "linux" mod_
 NS_OMZ="$HOME/.oh-my-zsh"
 NS_FONT_URL="https://github.com/romkatv/powerlevel10k-media/raw/master"
 NS_TERM_FONT="MesloLGS NF 11"
+NS_ZSH_PLUGINS_V070="plugins=(git sudo colored-man-pages zsh-autosuggestions zsh-syntax-highlighting)"
+NS_ZSH_PLUGINS="plugins=(git sudo colored-man-pages fzf z web-search urltools encode64 jsontools extract copypath copyfile copybuffer command-not-found zsh-autosuggestions zsh-syntax-highlighting)"
+NS_ZSH_CLIPCOPY=$(cat <<'EOF'
+# Copy plugins (copypath, copyfile, copybuffer) use Oh My Zsh's clipcopy, which
+# prefers wl-copy; on GNOME that can hang. Use xclip when an X display exists.
+if [[ -n $DISPLAY ]] && (( $+commands[xclip] )); then
+  clipcopy() { xclip -selection clipboard -in < "${1:-/dev/stdin}" >/dev/null 2>&1 }
+fi
+EOF
+)
 
 # ns_git_sync <repo-url> <dir>   clone once, pull on --update
 ns_git_sync() {
@@ -95,7 +105,23 @@ ns_shell_p10k() {
 # as ~/.zshrc.pre-northstar. After that it's yours: northstar never rewrites it.
 ns_shell_zshrc() {
   local rc="$HOME/.zshrc"
-  grep -q 'northstar-osint: managed-zshrc' "$rc" 2>/dev/null && { ns_info "Your ~/.zshrc ✓ (yours to edit)"; return 0; }
+  if grep -q 'northstar-osint: managed-zshrc' "$rc" 2>/dev/null; then
+    # Bring the plugin list up to date, but only if it's still the list an
+    # earlier northstar wrote (an edited line is left alone)
+    if grep -Fqx "$NS_ZSH_PLUGINS_V070" "$rc"; then
+      NS_OLD="$NS_ZSH_PLUGINS_V070" NS_NEW="$NS_ZSH_PLUGINS" NS_CLIP="$NS_ZSH_CLIPCOPY" awk '
+        $0 == ENVIRON["NS_OLD"] { print ENVIRON["NS_NEW"]; next }
+        { print }
+        $0 == "source \"$ZSH/oh-my-zsh.sh\"" && ENVIRON["NS_CLIP"] != "" { print ""; print ENVIRON["NS_CLIP"] }
+      ' "$rc" > "$rc.tmp" && mv "$rc.tmp" "$rc"
+      ns_info "Added the new zsh plugins to ~/.zshrc"
+    elif ! grep -Fqx "$NS_ZSH_PLUGINS" "$rc"; then
+      ns_info "Your ~/.zshrc has its own plugin list; northstar's current one is: $NS_ZSH_PLUGINS"
+    else
+      ns_info "Your ~/.zshrc ✓ (yours to edit)"
+    fi
+    return 0
+  fi
   [ -f "$rc" ] && cp "$rc" "$HOME/.zshrc.pre-northstar" && ns_info "Previous ~/.zshrc saved as ~/.zshrc.pre-northstar"
   cat > "$rc" <<'EOF'
 # ~/.zshrc, written by northstar-osint's shell module. It's yours to edit:
@@ -112,8 +138,14 @@ export PATH="$HOME/.local/share/northstar/bin:$HOME/.local/share/northstar/go/bi
 export ZSH="$HOME/.oh-my-zsh"
 ZSH_THEME="powerlevel10k/powerlevel10k"
 zstyle ':omz:update' mode disabled        # ns-update keeps Oh My Zsh up to date
-plugins=(git sudo colored-man-pages zsh-autosuggestions zsh-syntax-highlighting)
+plugins=(git sudo colored-man-pages fzf z web-search urltools encode64 jsontools extract copypath copyfile copybuffer command-not-found zsh-autosuggestions zsh-syntax-highlighting)
 source "$ZSH/oh-my-zsh.sh"
+
+# Copy plugins (copypath, copyfile, copybuffer) use Oh My Zsh's clipcopy, which
+# prefers wl-copy; on GNOME that can hang. Use xclip when an X display exists.
+if [[ -n $DISPLAY ]] && (( $+commands[xclip] )); then
+  clipcopy() { xclip -selection clipboard -in < "${1:-/dev/stdin}" >/dev/null 2>&1 }
+fi
 
 HISTSIZE=50000
 SAVEHIST=50000
@@ -127,7 +159,8 @@ EOF
 
 mod_shell() {
   local rc=0 custom="$NS_OMZ/custom" zsh_path cur me
-  ns_apt zsh fontconfig || return 1
+  ns_apt zsh fontconfig fzf command-not-found || return 1
+  sudo update-command-not-found >/dev/null 2>&1 || true     # builds its package index
   ns_git_sync https://github.com/ohmyzsh/ohmyzsh.git "$NS_OMZ" || return 1
   ns_git_sync https://github.com/romkatv/powerlevel10k.git "$custom/themes/powerlevel10k" || rc=1
   ns_git_sync https://github.com/zsh-users/zsh-autosuggestions.git "$custom/plugins/zsh-autosuggestions" || rc=1
