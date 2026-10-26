@@ -6,6 +6,7 @@ ns_register desktop "Menu launchers (app menu, GNOME dock, macOS app)" "linux ma
 
 # id | name | icon | description
 NS_LAUNCHERS="northstar|Northstar|system-search|All northstar OSINT menus
+ns-missing|Missing Person|system-users|Subject profile, timeline from last seen, findings (CTF flags) with evidence
 ns-username|Username & Email|avatar-default|Find accounts by username or email
 ns-telegram|Telegram|internet-chat|Collect public Telegram channels: posts, metadata, forward networks
 ns-domain|Domain Recon|network-workgroup|Subdomains, DNS, crawling, archives, lookalikes

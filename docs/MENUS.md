@@ -13,6 +13,10 @@ The hub. Besides opening each menu, it lets you:
 - **Open case folder**
 - **Update northstar**: runs `ns-update`.
 
+## ns-missing
+
+**Missing person**: subject profile, a timeline built from the whole case and placed relative to the last-seen moment, and a findings (CTF flag) log with evidence hashes, duplicate warnings and an export. See [MISSING-PERSONS.md](MISSING-PERSONS.md).
+
 ## ns-username
 
 | Option | Runs | Output |

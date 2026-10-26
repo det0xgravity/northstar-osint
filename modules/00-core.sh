@@ -42,6 +42,7 @@ mod_core() {
   install -m 755 "$NS_REPO/lib/ns_evidence.py" "$NS_BIN/ns_evidence"
   install -m 755 "$NS_REPO/lib/ns_case.py" "$NS_BIN/ns_casework"
   install -m 755 "$NS_REPO/lib/ns_doctor.py" "$NS_BIN/ns_doctor"
+  install -m 755 "$NS_REPO/lib/ns_missing.py" "$NS_BIN/ns_missing"
   cp "$NS_REPO"/config/*.json "$NS_REPO"/config/*.txt "$NS_HOME/config/" 2>/dev/null
   rm -f "$NS_HOME"/config/countries/*.json      # drop packs removed upstream
   cp "$NS_REPO"/config/countries/*.json "$NS_HOME/config/countries/"

@@ -17,8 +17,9 @@ section() { printf '\n== %s\n' "$1"; }
 # A throwaway northstar home with the engines on PATH, and scripted dialogs
 H="$W/home"; mkdir -p "$H/lib" "$H/bin" "$H/config" "$W/data" "$W/conf"
 cp "$R/lib/ui.sh" "$R/lib/ns_country.py" "$H/lib/"
+cp "$R/config/ctf-categories.txt" "$H/config/"
 cp -R "$R/config/countries" "$H/config/"
-for e in breach darkweb evidence doctor; do ln -s "$R/lib/ns_$e.py" "$H/bin/ns_$e"; done
+for e in breach darkweb evidence doctor missing; do ln -s "$R/lib/ns_$e.py" "$H/bin/ns_$e"; done
 ln -s "$R/lib/ns_case.py" "$H/bin/ns_casework"
 export NS_HOME="$H" NS_DATA="$W/data" XDG_CONFIG_HOME="$W/xdg" NS_UI=script NS_UI_ANSWERS="$W/answers"
 export PATH="$H/bin:$PATH"
@@ -121,6 +122,23 @@ fd=$(find "$CASE/face" -mindepth 1 -maxdepth 1 -type d | head -1)
 check "reference copied, basis kept with the results, sealed" \
   "[ -f '$fd/reference_photo.jpg' ] && [ -f '$fd/face-comparison-basis.txt' ] && [ -f '$fd/manifest.sha256' ]"
 check "only the case folder is searched" "grep -q \"ns_face reference_photo.jpg $CASE \" '$fd/results.csv'"
+
+section "Missing person"
+echo general > "$XDG_CONFIG_HOME/northstar/active_case"
+menu ns-missing "Subject profile" "Jane Doe" "JD" "1999" "2026-10-01 18:30" "Ottawa bus station" "5'6, red jacket" "janed99" "" "" "" ""
+check "profile saved" "grep -q '\"name\": \"Jane Doe\"' '$CASE/subject/subject.json'"
+printf 'shot' > "$W/shot.png"
+menu ns-missing "Log a finding" "Friends" "https://example.com/p/1" "Friend posted with her on 2026-10-03" "yes" "$W/shot.png"
+menu ns-missing "Log a finding" "Location" "https://example.com/p/1/" "Same post, location tag" "no"
+check "finding logged with evidence hash" "grep -q '^F001,.*Friends.*shot.png,[0-9a-f]\{64\}' '$CASE/subject/findings.csv'"
+check "duplicate URL warned" "grep -q 'already logged as F001' '$W/out.txt'"
+menu ns-missing "Add a timeline event" "2026-10-02 09:00" "Bank card used" "police briefing"
+mkdir -p "$CASE/media/x"; printf '{"timestamp": 1791100800, "title": "Night out", "uploader": "janed99", "webpage_url": "https://example.com/v"}' > "$CASE/media/x/v.info.json"
+menu ns-missing "Build the timeline"
+check "timeline marks last seen and later events" "grep -q 'LAST SEEN at Ottawa bus station' '$CASE/subject/timeline.csv' && grep -q '+0.6 days,Bank card used' '$CASE/subject/timeline.csv'"
+check "timeline includes media metadata and dated findings" "grep -q 'Post by janed99: Night out' '$CASE/subject/timeline.csv' && grep -q 'Friend posted' '$CASE/subject/timeline.csv'"
+menu ns-missing "Export findings"
+check "findings export grouped by category" "grep -q '## Friends (1)' '$CASE/subject/findings.md'"
 
 section "Installer module selection"
 I="$W/inst"; mkdir -p "$I/modules" "$I/bin" "$I/home"

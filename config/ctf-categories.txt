@@ -1,0 +1,11 @@
+# Finding categories for ns-missing (one per line). These follow the categories
+# Trace Labs Search Party events have commonly used; check the current
+# Contestant Guide at https://tracelabs.org/searchparty and edit to match.
+Basic subject info
+Friends
+Family
+Employment
+Day last seen
+Advancing the timeline
+Location
+Dark web

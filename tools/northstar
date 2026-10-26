@@ -8,6 +8,7 @@ export NS_FROM_MAIN=1
 while true; do
   case_name=$(ns_case)
   choice=$(ui_list "Active case: $case_name" \
+    "Missing person (profile, timeline, findings)" \
     "Username & email" \
     "Telegram" \
     "Domain & infrastructure" \
@@ -31,6 +32,7 @@ while true; do
     "Update northstar") || break
 
   case "$choice" in
+    "Missing person"*)         ns-missing ;;
     "Username & email")        ns-username ;;
     "Telegram")                ns-telegram ;;
     "Domain & infrastructure") ns-domain ;;

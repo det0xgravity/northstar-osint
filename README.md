@@ -95,6 +95,7 @@ Full details: [docs/MODULES.md](docs/MODULES.md).
 
 ```
 northstar                # main menu
+├── Missing person       # ns-missing
 ├── Username & email     # ns-username
 ├── Telegram             # ns-telegram
 ├── Domain & infrastructure  # ns-domain
@@ -140,6 +141,7 @@ Secrets you type into a menu, such as session cookies, are redacted from `audit.
 - [Modules](docs/MODULES.md): every tool installed, with upstream links
 - [Menus](docs/MENUS.md): what each menu option runs and produces
 - [Countries](docs/COUNTRIES.md): country searches, the resource list, and how to add a country
+- [Missing persons & CTFs](docs/MISSING-PERSONS.md): subject profile, timeline, findings log, ground rules
 - [Evidence & exhibits](docs/EVIDENCE.md): manifests, provenance, the tamper-evident audit log, exhibits, export
 - [Breach data & dark web](docs/BREACH-DARKWEB.md): sources, safety rules, API keys, Tor Browser on arm64
 - [Kasm & Proxmox](docs/KASM.md): running northstar as a brokered VM and building templates

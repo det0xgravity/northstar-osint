@@ -4,6 +4,17 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project uses
 [Semantic Versioning](https://semver.org/).
 
+## [0.18.0] - 2026-10-26
+
+### Added
+- `ns-missing` (main menu: Missing person): subject profile and photos (with
+  hashes); timeline from your events, the last-seen moment, dated findings,
+  downloaded media metadata and photo EXIF times, placed relative to last seen
+  (`timeline.csv`, `timeline.html`); findings (CTF flag) log with categories
+  from `config/ctf-categories.txt`, evidence copied with SHA-256, duplicate-URL
+  warnings and a grouped export. `docs/MISSING-PERSONS.md`.
+- 6 more tests (41 in total).
+
 ## [0.17.0] - 2026-10-26
 
 ### Added

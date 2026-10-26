@@ -1,0 +1,105 @@
+#!/usr/bin/env bash
+# ns-missing — missing-person casework and Trace Labs-style CTFs: a subject
+# profile, a timeline built from everything in the case, and a findings (flag)
+# log with evidence hashes, duplicate warnings and an export.
+# Passive research only: never contact the subject or the people around them.
+# shellcheck source=../lib/ui.sh
+. "${NS_HOME:-$HOME/.local/share/northstar}/lib/ui.sh"
+
+case_dir=$(ns_case_dir)
+sub="$case_dir/subject"
+
+choice=$(ui_list "Missing person: case $(ns_case)" \
+  "Log a finding (flag)" \
+  "Subject profile (create or update)" \
+  "Add subject photos" \
+  "Add a timeline event" \
+  "Build the timeline" \
+  "Show the subject profile" \
+  "Export findings" \
+  "Missing-persons databases and resources") || exit 0
+
+case "$choice" in
+  "Log a finding"*)
+    cats=()
+    while IFS= read -r c; do
+      case "$c" in ""|\#*) ;; *) cats+=("$c") ;; esac
+    done < "$NS_HOME/config/ctf-categories.txt"
+    cat=$(ui_list "Category" "${cats[@]}") || exit 0
+    url=$(ui_entry "URL of the finding:") || exit 0
+    why=$(ui_entry "What it shows and why it matters (include a date as YYYY-MM-DD if it has one):") || exit 0
+    ev=""
+    if ui_question "Attach evidence (screenshot or file)? It's copied into the case with its SHA-256."; then
+      ev=$(ui_files "Choose the evidence file") && ev=$(printf '%s\n' "$ev" | head -1)
+    fi
+    r=$(ns_missing finding-add "$case_dir" "$cat" "$url" "$why" "${ev:-}")
+    ns_audit ns-missing "$url" "finding: $cat"
+    printf '%s\n' "$r"; ui_notify "$r" ;;
+
+  "Subject profile"*)
+    # key|question (each pre-filled with the current value)
+    fields="name|Full name
+aliases|Aliases and nicknames
+dob|Date of birth or age
+last_seen|Last seen (UTC, YYYY-MM-DD HH:MM)
+last_seen_place|Last seen where
+description|Description (height, build, hair, eyes, marks, clothing)
+usernames|Known usernames (comma-separated)
+emails|Known emails
+phones|Known phone numbers
+vehicles|Vehicles (make, model, colour, plate)
+notes|Other context"
+    answers=$(mktemp)
+    while IFS='|' read -r k label; do
+      cur=$(ns_missing profile-get "$case_dir" "$k")
+      v=$(ui_entry "$label:" "$cur") || v="$cur"      # Cancel keeps the current value
+      printf '%s\t%s\n' "$k" "$(printf '%s' "$v" | tr '\t\n' '  ')" >> "$answers"
+    done <<FIELDS
+$fields
+FIELDS
+    python3 -c 'import json,sys; print(json.dumps(dict(l.rstrip("\n").split("\t", 1) for l in open(sys.argv[1]) if "\t" in l)))' "$answers" \
+      | ns_missing profile-set "$case_dir" >/dev/null
+    rm -f "$answers"
+    ns_audit ns-missing "profile" "subject profile saved"
+    r=$(ns_missing profile-show "$case_dir"); printf '%s\n' "$r"; ui_info "$r" ;;
+
+  "Add subject photos")
+    files=$(ui_files "Choose photos of the subject") || exit 0
+    mkdir -p "$sub/photos"
+    n=0
+    while IFS= read -r f; do
+      [ -f "$f" ] || continue
+      cp -p "$f" "$sub/photos/" && n=$((n+1))
+      printf '%s  %s\n' "$(ns_hash_file "$f")" "$(basename "$f")" >> "$sub/photos/hashes.sha256"
+    done <<LIST
+$files
+LIST
+    ns_audit ns-missing "photos" "$n subject photos added"
+    ui_notify "$n photos added to the subject profile" ;;
+
+  "Add a timeline event")
+    when=$(ui_entry "When (UTC): YYYY-MM-DD or YYYY-MM-DD HH:MM") || exit 0
+    what=$(ui_entry "What happened:") || exit 0
+    src=$(ui_entry "Source (URL, file or note):") || exit 0
+    r=$(ns_missing event-add "$case_dir" "$when" "$what" "$src")
+    ns_audit ns-missing "timeline" "event: $when"
+    printf '%s\n' "$r"; ui_notify "$r" ;;
+
+  "Build the timeline")
+    r=$(ns_missing timeline "$case_dir"); printf '%s\n' "$r"
+    ns_audit ns-missing "timeline" "built"
+    ui_info "$r" || true
+    [ -s "$sub/timeline.html" ] && ui_reveal "$sub/timeline.html" ;;
+
+  "Show the subject"*)
+    r=$(ns_missing profile-show "$case_dir"); printf '%s\n' "$r"; ui_info "$r" ;;
+
+  "Export findings")
+    r=$(ns_missing findings-export "$case_dir"); printf '%s\n' "$r"
+    ns_audit ns-missing "findings" "exported"
+    ui_info "$r" || true
+    ui_reveal "$sub" ;;
+
+  "Missing-persons"*)
+    ns-country INT ;;
+esac
