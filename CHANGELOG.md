@@ -4,6 +4,11 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project uses
 [Semantic Versioning](https://semver.org/).
 
+## [0.7.4] - 2026-10-26
+
+### Changed
+- GNOME's top-bar clock uses 24-hour time, like the prompt and audit.log.
+
 ## [0.7.3] - 2026-10-26
 
 ### Changed

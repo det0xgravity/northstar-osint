@@ -89,6 +89,9 @@ ns_gnome_tweaks() {
   # GNOME has no system tray; Flameshot and KeePassXC live there
   ns_gnome_extension ubuntu-appindicators@ubuntu.com gnome-shell-extension-appindicator \
     "Tray icons enabled for Flameshot and KeePassXC (from your next login)"
+  # 24-hour clock, matching the prompt and the timestamps in audit.log
+  gsettings set org.gnome.desktop.interface clock-format 24h \
+    && ns_info "Top-bar clock set to 24-hour"
   ns_has systemd-detect-virt && virt=$(systemd-detect-virt --vm 2>/dev/null)
   if [ -n "$virt" ] && [ "$virt" != none ]; then
     gsettings set org.gnome.desktop.interface enable-hot-corners false \
