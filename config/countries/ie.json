@@ -16,6 +16,14 @@
       ]
     },
     {
+      "label": "Missing persons",
+      "prompt": "Name of the missing or unidentified person:",
+      "links": [
+        "g:\"{q}\" site:garda.ie missing",
+        "https://www.garda.ie/en/missing-persons/"
+      ]
+    },
+    {
       "label": "Business / organization",
       "prompt": "Company or organization name:",
       "links": [
@@ -143,6 +151,15 @@
         {
           "name": "RIP.ie (death notices)",
           "url": "https://rip.ie/"
+        }
+      ]
+    },
+    {
+      "name": "Missing Persons",
+      "children": [
+        {
+          "name": "An Garda Síochána - Missing Persons",
+          "url": "https://www.garda.ie/en/missing-persons/"
         }
       ]
     }

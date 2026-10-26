@@ -17,6 +17,18 @@
       ]
     },
     {
+      "label": "Missing persons",
+      "prompt": "Name of the missing or unidentified person:",
+      "links": [
+        "https://charleyproject.org/?s={q}",
+        "g:\"{q}\" (site:namus.nij.ojp.gov OR site:missingkids.org OR site:doenetwork.org)",
+        "g:\"{q}\" site:fbi.gov missing OR kidnapping",
+        "https://namus.nij.ojp.gov/",
+        "https://www.missingkids.org/gethelpnow/search"
+      ],
+      "note": "NamUs and NCMEC searches can't be pre-filled: the name is on the clipboard."
+    },
+    {
       "label": "Business / organization",
       "prompt": "Business or organization name:",
       "links": [
@@ -255,6 +267,31 @@
         {
           "name": "FCC License Search (ULS)",
           "url": "https://wireless2.fcc.gov/UlsApp/UlsSearch/searchLicense.jsp"
+        }
+      ]
+    },
+    {
+      "name": "Missing Persons",
+      "children": [
+        {
+          "name": "NamUs - Missing & Unidentified Persons",
+          "url": "https://namus.nij.ojp.gov/"
+        },
+        {
+          "name": "NCMEC - Missing Children Search",
+          "url": "https://www.missingkids.org/gethelpnow/search"
+        },
+        {
+          "name": "The Charley Project",
+          "url": "https://charleyproject.org/"
+        },
+        {
+          "name": "The Doe Network",
+          "url": "https://www.doenetwork.org/"
+        },
+        {
+          "name": "FBI - Kidnappings & Missing Persons",
+          "url": "https://www.fbi.gov/wanted/kidnap"
         }
       ]
     }

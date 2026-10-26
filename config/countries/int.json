@@ -18,6 +18,17 @@
       "note": "OFAC, the UN and World Bank lists can't be pre-filled: paste the name from your clipboard."
     },
     {
+      "label": "Missing persons",
+      "prompt": "Name of the missing or unidentified person:",
+      "links": [
+        "g:\"{q}\" site:interpol.int yellow notice",
+        "g:\"{q}\" (site:icmp.int OR site:missingchildreneurope.eu OR site:doenetwork.org)",
+        "https://www.interpol.int/How-we-work/Notices/Yellow-Notices/View-Yellow-Notices",
+        "https://www.interpol.int/What-you-can-do/Identify-Me"
+      ],
+      "note": "Only some INTERPOL Yellow Notices are public. Report sightings to local police, never to the family directly."
+    },
+    {
       "label": "Company (any country)",
       "prompt": "Company name:",
       "links": [
@@ -212,6 +223,35 @@
         {
           "name": "CommonLII",
           "url": "https://www.commonlii.org/"
+        }
+      ]
+    },
+    {
+      "name": "Missing Persons",
+      "children": [
+        {
+          "name": "INTERPOL - View Yellow Notices (missing persons)",
+          "url": "https://www.interpol.int/How-we-work/Notices/Yellow-Notices/View-Yellow-Notices"
+        },
+        {
+          "name": "INTERPOL - Identify Me (unidentified women)",
+          "url": "https://www.interpol.int/What-you-can-do/Identify-Me"
+        },
+        {
+          "name": "ICMP - International Commission on Missing Persons",
+          "url": "https://www.icmp.int/"
+        },
+        {
+          "name": "Missing Children Europe (116 000)",
+          "url": "https://missingchildreneurope.eu/"
+        },
+        {
+          "name": "AMBER Alert Europe",
+          "url": "https://www.amberalert.eu/"
+        },
+        {
+          "name": "The Doe Network (international unidentified)",
+          "url": "https://www.doenetwork.org/"
         }
       ]
     }

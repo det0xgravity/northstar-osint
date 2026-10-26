@@ -293,6 +293,7 @@ ns_pause() {
 
 # --- scripted dialogs (tests and CI) ---------------------------------------------------
 # NS_UI=script NS_UI_ANSWERS=<file>: every dialog takes the next line of the file
+# (an empty line cancels; "<default>" accepts an entry's pre-filled value)
 # instead of asking. ui_list picks the first option starting with that line;
 # ui_question takes y/yes as yes; a missing line cancels. Browser, clipboard,
 # notification and folder actions are logged to stderr and not performed.
@@ -311,7 +312,7 @@ if [ "${NS_UI:-}" = script ]; then
     for o in "$@"; do case "$o" in "$want"*) printf '%s\n' "$o"; return 0 ;; esac; done
     return 1
   }
-  ui_entry()    { _ui_next; }
+  ui_entry()    { local a; a=$(_ui_next) || return 1; [ "$a" = "<default>" ] && a="${2:-}"; printf '%s\n' "$a"; }
   ui_secret()   { _ui_next; }
   ui_files()    { _ui_next; }
   ui_dir()      { _ui_next; }

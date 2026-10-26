@@ -18,6 +18,15 @@
       ]
     },
     {
+      "label": "Missing persons",
+      "prompt": "Name of the missing or unidentified person:",
+      "links": [
+        "g:\"{q}\" site:canadasmissing.ca",
+        "g:\"{q}\" (site:rcmp.ca OR site:rcmp-grc.gc.ca OR site:opp.ca OR site:tps.ca OR site:spvm.qc.ca) missing",
+        "https://canadasmissing.ca/"
+      ]
+    },
+    {
       "label": "Business / organization",
       "prompt": "Business or organization name:",
       "links": [
@@ -331,10 +340,6 @@
           "url": "https://www.inmemoriam.ca/"
         },
         {
-          "name": "Canada's Missing",
-          "url": "https://canadasmissing.ca/"
-        },
-        {
           "name": "CIRA (.ca registry)",
           "url": "https://www.cira.ca/"
         }
@@ -366,6 +371,15 @@
         {
           "name": "NHTSA VIN Decoder",
           "url": "https://vpic.nhtsa.dot.gov/decoder/"
+        }
+      ]
+    },
+    {
+      "name": "Missing Persons",
+      "children": [
+        {
+          "name": "Canada's Missing (NCMPUR)",
+          "url": "https://canadasmissing.ca/"
         }
       ]
     }

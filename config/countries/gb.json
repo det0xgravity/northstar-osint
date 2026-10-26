@@ -19,6 +19,16 @@
       ]
     },
     {
+      "label": "Missing persons",
+      "prompt": "Name of the missing or unidentified person:",
+      "links": [
+        "g:\"{q}\" (site:missingpeople.org.uk OR site:missingpersons.police.uk)",
+        "https://www.missingpeople.org.uk/appeal-search",
+        "https://missingpersons.police.uk/"
+      ],
+      "note": "Missing People's charity helpline is 116 000; the UK Missing Persons Unit also holds unidentified-person cases."
+    },
+    {
       "label": "Business / organization",
       "prompt": "Company or organization name:",
       "links": [
@@ -218,6 +228,19 @@
         {
           "name": "CAA G-INFO Aircraft Register",
           "url": "https://www.caa.co.uk/aircraft-register/g-info/"
+        }
+      ]
+    },
+    {
+      "name": "Missing Persons",
+      "children": [
+        {
+          "name": "Missing People - Appeal Search",
+          "url": "https://www.missingpeople.org.uk/appeal-search"
+        },
+        {
+          "name": "UK Missing Persons Unit (NCA) - Missing & Unidentified",
+          "url": "https://missingpersons.police.uk/"
         }
       ]
     }

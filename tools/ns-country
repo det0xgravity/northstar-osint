@@ -3,7 +3,7 @@
 # search type: opens targeted searches and that country's registries in the
 # browser, copies the query for registries that can't be pre-filled, and logs
 # every search to the case. Countries are data packs in config/countries/.
-# Usage: ns-country [COUNTRY-CODE]
+# Usage: ns-country [COUNTRY-CODE [SEARCH-LABEL [QUERY]]]  (empty code: pick a country)
 # shellcheck source=../lib/ui.sh
 . "${NS_HOME:-$HOME/.local/share/northstar}/lib/ui.sh"
 
@@ -36,8 +36,10 @@ done < <(pack searches "$code")
 [ ${#labels[@]} -gt 0 ] || { ui_error "Unknown country code: $code"; exit 1; }
 mkdir -p "$NS_CONF" && printf '%s\n' "$code" > "$NS_CONF/last_country"
 
-choice=$(ui_list "$(pack name "$code") search" "${labels[@]}") || exit 0
-q=$(ui_entry "$(pack prompt "$code" "$choice")") || exit 0
+choice=""
+for l in "${labels[@]}"; do [ "$l" = "${2:-}" ] && choice="$l"; done   # preselected search, if this pack has it
+[ -n "$choice" ] || choice=$(ui_list "$(pack name "$code") search" "${labels[@]}") || exit 0
+q=$(ui_entry "$(pack prompt "$code" "$choice")" "${3:-}") || exit 0
 
 urls=(); info=""; clip="$q"; dir="$code"; what="search"
 while IFS=$'\t' read -r kind val; do

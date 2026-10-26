@@ -16,6 +16,15 @@
       ]
     },
     {
+      "label": "Missing persons",
+      "prompt": "Name of the missing or unidentified person:",
+      "links": [
+        "g:\"{q}\" site:police.govt.nz missing",
+        "https://www.police.govt.nz/missing-persons/missing-persons-list"
+      ],
+      "note": "NZ Police only list cases where the family has agreed to publication."
+    },
+    {
       "label": "Business / organization",
       "prompt": "Company or organization name:",
       "links": [
@@ -159,6 +168,15 @@
         {
           "name": "CAA Aircraft Register",
           "url": "https://www.aviation.govt.nz/aircraft/aircraft-registration/aircraft-register-search/"
+        }
+      ]
+    },
+    {
+      "name": "Missing Persons",
+      "children": [
+        {
+          "name": "NZ Police - Missing Persons List",
+          "url": "https://www.police.govt.nz/missing-persons/missing-persons-list"
         }
       ]
     }

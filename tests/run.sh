@@ -205,6 +205,12 @@ td=$(find "$CASE/translation" -mindepth 1 -maxdepth 1 -type d -name 'fr-en_*' | 
 check "files copied beside their translation" "[ -f '$td/post.srt' ] && grep -qx 'UNO' '$td/post.en.srt'"
 check "translation result sealed" "[ -f '$td/manifest.sha256' ]"
 
+section "Missing-persons searches"
+check "seven packs have a Missing persons search" "[ \"\$(grep -l '\"Missing persons\"' '$R'/config/countries/*.json | wc -l)\" -eq 7 ]"
+printf '#!/bin/sh\nexec bash "%s/tools/ns-country" "$@"\n' "$R" > "$G/ns-country"; chmod +x "$G/ns-country"
+PATH="$G:$PATH" menu ns-missing "Missing-persons" "United States" "<default>" "yes"
+check "subject's name pre-filled into the US missing-persons search" "grep -q 'charleyproject.org/?s=Jane+Doe' '$W/out.txt'"
+
 section "Installer module selection"
 I="$W/inst"; mkdir -p "$I/modules" "$I/bin" "$I/home"
 cp "$R/install.sh" "$I/" && cp -R "$R/lib" "$I/"

@@ -16,6 +16,15 @@
       "note": "The bankruptcy register (NPII) charges a small fee per search."
     },
     {
+      "label": "Missing persons",
+      "prompt": "Name of the missing or unidentified person:",
+      "links": [
+        "g:\"{q}\" site:missingpersons.gov.au",
+        "g:\"{q}\" (site:police.nsw.gov.au OR site:police.vic.gov.au OR site:police.qld.gov.au OR site:police.wa.gov.au OR site:police.sa.gov.au) missing",
+        "https://www.missingpersons.gov.au/"
+      ]
+    },
+    {
       "label": "Business / organization",
       "prompt": "Business or organization name:",
       "links": [
@@ -173,6 +182,15 @@
         {
           "name": "White Pages Australia",
           "url": "https://www.whitepages.com.au/"
+        }
+      ]
+    },
+    {
+      "name": "Missing Persons",
+      "children": [
+        {
+          "name": "National Missing Persons Coordination Centre (AFP)",
+          "url": "https://www.missingpersons.gov.au/"
         }
       ]
     }

@@ -101,5 +101,6 @@ LIST
     ui_reveal "$sub" ;;
 
   "Missing-persons"*)
-    ns-country INT ;;
+    # Missing-persons databases for a country (or International), the subject's name pre-filled
+    ns-country "" "Missing persons" "$(ns_missing profile-get "$case_dir" name)" ;;
 esac

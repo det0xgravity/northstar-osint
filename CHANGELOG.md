@@ -4,6 +4,18 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project uses
 [Semantic Versioning](https://semver.org/).
 
+## [0.24.0] - 2026-10-26
+
+### Added
+- "Missing persons" searches and bookmark folders in the US (NamUs, NCMEC,
+  Charley Project, Doe Network, FBI), UK (Missing People, UK Missing Persons
+  Unit), Ireland (Garda), Australia (NMPCC), New Zealand (NZ Police), Canada
+  (Canada's Missing) and International (INTERPOL Yellow Notices and Identify
+  Me, ICMP, Missing Children Europe, AMBER Alert Europe) packs.
+- Missing person → "Missing-persons databases" picks a country and opens its
+  missing-persons search with the subject's name pre-filled.
+- `ns-country [CODE [SEARCH [QUERY]]]` can preselect a search and pre-fill it.
+
 ## [0.23.0] - 2026-10-26
 
 ### Added

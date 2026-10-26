@@ -22,23 +22,23 @@ There are 17 countries plus an International pack, with 144 search types and 268
 
 | Country | Code | Search types | Bookmarks |
 |---|---|---|---|
-| International | `INT` | Sanctions & watchlists, Company (any country), Leaks & investigations, Phone number, Vessel (name, IMO or MMSI), Aircraft (registration), EU institutions, lobbying & tenders, Crypto address | 24 |
-| Australia | `AU` | Person, Business / organization, Phone number, Address / property, Courts & legal, Financial & regulatory check, Political donations & lobbying, Vehicle (VIN), Aircraft | 14 |
-| Canada | `CA` | Person, Business / organization, Phone number, Address / postal code, Financial & regulatory check, Political contributions & lobbying, Vessel, Aircraft, Vehicle (VIN), Amateur radio call sign | 53 |
+| International | `INT` | Sanctions & watchlists, Missing persons, Company (any country), Leaks & investigations, Phone number, Vessel (name, IMO or MMSI), Aircraft (registration), EU institutions, lobbying & tenders, Crypto address | 30 |
+| Australia | `AU` | Person, Missing persons, Business / organization, Phone number, Address / property, Courts & legal, Financial & regulatory check, Political donations & lobbying, Vehicle (VIN), Aircraft | 15 |
+| Canada | `CA` | Person, Missing persons, Business / organization, Phone number, Address / postal code, Financial & regulatory check, Political contributions & lobbying, Vessel, Aircraft, Vehicle (VIN), Amateur radio call sign | 53 |
 | France | `FR` | Person, Business / organization, Phone number, Address / property, Courts & legal, Financial & regulatory check, Political & lobbying, Aircraft | 18 |
 | Germany | `DE` | Person, Business / organization, Phone number, Address / property, Courts & legal, Financial & regulatory check, Political & lobbying, Aircraft | 13 |
 | Indonesia | `ID` | Person, Business / organization, Phone number, Address / property, Courts & legal, Financial & regulatory check, Aircraft | 6 |
-| Ireland | `IE` | Person, Business / organization, Phone number, Address / property, Courts & legal, Financial & regulatory check, Political donations & lobbying | 13 |
+| Ireland | `IE` | Person, Missing persons, Business / organization, Phone number, Address / property, Courts & legal, Financial & regulatory check, Political donations & lobbying | 14 |
 | Italy | `IT` | Person, Business / organization, Phone number, Address / property, Courts & legal, Financial & regulatory check, Vehicle (licence plate), Aircraft | 10 |
 | Malaysia | `MY` | Person, Business / organization, Phone number, Address / property, Financial & regulatory check, Aircraft | 9 |
 | Netherlands | `NL` | Person, Business / organization, Phone number, Address / property, Courts & legal, Financial & regulatory check, Vehicle (licence plate), Aircraft | 10 |
-| New Zealand | `NZ` | Person, Business / organization, Phone number, Address / property, Courts & legal, Financial & regulatory check, Political donations & interests, Vehicle (plate), Aircraft | 12 |
+| New Zealand | `NZ` | Person, Missing persons, Business / organization, Phone number, Address / property, Courts & legal, Financial & regulatory check, Political donations & interests, Vehicle (plate), Aircraft | 13 |
 | Philippines | `PH` | Person, Business / organization, Phone number, Address / property, Courts & legal, Financial & regulatory check, Aircraft | 8 |
 | Singapore | `SG` | Person, Business / organization, Phone number, Address / property, Courts & legal, Financial & regulatory check, Aircraft | 8 |
 | Spain | `ES` | Person, Business / organization, Phone number, Address / property, Courts & legal, Financial & regulatory check, Political & lobbying, Aircraft | 10 |
 | Thailand | `TH` | Person, Business / organization, Phone number, Address / property, Courts & legal, Financial & regulatory check, Aircraft | 6 |
-| United Kingdom | `GB` | Person, Business / organization, Phone number, Address / property, Courts & legal, Financial & regulatory check, Political donations & interests, Vehicle (registration), Aircraft | 22 |
-| United States | `US` | Person, Business / organization, Phone number, Address / property, Courts & legal, Financial & regulatory check, Political contributions & lobbying, Vessel, Aircraft (N-number), Vehicle (VIN), Amateur radio call sign | 26 |
+| United Kingdom | `GB` | Person, Missing persons, Business / organization, Phone number, Address / property, Courts & legal, Financial & regulatory check, Political donations & interests, Vehicle (registration), Aircraft | 24 |
+| United States | `US` | Person, Missing persons, Business / organization, Phone number, Address / property, Courts & legal, Financial & regulatory check, Political contributions & lobbying, Vessel, Aircraft (N-number), Vehicle (VIN), Amateur radio call sign | 31 |
 | Vietnam | `VN` | Person, Business / organization, Phone number, Address / property, Courts & legal, Financial & regulatory check, Aircraft | 6 |
 
 ## Notes
