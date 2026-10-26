@@ -58,10 +58,10 @@ CI (`.github/workflows/lint.yml`) runs the same checks.
 
 ## Status
 
-v0.2.0 adds arm64 VM guest support, the Amass v5 CLI and bookmark fixes. It has
-passed lint and logic checks, but no full install has been run on real hardware
-yet. The first end-to-end runs should be on a fresh Debian 13 GNOME VM snapshot,
-on x86_64 (Proxmox) and on arm64 (UTM on Apple Silicon).
+v0.4.3. First real install passed on 2026-10-26: Debian 13 GNOME, arm64, in a
+UTM (QEMU) VM on Apple Silicon. All modules completed, and the username menu
+works end to end. Still untested: x86_64 (Proxmox/Kasm, Tor/Mullvad Flatpaks),
+Ubuntu, Kali, Parrot, macOS, and the country menus on real hardware.
 
 ## Open work
 
