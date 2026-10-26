@@ -46,6 +46,18 @@ ui_entry() {
   printf '%s\n' "$r"
 }
 
+# ui_secret "Prompt"   -> text typed with hidden input (passwords, API keys)
+ui_secret() {
+  local r
+  if ui_mac; then
+    r=$(osascript -e "text returned of (display dialog \"$(_as_q "$1")\" default answer \"\" with hidden answer with title \"$NS_TITLE\")" 2>/dev/null) || return 1
+  else
+    r=$(zenity --entry --hide-text --title="$NS_TITLE" --width=460 --text="$1" 2>/dev/null) || return 1
+  fi
+  [ -n "$r" ] || return 1
+  printf '%s\n' "$r"
+}
+
 ui_info() {
   if ui_mac; then
     osascript -e "display dialog \"$(_as_q "$1")\" buttons {\"OK\"} default button 1 with title \"$NS_TITLE\"" >/dev/null 2>&1
@@ -157,6 +169,23 @@ ns_google() { echo "https://www.google.com/search?q=$(ns_enc "$1")"; }
 ns_lower()  { printf '%s' "$1" | tr '[:upper:]' '[:lower:]'; }
 ns_upper()  { printf '%s' "$1" | tr '[:lower:]' '[:upper:]'; }
 ns_slug()   { printf '%s' "$1" | tr -c 'A-Za-z0-9._@-' '_' | cut -c1-60; }
+
+# --- API keys ----------------------------------------------------------------------
+# One NAME=value per line in ~/.config/northstar/keys.env, mode 600. Read by the
+# Python engines directly; keys never go on a command line or into audit.log.
+NS_KEYS="$NS_CONF/keys.env"
+export NS_KEYS                       # the engines (ns_breach) read keys from here
+ns_key_get() { grep -m1 "^$1=" "$NS_KEYS" 2>/dev/null | cut -d= -f2-; }
+
+# ns_key_set NAME VALUE   (an empty VALUE removes the key)
+ns_key_set() {
+  local tmp
+  ( umask 077; mkdir -p "$NS_CONF" )
+  tmp=$(mktemp "$NS_CONF/.keys.XXXXXX") || return 1      # mktemp files are mode 600
+  grep -v "^$1=" "$NS_KEYS" > "$tmp" 2>/dev/null
+  [ -n "$2" ] && printf '%s=%s\n' "$1" "$2" >> "$tmp"
+  mv "$tmp" "$NS_KEYS"
+}
 
 # --- cases & audit trail --------------------------------------------------------------
 # Output for every search lands in ~/Northstar/Cases/<active case>/, and every

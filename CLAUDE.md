@@ -19,6 +19,8 @@ references to them.
 - `lib/ui.sh`: runtime library for menu tools (`ui_*` dialogs via zenity or
   osascript, `ns_outdir`, `ns_run`, `ns_audit`, `ns_finish`, case handling).
 - `lib/gen_policies.py`: builds Firefox/Brave policy JSON and a bookmarks export.
+- `lib/ns_breach.py`, `lib/ns_darkweb.py`: engines for `ns-breach` and
+  `ns-darkweb` (stdlib + curl; API keys read from `~/.config/northstar/keys.env`).
 - `lib/ns_country.py`: engine for `ns-country` (reads the country packs, builds
   search links, phone analysis, `validate`).
 - `modules/NN-name.sh`: one module each; it registers with
@@ -41,7 +43,10 @@ references to them.
   (`ns_pipx <command> [spec]`) or private venvs (`ns_git_venv`).
 - Install only from official sources. Don't vendor third-party binaries.
 - Menu tools must log through `ns_run`/`ns_audit`, and must never write secrets
-  (cookies, API keys, passwords) to `audit.log`.
+  (cookies, API keys, passwords) to `audit.log`. API keys live only in
+  `keys.env` (mode 600) and must never appear on a command line.
+- Breach features query lookup services only; never download or store dumps.
+  Dark-web fetches are text-only and must not bypass sites' anti-bot measures.
 - The installer must run as a normal user; it calls sudo itself.
 
 ## Checks to run before committing
@@ -70,9 +75,11 @@ Ubuntu, Kali, Parrot, macOS, and the country menus on real hardware.
    a real domain (Oct 2026, v5.1.3) stored only the seed name. Check whether
    that's expected without `datasources.yaml` keys before relying on it. The
    engine listens on `:4000` on all interfaces and ignores `-dir` for storage.
-2. **Re-check arm64 Tor/Mullvad.** Tor Browser 16.0 stable is expected to ship
-   aarch64 Linux builds. When it does (and Flathub builds aarch64), remove the
-   skip in `modules/50-browsers.sh` and the notes in `docs/`.
+2. **arm64 Tor Browser is the alpha.** `ns_tor_browser_tarball` switches to
+   stable by itself once the release channel has `linux-aarch64`; then update
+   the "alpha" notes in `docs/`. Mullvad Browser still has no arm64 Linux build.
+   The signature check has only been reasoned about, not run: confirm the
+   installer prints "signature-verified" on the arm64 VM.
 3. **Bookmarks to check by hand.** `ns-linkcheck` can't verify sites that block
    scripts (403), including many in the country packs. Government sites in
    Australia, Indonesia, Thailand and Vietnam also drop connections from abroad

@@ -75,8 +75,17 @@ Run `ghunt login` once and follow its prompts.
 
 ## VM / Kasm
 
-**No Tor Browser or Mullvad Browser in an arm64 VM**
-That's expected: neither has a stable arm64 Linux build yet. See [INSTALL.md](INSTALL.md#running-in-a-vm-on-apple-silicon).
+**No Mullvad Browser in an arm64 VM, and Tor Browser says "alpha"**
+That's expected. Mullvad Browser has no arm64 Linux build, and Tor Browser's only arm64 Linux builds are alphas for now. northstar switches to stable automatically once one exists. See [BREACH-DARKWEB.md](BREACH-DARKWEB.md#tor-browser-on-arm64-vms-on-apple-silicon).
+
+**Tor Browser "signature did NOT verify"**
+The download didn't match the Tor Project's signing key, so nothing was installed. Usually it's a broken or intercepted download: run `ns-update` again. If it keeps happening, don't install Tor Browser on that network.
+
+**ns-darkweb says Tor isn't reachable**
+On Linux: `sudo systemctl start tor`, then `systemctl status tor`. On macOS: `brew services start tor`. Some networks block Tor; Tor Browser's connection settings can use bridges in that case.
+
+**A breach source shows "rate limit reached" or "key rejected"**
+Free services limit how often you can search (XposedOrNot about 25 an hour; ransomware.live one a minute). Wait and retry. "Key rejected" means the API key is wrong or has expired: update it in **API keys**.
 
 **A menu seems to stop after "Results saved to:"**
 Its next dialog has probably opened behind another window: GNOME doesn't let a new window jump in front of the one you're using. Press Alt+Tab to find it. Since v0.4.3, tools started from the main menu no longer open the file manager by themselves, so this mostly happens after *Image analysis*, which opens the folder so you can drag the image into the search pages. Use **Open latest results** in the main menu to see what a search produced.

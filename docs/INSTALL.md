@@ -66,12 +66,9 @@ xrdp, the SSH host-key service and `ns-seal` are set up in every case. If you do
 
 In UTM, choose the **QEMU** backend ("Virtualize", not "Apple Virtualization") if you want clipboard sharing with the Mac.
 
-**Tor Browser and Mullvad Browser are skipped in arm64 Linux guests.** Flathub only builds them for x86_64, and the Tor Project's aarch64 Linux builds are still alpha releases, which it doesn't recommend if you need strong anonymity. The installer prints a note and carries on. Until stable arm64 builds ship, you can:
+**Tor Browser on arm64:** Flathub only builds Tor Browser for x86_64, so in an arm64 guest northstar installs it directly from the Tor Project and verifies its signature. There's no *stable* arm64 Linux build yet, so for now that's the **alpha**, which the installer flags clearly. It switches to stable automatically once a stable arm64 build exists. The Tor Project advises people at high risk to use stable, so for the most sensitive work, use Tor Browser on the Mac host (`./install.sh --only browsers` installs it there from Homebrew). Details in [BREACH-DARKWEB.md](BREACH-DARKWEB.md#tor-browser-on-arm64-vms-on-apple-silicon).
 
-- run them on the Mac host instead, where `./install.sh --only browsers` installs both from Homebrew, or
-- download the Tor Browser alpha for Linux (aarch64) from [torproject.org](https://www.torproject.org/download/alpha/) at your own risk.
-
-Firefox, Brave and every other module work normally on arm64.
+**Mullvad Browser** has no arm64 Linux build yet, so it's skipped in arm64 guests. Firefox, Brave and every other module work normally on arm64.
 
 ## Options
 

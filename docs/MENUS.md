@@ -70,6 +70,18 @@ You can paste a full URL as the domain. The scheme, path and `www.` are stripped
 
 Country-specific public-records searches. `ns-country` asks for a country, or takes a code: `ns-country GB`. `ns-canada` opens the Canada pack directly. See [COUNTRIES.md](COUNTRIES.md).
 
+## ns-breach
+
+Breach and infostealer lookups by email, username, domain or phone, a password exposure check, and HIBP's breach catalogue. Free sources always run; paid ones run with your API keys. See [BREACH-DARKWEB.md](BREACH-DARKWEB.md).
+
+## ns-darkweb
+
+Tor connection check, onion search (Ahmia), text-only capture of an onion page, ransomware leak-site claims, and Tor Browser. See [BREACH-DARKWEB.md](BREACH-DARKWEB.md).
+
+## ns-keys
+
+Add, check or remove API keys (Have I Been Pwned, Intelligence X, DeHashed, LeakCheck). Keys are typed into a hidden field, stored in `~/.config/northstar/keys.env` (readable only by you), and never logged.
+
 ## ns-update
 
 Pulls the latest northstar-osint and runs `install.sh --update --yes` for every module except the ones you chose to skip, so modules added in a new release are installed too. If the download fails (usually because files in the checkout were edited by hand), it says so clearly, still upgrades the installed tools, and exits with an error.

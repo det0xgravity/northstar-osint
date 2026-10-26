@@ -66,16 +66,20 @@ System packages (git, curl, jq, Python, pipx, Go, whois, dig, zenity, clipboard 
 |---|---|
 | Firefox / Firefox ESR | Main investigation browser, with OSINT extensions and bookmarks by policy |
 | [Brave](https://brave.com) | Chromium-based alternative, with bookmarks by policy |
-| [Tor Browser](https://www.torproject.org) | Anonymity and .onion access (Flatpak launcher on Linux; skipped on arm64 Linux) |
+| [Tor Browser](https://www.torproject.org) | Anonymity and .onion access (Flatpak launcher on x86_64 Linux; signature-verified download from the Tor Project on arm64 Linux, currently the alpha) |
 | [Mullvad Browser](https://mullvad.net/browser) | Tor Browser's anti-fingerprinting without the Tor network (skipped on arm64 Linux) |
 
-On arm64 Linux, such as a VM on Apple Silicon, Tor Browser and Mullvad Browser aren't installed because there are no stable builds yet. See [INSTALL.md](INSTALL.md#running-in-a-vm-on-apple-silicon).
+On arm64 Linux, such as a VM on Apple Silicon, Mullvad Browser isn't installed because it has no arm64 build, and Tor Browser comes from the Tor Project's alpha channel until stable supports arm64. See [INSTALL.md](INSTALL.md#running-in-a-vm-on-apple-silicon).
 
 **Extensions** (Firefox, from `config/firefox-extensions.txt`): uBlock Origin, Multi-Account Containers, SingleFile, KeePassXC-Browser, Search by Image, Wayback Machine, Mitaka, Shodan, User-Agent Switcher and Manager.
 
 **Policy also sets:** bookmarks toolbar always visible, telemetry and studies off, Firefox's password saving off (use KeePassXC).
 
 > Don't add extensions to Tor Browser or Mullvad Browser. They protect you by making every user look identical, and each extension makes you more unique.
+
+## darkweb
+
+The Tor client as a service (a SOCKS proxy on `127.0.0.1:9050`, never a relay) and `torsocks`, used by `ns-darkweb`. Tor Browser itself comes with `browsers`. See [BREACH-DARKWEB.md](BREACH-DARKWEB.md).
 
 ## countries
 

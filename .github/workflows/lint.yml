@@ -29,7 +29,7 @@ jobs:
 
       - name: Python and JSON
         run: |
-          python3 -m py_compile lib/gen_policies.py lib/ns_country.py
+          python3 -m py_compile lib/gen_policies.py lib/ns_country.py lib/ns_breach.py lib/ns_darkweb.py
           python3 -m json.tool config/bookmarks.json > /dev/null
           python3 lib/ns_country.py validate
 

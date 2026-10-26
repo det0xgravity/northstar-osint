@@ -14,6 +14,48 @@ ns_brave_repo() {
   NS_APT_UPDATED=0   # force an apt update so the new repo is picked up
 }
 
+# Tor Browser from the Tor Project's own builds, for Linux on arm64 (Flathub's
+# launcher is x86_64-only). Uses the stable channel when it has an arm64 build,
+# otherwise the alpha, and verifies the download against the Tor Browser
+# Developers signing key. Tor Browser updates itself after that; when stable
+# gains arm64, the next run switches the alpha install to stable.
+NS_TB_FPR="EF6E286DDA85EA2A4BA7DE684E2C6E8793298290"
+ns_tor_browser_tarball() {
+  local arch="linux-aarch64" dest="$NS_HOME/tor-browser" chan="" c json="" bin sig ver tmp
+  for c in release alpha; do
+    json=$(curl -fsSL "https://aus1.torproject.org/torbrowser/update_3/$c/downloads.json") || continue
+    bin=$(printf '%s' "$json" | jq -r --arg a "$arch" '.downloads[$a].ALL.binary // empty')
+    if [ -n "$bin" ]; then chan=$c; break; fi
+  done
+  [ -n "$chan" ] || { ns_warn "No Tor Browser build for $arch found"; return 1; }
+  if [ "$(cat "$dest/.northstar-channel" 2>/dev/null)" = "$chan" ]; then
+    ns_info "Tor Browser ($chan) ✓ — it keeps itself up to date"
+    return 0
+  fi
+  ver=$(printf '%s' "$json" | jq -r '.version')
+  sig=$(printf '%s' "$json" | jq -r --arg a "$arch" '.downloads[$a].ALL.sig')
+  [ "$chan" = alpha ] && ns_warn "Installing Tor Browser $ver ALPHA: there's no stable arm64 build yet. ns-update switches to stable once there is."
+  ns_has gpg || ns_apt gnupg || return 1
+  tmp=$(mktemp -d)
+  curl -fsSL "$bin" -o "$tmp/tb.tar.xz" && curl -fsSL "$sig" -o "$tmp/tb.tar.xz.asc" \
+    || { ns_warn "Tor Browser download failed"; rm -rf "$tmp"; return 1; }
+  mkdir -m 700 "$tmp/gnupg"
+  GNUPGHOME="$tmp/gnupg" gpg --batch --quiet --auto-key-locate nodefault,wkd \
+    --locate-keys torbrowser@torproject.org >/dev/null 2>&1 \
+    || { ns_warn "Couldn't fetch the Tor Browser signing key"; rm -rf "$tmp"; return 1; }
+  if ! GNUPGHOME="$tmp/gnupg" gpg --batch --status-fd 1 --verify "$tmp/tb.tar.xz.asc" "$tmp/tb.tar.xz" 2>/dev/null \
+       | grep -q "VALIDSIG .* $NS_TB_FPR\$"; then
+    ns_warn "Tor Browser signature did NOT verify — not installing it"
+    rm -rf "$tmp"; return 1
+  fi
+  rm -rf "$dest" && mkdir -p "$dest"
+  tar -xJf "$tmp/tb.tar.xz" -C "$dest" --strip-components=1 || { rm -rf "$tmp"; return 1; }
+  rm -rf "$tmp"
+  printf '%s\n' "$chan" > "$dest/.northstar-channel"
+  ( cd "$dest" && ./start-tor-browser.desktop --register-app >/dev/null 2>&1 )
+  ns_info "Tor Browser $ver ($chan) installed and signature-verified; it's in your applications menu"
+}
+
 ns_install_policies() {
   local tmp rc d app
   tmp=$(mktemp -d)
@@ -71,9 +113,10 @@ mod_browsers() {
       { ns_brave_repo && ns_apt brave-browser; } || rc=1
     fi
     if [ "$NS_ARCH" = "arm64" ]; then
-      # Flathub builds both for x86_64 only, and Tor Project's aarch64 Linux
-      # builds are alpha-only (checked October 2026, Tor Browser 15.0 stable).
-      ns_warn "Skipping Tor Browser and Mullvad Browser: no stable arm64 Linux builds yet (see docs/INSTALL.md)"
+      # Flathub builds both for x86_64 only. Tor Browser comes straight from the
+      # Tor Project instead; Mullvad Browser has no arm64 Linux build at all yet.
+      ns_tor_browser_tarball || rc=1
+      ns_info "Skipping Mullvad Browser: no arm64 Linux build yet (see docs/INSTALL.md)"
     else
       ns_flatpak org.torproject.torbrowser-launcher || rc=1
       ns_flatpak net.mullvad.MullvadBrowser || ns_warn "Mullvad Browser flatpak failed to install"

@@ -14,6 +14,9 @@ while true; do
     "Metadata" \
     "Image analysis" \
     "Country search" \
+    "Breach data" \
+    "Dark web" \
+    "API keys" \
     "Switch / create case  (current: $case_name)" \
     "Open latest results" \
     "Open case folder" \
@@ -26,6 +29,9 @@ while true; do
     "Metadata")                ns-metadata ;;
     "Image analysis")          ns-image ;;
     "Country search")          ns-country ;;
+    "Breach data")             ns-breach ;;
+    "Dark web")                ns-darkweb ;;
+    "API keys")                ns-keys ;;
     "Switch / create case"*)
       new=$(ui_entry "Case name (letters, numbers, dashes):" "$case_name") || continue
       ns_set_case "$new"

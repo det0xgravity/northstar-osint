@@ -34,6 +34,9 @@ mod_core() {
   install -m 644 "$NS_REPO/lib/ui.sh" "$NS_HOME/lib/ui.sh"
   install -m 644 "$NS_REPO/lib/gen_policies.py" "$NS_HOME/lib/gen_policies.py"
   install -m 644 "$NS_REPO/lib/ns_country.py" "$NS_HOME/lib/ns_country.py"
+  # Engines run as commands, so audit.log shows "ns_breach email …"
+  install -m 755 "$NS_REPO/lib/ns_breach.py" "$NS_BIN/ns_breach"
+  install -m 755 "$NS_REPO/lib/ns_darkweb.py" "$NS_BIN/ns_darkweb"
   cp "$NS_REPO"/config/*.json "$NS_REPO"/config/*.txt "$NS_HOME/config/" 2>/dev/null
   rm -f "$NS_HOME"/config/countries/*.json      # drop packs removed upstream
   cp "$NS_REPO"/config/countries/*.json "$NS_HOME/config/countries/"

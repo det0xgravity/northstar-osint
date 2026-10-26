@@ -4,6 +4,24 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project uses
 [Semantic Versioning](https://semver.org/).
 
+## [0.6.0] - 2026-10-26
+
+### Added
+- `ns-breach`: breach and infostealer exposure by email, username, domain or
+  phone. Free sources: XposedOrNot, Hudson Rock, LeakCheck public, the HIBP
+  catalogue. With your keys: Have I Been Pwned, Intelligence X, DeHashed,
+  LeakCheck Pro. Passwords are masked on screen; raw results are mode 600.
+  A password exposure check uses HIBP's k-anonymity range API and stores nothing.
+- `ns-keys`: hidden-input API key manager (`~/.config/northstar/keys.env`,
+  mode 600; keys never on a command line or in the audit log).
+- `ns-darkweb`: Tor connection check, Ahmia search (opened in the browser),
+  text-only capture of onion pages through Tor with SHA-256 hashes,
+  ransomware leak-site claims (ransomware.live), and Tor Browser.
+- `darkweb` module: the Tor client service and torsocks.
+- Tor Browser on arm64 Linux, straight from the Tor Project and
+  signature-verified: the alpha for now, switching to stable automatically.
+- `docs/BREACH-DARKWEB.md`.
+
 ## [0.5.1] - 2026-10-26
 
 ### Fixed

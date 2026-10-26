@@ -11,7 +11,9 @@ ns-domain|Domain Recon|network-workgroup|Subdomains, DNS, crawling, archives, lo
 ns-media|Media Download|video-x-generic|Collect video, images, galleries and streams
 ns-metadata|Metadata|document-properties|View, export and strip file metadata
 ns-image|Image Analysis|image-x-generic|Reverse image search and EXIF/GPS
-ns-country|Country Search|applications-internet|Public-records searches for Canada, the US, UK, Europe, Asia-Pacific and more"
+ns-country|Country Search|applications-internet|Public-records searches for Canada, the US, UK, Europe, Asia-Pacific and more
+ns-breach|Breach Data|dialog-password|Breach and infostealer exposure for emails, usernames, domains and phones
+ns-darkweb|Dark Web|network-vpn|Tor connection check, onion search, text-only page capture, ransomware leak-site claims"
 
 ns_linux_launchers() {
   local apps="$HOME/.local/share/applications" id name icon desc
@@ -45,7 +47,8 @@ raw = subprocess.check_output(["gsettings", "get", "org.gnome.shell", "favorite-
 favs = ast.literal_eval(raw.replace("@as ", "").strip())
 favs = [f for f in favs if f != "ns-canada.desktop"]   # replaced by ns-country
 for app in ["northstar.desktop", "ns-username.desktop", "ns-domain.desktop", "ns-media.desktop",
-            "ns-metadata.desktop", "ns-image.desktop", "ns-country.desktop"]:
+            "ns-metadata.desktop", "ns-image.desktop", "ns-country.desktop",
+            "ns-breach.desktop", "ns-darkweb.desktop"]:
     if app not in favs:
         favs.append(app)
 subprocess.check_call(["gsettings", "set", "org.gnome.shell", "favorite-apps", str(favs)])
