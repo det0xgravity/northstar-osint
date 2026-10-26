@@ -4,6 +4,13 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project uses
 [Semantic Versioning](https://semver.org/).
 
+## [0.4.7] - 2026-10-26
+
+### Changed
+- GNOME in VMs: one fixed workspace instead of dynamic workspaces. Searches
+  that reused a browser window on the other workspace made the screen slide
+  there, which looked like the overview opening.
+
 ## [0.4.6] - 2026-10-26
 
 ### Fixed

@@ -83,7 +83,7 @@ Creates a private Python environment with Google's [libphonenumber](https://gith
 
 ## desktop
 
-- **Linux**: `.desktop` launchers for every menu in `~/.local/share/applications` (they show up in any desktop's app menu), plus GNOME dock favourites. On GNOME it also stops the Activities overview from opening at every login (the packaged *No overview at start-up* extension, where the distribution has it). In a VM it also turns off the top-left hot corner and the lone Super-key trigger. Otherwise the overview opens whenever the pointer leaves the VM window through that corner, or the host's ⌘/Windows key reaches the VM.
+- **Linux**: `.desktop` launchers for every menu in `~/.local/share/applications` (they show up in any desktop's app menu), plus GNOME dock favourites. On GNOME it also stops the Activities overview from opening at every login (the packaged *No overview at start-up* extension, where the distribution has it). In a VM it also uses a single fixed workspace, so the screen doesn't slide away when a search reuses a browser window on another workspace, and turns off the top-left hot corner and the lone Super-key trigger. Otherwise the overview opens whenever the pointer leaves the VM window through that corner, or the host's ⌘/Windows key reaches the VM.
 - **macOS**: `~/Applications/Northstar.app`.
 
 ## extras

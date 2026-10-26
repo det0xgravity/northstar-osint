@@ -89,7 +89,14 @@ gsettings set org.gnome.desktop.interface enable-hot-corners false
 gsettings set org.gnome.mutter overlay-key ''
 ```
 
-To undo them: **Settings → Multitasking → Hot Corner**, `gsettings reset org.gnome.mutter overlay-key`, and `gnome-extensions disable no-overview@fthx`. You can still open the overview with the dots at the top left, or Super+S.
+In VMs it also switches GNOME to **one fixed workspace**. With GNOME's default dynamic workspaces, a search that sends tabs to a browser window on another workspace makes the screen slide over to it. The "pill and dot" at the top left is the workspace indicator. To set this by hand:
+
+```bash
+gsettings set org.gnome.mutter dynamic-workspaces false
+gsettings set org.gnome.desktop.wm.preferences num-workspaces 1
+```
+
+To undo them: **Settings → Multitasking** (hot corner and workspaces), `gsettings reset org.gnome.mutter overlay-key`, and `gnome-extensions disable no-overview@fthx`. You can still open the overview with the dots at the top left, or Super+S.
 
 **Black screen when connecting over RDP**
 You're probably still logged in on the Proxmox console. Log out there first, since GNOME allows one session per user. Also check that `~/.xsession` names your desktop session.

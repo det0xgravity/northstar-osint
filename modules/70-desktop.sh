@@ -57,7 +57,9 @@ PY
 # corner on its way to the host's toolbar, and the host's Cmd/Windows key
 # reaches the guest as Super whenever you switch apps. Skip the login overview
 # (Debian's packaged "No overview at start-up" extension) and, in VMs only,
-# turn off the hot corner and the Super-key trigger.
+# turn off the hot corner and the Super-key trigger. Also in VMs, use a single
+# fixed workspace: with GNOME's dynamic workspaces, a search that reuses a
+# browser window on the other workspace makes the whole screen slide there.
 ns_gnome_tweaks() {
   ns_in_gnome_session || return 0
   local ext="no-overview@fthx" virt=""
@@ -82,6 +84,9 @@ PY
       && ns_info "Top-left hot corner off (VM) — re-enable in Settings → Multitasking"
     gsettings set org.gnome.mutter overlay-key '' \
       && ns_info "Super/Cmd key alone no longer opens the overview (VM) — undo: gsettings reset org.gnome.mutter overlay-key"
+    gsettings set org.gnome.mutter dynamic-workspaces false \
+      && gsettings set org.gnome.desktop.wm.preferences num-workspaces 1 \
+      && ns_info "One fixed workspace (VM) — undo: gsettings reset org.gnome.mutter dynamic-workspaces"
   fi
 }
 
