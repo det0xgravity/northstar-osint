@@ -38,6 +38,8 @@ System packages (git, curl, jq, Python, pipx, Go, whois, dig, zenity, clipboard 
 
 | Tool | Command | Purpose |
 |---|---|---|
+| [whisper-ctranslate2](https://github.com/Softcatala/whisper-ctranslate2) | `whisper-ctranslate2` | Offline speech-to-text and translation (used by `ns-video`) |
+| [Tesseract](https://github.com/tesseract-ocr/tesseract) / [OCRmyPDF](https://github.com/ocrmypdf/OCRmyPDF) | `tesseract`, `ocrmypdf` | Text recognition in images and scanned PDFs |
 | [monolith](https://github.com/Y2Z/monolith) | `monolith` | Saves a web page as one self-contained, isolated HTML file (used by `ns-archive`) |
 | [yt-dlp](https://github.com/yt-dlp/yt-dlp) | `yt-dlp` | Video/audio from thousands of sites |
 | [gallery-dl](https://github.com/mikf/gallery-dl) | `gallery-dl` | Image galleries and social posts |

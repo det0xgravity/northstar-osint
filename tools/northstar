@@ -14,6 +14,7 @@ while true; do
     "Capture web pages" \
     "Metadata" \
     "Image analysis" \
+    "Video verification" \
     "Country search" \
     "Breach data" \
     "Dark web" \
@@ -31,6 +32,7 @@ while true; do
     "Capture web pages")       ns-archive ;;
     "Metadata")                ns-metadata ;;
     "Image analysis")          ns-image ;;
+    "Video verification")      ns-video ;;
     "Country search")          ns-country ;;
     "Breach data")             ns-breach ;;
     "Dark web")                ns-darkweb ;;

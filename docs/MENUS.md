@@ -66,6 +66,19 @@ Evidence-grade web page capture. Each page gets its own folder:
 
 Options: capture one page, capture a list of URLs from a text file, or look up existing archived copies (Wayback, archive.today, Memento TimeTravel). The folder is sealed, you can record it as an exhibit straight away, and archive.today opens so you can add an independent public copy (it needs a CAPTCHA). Pages are fetched over your own connection: use a VPN if your work needs it.
 
+## ns-video
+
+Video verification, from a URL (downloaded with yt-dlp, plus its info JSON, description, thumbnail and comments) or a local file (copied with its timestamps, and the original's SHA-256 recorded).
+
+| Output | Contents |
+|---|---|
+| `frames/` | A frame at every scene change, and one every 10 seconds, for reverse image search |
+| `ffprobe.txt`, `mediainfo.txt`, `exif.txt` | Technical metadata: codecs, durations, creation tags, encoder |
+| `transcript/` | Offline transcript of the speech (whisper-ctranslate2, "small" model): text, subtitles (SRT/VTT), JSON with timings. Optional |
+| `translation/` | English translation, offered when the speech isn't English |
+
+Transcription runs entirely on your computer. The first time, it downloads a ~500 MB speech model; after that, nothing is sent anywhere. At the end, the reverse image search pages and the frames folder open so you can drag in the most distinctive frames.
+
 ## ns-metadata
 
 | Option | Runs | Output |
@@ -73,12 +86,14 @@ Options: capture one page, capture a list of URLs from a text file, or look up e
 | View metadata | exiftool for every selected file (plus mediainfo for audio/video). If GPS is present, the location opens in Maps. | `<file>.exif.txt`, `<file>.mediainfo.txt`, `<file>.gps.txt` |
 | Export folder to CSV | `exiftool -r -csv` | `metadata.csv` |
 | Make clean copies | Copies files, then strips metadata with mat2 (or exiftool) | Cleaned copies. **Originals are never modified.** |
+| Make a scanned PDF searchable | OCRmyPDF on a copy (pages that already have text are skipped) | `<name>.original.pdf`, `<name>.searchable.pdf`, `<name>.txt` |
 
 ## ns-image
 
 | Option | What happens |
 |---|---|
 | Reverse search an image URL | Opens Google Lens, Yandex, Bing and TinEye with the URL; saves a copy and its EXIF |
+| Read the text in images (OCR) | Tesseract on one or more images, in every installed language. Text goes to `<image>.txt`. On Debian, add languages with e.g. `sudo apt install tesseract-ocr-fra` |
 | Analyze a local image | Copies the image to the case, saves its EXIF and a SHA-256 hash, opens Maps if GPS is present, and opens reverse-search pages ready for drag-and-drop |
 
 ## ns-country

@@ -5,7 +5,8 @@
 
 choice=$(ui_list "Image analysis" \
   "Reverse search an image URL (Google Lens, Yandex, Bing, TinEye)" \
-  "Analyze a local image (EXIF, GPS, then reverse search)") || exit 0
+  "Analyze a local image (EXIF, GPS, then reverse search)" \
+  "Read the text in images (OCR)") || exit 0
 
 case "$choice" in
 "Reverse search an image URL"*)
@@ -37,6 +38,23 @@ This contacts the image's server from YOUR IP address (Tor isn't running). The r
       ns_audit image-download "$u" "copy downloaded${via:+ via Tor}"
     fi
   fi
+  ns_finish "$out" ;;
+
+"Read the text"*)
+  ns_cmd tesseract || { ui_error "Tesseract isn't installed: ./install.sh --only media"; exit 1; }
+  files=$(ui_files "Choose image(s)") || exit 0
+  out=$(ns_outdir ocr "images")
+  # Every installed language (Debian: add more with tesseract-ocr-<lang>, e.g. tesseract-ocr-fra)
+  langs=$(tesseract --list-langs 2>/dev/null | tail -n +2 | grep -v '^osd$' | paste -sd+ -)
+  while IFS= read -r f; do
+    [ -f "$f" ] || continue
+    base=$(basename "$f")
+    cp -p "$f" "$out/"
+    ns_run "$out" tesseract "$base" "${base%.*}" -l "${langs:-eng}" >/dev/null
+    printf '\n\033[1m=== %s ===\033[0m\n' "$base"; cat "$out/${base%.*}.txt" 2>/dev/null
+  done <<EOF
+$files
+EOF
   ns_finish "$out" ;;
 
 "Analyze a local image"*)

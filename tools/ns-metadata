@@ -7,9 +7,22 @@
 choice=$(ui_list "Metadata" \
   "View metadata of one or more files" \
   "Export metadata for a whole folder to CSV" \
-  "Make clean copies with metadata removed") || exit 0
+  "Make clean copies with metadata removed" \
+  "Make a scanned PDF searchable (OCR)") || exit 0
 
 case "$choice" in
+"Make a scanned PDF"*)
+  ns_cmd ocrmypdf || { ui_error "OCRmyPDF isn't installed: ./install.sh --only media"; exit 1; }
+  f=$(ui_files "Choose a PDF") || exit 0
+  f=$(printf '%s\n' "$f" | head -1)
+  [ -f "$f" ] || exit 0
+  base=$(basename "$f" .pdf)
+  out=$(ns_outdir ocr "$base")
+  cp -p "$f" "$out/$base.original.pdf"
+  # The original is kept; the searchable copy and a plain-text version sit beside it
+  ns_run "$out" ocrmypdf --skip-text --sidecar "$base.txt" -- "$base.original.pdf" "$base.searchable.pdf"
+  ns_finish "$out"
+  exit 0 ;;
 View*)
   files=$(ui_files "Choose file(s) to inspect") || exit 0
   out=$(ns_outdir metadata "inspect")

@@ -98,6 +98,7 @@ northstar                # main menu
 ├── Capture web pages    # ns-archive
 ├── Metadata             # ns-metadata
 ├── Image analysis       # ns-image
+├── Video verification   # ns-video
 ├── Country search       # ns-country
 ├── Breach data          # ns-breach
 ├── Dark web             # ns-darkweb

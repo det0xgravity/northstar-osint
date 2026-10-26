@@ -4,6 +4,19 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project uses
 [Semantic Versioning](https://semver.org/).
 
+## [0.12.0] - 2026-10-26
+
+Phase 4a of the review: video verification and OCR.
+
+### Added
+- `ns-video` (main menu: Video verification): download a video with its
+  metadata (or take a local file), extract scene-change and 10-second
+  keyframes, and transcribe and translate its speech offline
+  (whisper-ctranslate2), then open reverse image search.
+- OCR: "Read the text in images" in Image analysis (Tesseract) and "Make a
+  scanned PDF searchable" in Metadata (OCRmyPDF, with a plain-text copy).
+- `media` module installs tesseract-ocr, ocrmypdf and whisper-ctranslate2.
+
 ## [0.11.0] - 2026-10-26
 
 Phase 3 of the review: web page capture.
