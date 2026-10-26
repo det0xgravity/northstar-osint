@@ -109,7 +109,7 @@ All of it is cloned from the official repositories and updated by `ns-update`. Y
 | Tool | Purpose |
 |---|---|
 | [KeePassXC](https://keepassxc.org) | Store sock-puppet credentials inside the workstation |
-| [Flameshot](https://flameshot.org) | Annotated screenshots: Print Screen on GNOME, and clicking it in the app list opens the capture straight away |
+| [Flameshot](https://flameshot.org) | Annotated screenshots. Starts at login as a tray icon (click it to capture); Print Screen captures directly on GNOME |
 | [OBS Studio](https://obsproject.com) | Screen recording (Flatpak; Debian's package on arm64 Linux) |
 
 ## vm *(Linux only)*

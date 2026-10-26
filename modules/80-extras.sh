@@ -23,35 +23,28 @@ ns_flameshot_printkey() {
   ns_info "Print Screen now opens Flameshot"
 }
 
-# Clicking Flameshot in the app list only starts it in the background (a tray
-# icon), which looks like nothing happened. A same-named entry in the user's
-# applications folder overrides the system one: clicking now takes a screenshot.
-ns_flameshot_launcher() {
-  local apps="$HOME/.local/share/applications"
+# Flameshot runs in standby as a tray icon (GNOME's tray comes from the
+# AppIndicator extension enabled by the desktop module). Start it at login so
+# it's always ready; Print Screen opens the capture directly.
+ns_flameshot_tray() {
+  local apps="$HOME/.local/share/applications" auto="$HOME/.config/autostart"
   ns_has flameshot || return 0
-  mkdir -p "$apps"
-  cat > "$apps/org.flameshot.Flameshot.desktop" <<'EOF'
+  # v0.6.1 overrode the app-list entry to capture immediately; restore the
+  # standard one, which starts Flameshot in the tray
+  grep -q 'northstar' "$apps/org.flameshot.Flameshot.desktop" 2>/dev/null \
+    && rm -f "$apps/org.flameshot.Flameshot.desktop"
+  mkdir -p "$auto"
+  cat > "$auto/org.flameshot.Flameshot.desktop" <<'EOF'
 [Desktop Entry]
 Type=Application
 Name=Flameshot
-GenericName=Screenshot tool
-Comment=Take an annotated screenshot (northstar: opens the capture straight away)
-Exec=flameshot gui
+Comment=Screenshot tool in the tray (started at login by northstar-osint)
+Exec=flameshot
 Icon=org.flameshot.Flameshot
 Terminal=false
-Categories=Graphics;Utility;
-Keywords=screenshot;screen;capture;
-Actions=Launcher;Config;
-
-[Desktop Action Launcher]
-Name=Open the capture launcher (delay, full screen)
-Exec=flameshot launcher
-
-[Desktop Action Config]
-Name=Settings
-Exec=flameshot config
+X-GNOME-Autostart-enabled=true
 EOF
-  ns_info "Flameshot in the app list now takes a screenshot straight away"
+  ns_info "Flameshot starts in the tray at login (Print Screen captures; remove ~/.config/autostart/org.flameshot.Flameshot.desktop to stop)"
 }
 
 mod_extras() {
@@ -65,7 +58,7 @@ mod_extras() {
     else
       ns_flatpak com.obsproject.Studio || rc=1
     fi
-    ns_flameshot_launcher
+    ns_flameshot_tray
     ns_flameshot_printkey || rc=1
   fi
   return $rc

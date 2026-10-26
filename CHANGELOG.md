@@ -4,6 +4,13 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project uses
 [Semantic Versioning](https://semver.org/).
 
+## [0.7.1] - 2026-10-26
+
+### Changed
+- Flameshot goes back to standby in the tray when clicked (the 0.6.1 entry
+  that captured immediately is removed), and now starts at login. Print
+  Screen still captures directly.
+
 ## [0.7.0] - 2026-10-26
 
 ### Added

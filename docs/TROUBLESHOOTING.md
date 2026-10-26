@@ -108,7 +108,7 @@ gsettings set org.gnome.desktop.wm.preferences num-workspaces 1
 To undo them: **Settings → Multitasking** (hot corner and workspaces), `gsettings reset org.gnome.mutter overlay-key`, and `gnome-extensions disable no-overview@fthx`. You can still open the overview with the dots at the top left, or Super+S.
 
 **Clicking Flameshot does nothing**
-Before v0.6.1, clicking Flameshot only started it in the background, waiting in the system tray, and GNOME has no tray by default. Now clicking it opens the capture directly (or press Print Screen). After `ns-update`, log out and back in: GNOME then also shows tray icons for Flameshot and KeePassXC.
+Flameshot runs in standby as an icon in the top bar, and GNOME needs the AppIndicator extension to show tray icons. northstar enables it; log out and back in after `ns-update` to see the icon. Flameshot also starts at login. Click its icon, or press Print Screen, to capture. If it ever stops responding: `pkill flameshot`, then start it again.
 
 **The prompt shows squares or question marks instead of icons**
 The terminal isn't using the MesloLGS NF font. Run `ns-update` from inside the desktop session, or set the font by hand in your terminal's preferences: **MesloLGS NF**, size 11. Then open a new terminal.
