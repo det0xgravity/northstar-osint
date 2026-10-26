@@ -4,6 +4,19 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project uses
 [Semantic Versioning](https://semver.org/).
 
+## [0.11.0] - 2026-10-26
+
+Phase 3 of the review: web page capture.
+
+### Added
+- `ns-archive` (main menu: Capture web pages): per page, an isolated
+  single-file copy (monolith `-I`), a full-page screenshot, response headers,
+  UTC time, final URL, server IP, the domain's RDAP record and a Wayback
+  request with its real result; one page or a list. Sealed, with an offer to
+  record an exhibit; archive.today opened for an independent public copy.
+  Also looks up existing copies (Wayback, archive.today, Memento).
+- monolith in the `media` module (release binary on Linux, Homebrew on macOS).
+
 ## [0.10.1] - 2026-10-26
 
 ### Added

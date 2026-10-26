@@ -11,6 +11,7 @@ while true; do
     "Username & email" \
     "Domain & infrastructure" \
     "Media download" \
+    "Capture web pages" \
     "Metadata" \
     "Image analysis" \
     "Country search" \
@@ -27,6 +28,7 @@ while true; do
     "Username & email")        ns-username ;;
     "Domain & infrastructure") ns-domain ;;
     "Media download")          ns-media ;;
+    "Capture web pages")       ns-archive ;;
     "Metadata")                ns-metadata ;;
     "Image analysis")          ns-image ;;
     "Country search")          ns-country ;;

@@ -95,6 +95,7 @@ northstar                # main menu
 ├── Username & email     # ns-username
 ├── Domain & infrastructure  # ns-domain
 ├── Media download       # ns-media
+├── Capture web pages    # ns-archive
 ├── Metadata             # ns-metadata
 ├── Image analysis       # ns-image
 ├── Country search       # ns-country

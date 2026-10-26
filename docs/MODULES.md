@@ -38,6 +38,7 @@ System packages (git, curl, jq, Python, pipx, Go, whois, dig, zenity, clipboard 
 
 | Tool | Command | Purpose |
 |---|---|---|
+| [monolith](https://github.com/Y2Z/monolith) | `monolith` | Saves a web page as one self-contained, isolated HTML file (used by `ns-archive`) |
 | [yt-dlp](https://github.com/yt-dlp/yt-dlp) | `yt-dlp` | Video/audio from thousands of sites |
 | [gallery-dl](https://github.com/mikf/gallery-dl) | `gallery-dl` | Image galleries and social posts |
 | [Instaloader](https://github.com/instaloader/instaloader) | `instaloader` | Instagram profiles, posts, stories |

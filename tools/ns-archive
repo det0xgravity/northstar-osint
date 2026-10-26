@@ -1,0 +1,113 @@
+#!/usr/bin/env bash
+# ns-archive — capture web pages as evidence: an isolated single-file copy
+# (monolith), a full-page screenshot (gowitness), response headers, the domain's
+# RDAP record and a Wayback Machine request, all sealed with hashes and UTC times.
+# shellcheck source=../lib/ui.sh
+. "${NS_HOME:-$HOME/.local/share/northstar}/lib/ui.sh"
+
+# capture_url <url> <dir>
+capture_url() {
+  local url="$1" d="$2" host r code
+  mkdir -p "$d"
+  host=$(printf '%s' "$url" | sed -E 's#^[a-zA-Z]+://##; s#[/:?#].*$##')
+  printf '%s\n' "$url" > "$d/source_url.txt"
+  printf 'Captured (UTC): %s\n' "$(date -u '+%Y-%m-%d %H:%M:%S')" > "$d/capture.txt"
+  echo "== $url"
+
+  # Response headers, final URL after redirects, and the server's IP
+  r=$(curl -sS -L --max-time 60 -A "Mozilla/5.0" -D "$d/headers.txt" -o /dev/null \
+        -w '%{http_code}\t%{url_effective}\t%{remote_ip}' -- "$url" 2>&1)
+  ns_audit curl "$host" "headers: $url"
+  printf 'HTTP status: %s\nFinal URL: %s\nServer IP: %s\n' "$(printf '%s' "$r" | cut -f1)" \
+    "$(printf '%s' "$r" | cut -f2)" "$(printf '%s' "$r" | cut -f3)" | tee -a "$d/capture.txt"
+
+  # Single-file copy, isolated: opening it later can't contact the internet
+  if ns_cmd monolith; then
+    ns_run "$d" monolith -I -e -t 60 -o page.html -- "$url" >/dev/null
+    [ -s "$d/page.html" ] && echo "  page.html saved (isolated single-file copy)"
+  else
+    echo "  [skip] monolith isn't installed (./install.sh --only media)"
+  fi
+
+  # Full-page screenshot
+  if ns_cmd gowitness; then
+    ns_run "$d" gowitness scan single --url "$url" -s . --screenshot-fullpage --write-jsonl >/dev/null
+  else
+    echo "  [skip] gowitness isn't installed (./install.sh --only domain)"
+  fi
+
+  # Who held the domain at capture time
+  if printf '%s' "$host" | grep -Eq '^[A-Za-z0-9.-]+\.[A-Za-z]{2,}$' &&
+     curl -fsSL --max-time 30 "https://rdap.org/domain/$host" -o "$d/rdap.json" 2>/dev/null; then
+    ns_audit rdap "$host" "https://rdap.org/domain/$host"
+  else
+    rm -f "$d/rdap.json"
+  fi
+
+  # Ask the Wayback Machine for an independent copy, and record what it said
+  r=$(curl -s -o /dev/null --max-time 120 -w '%{http_code} %{redirect_url}' -A "northstar-osint" \
+        "https://web.archive.org/save/$url")
+  code=${r%% *}
+  case "$code" in
+    2*|3*) printf 'Wayback: %s\n' "${r#* }" ;;
+    429)   printf 'Wayback: rate-limited (HTTP 429), not captured\n' ;;
+    *)     printf 'Wayback: failed (HTTP %s)\n' "${code:-no response}" ;;
+  esac | tee -a "$d/capture.txt"
+  ns_audit wayback "$url" "save request: HTTP ${code:-none}"
+}
+
+valid_url() { case "$1" in http://*|https://*) return 0 ;; esac; return 1; }
+
+choice=$(ui_list "Capture web pages" \
+  "Capture one page" \
+  "Capture a list of URLs (text file, one per line)" \
+  "Look up existing archived copies of a URL") || exit 0
+
+case "$choice" in
+  "Capture one page")
+    url=$(ui_entry "Page URL (https://…):") || exit 0
+    valid_url "$url" || { ui_error "Enter a full web address starting with https://"; exit 1; }
+    ui_info "The page is fetched from this computer's internet connection (use a VPN if your work needs it).
+
+Click OK to capture it." || true
+    out=$(ns_outdir capture "$(printf '%s' "$url" | sed -E 's#^[a-zA-Z]+://##; s#/.*$##')")
+    capture_url "$url" "$out"
+    set_one="$url" ;;
+
+  "Capture a list"*)
+    f=$(ui_files "Text file with one URL per line") || exit 0
+    f=$(printf '%s\n' "$f" | head -1)
+    [ -f "$f" ] || exit 0
+    out=$(ns_outdir capture "$(basename "$f")")
+    cp "$f" "$out/urls.txt"
+    n=0
+    while IFS= read -r url || [ -n "$url" ]; do
+      url=$(printf '%s' "$url" | tr -d '\r' | sed 's/^[[:space:]]*//; s/[[:space:]]*$//')
+      valid_url "$url" || continue
+      n=$((n+1))
+      capture_url "$url" "$out/$(printf '%03d' "$n")_$(ns_slug "$(printf '%s' "$url" | sed -E 's#^[a-zA-Z]+://##')")"
+    done < "$out/urls.txt"
+    echo "$n pages captured." ;;
+
+  "Look up"*)
+    url=$(ui_entry "URL:") || exit 0
+    valid_url "$url" || { ui_error "Enter a full web address starting with https://"; exit 1; }
+    ns_audit archive-lookup "$url" "Wayback, archive.today, Memento"
+    ui_open "https://web.archive.org/web/*/$url" "https://archive.ph/$url" \
+            "https://timetravel.mementoweb.org/list/0/$url"
+    exit 0 ;;
+esac
+
+# Seal, then offer to record it as an exhibit straight away
+ns_seal_result "$out" >/dev/null
+mkdir -p "$NS_CONF" && printf '%s\n' "$out" > "$NS_CONF/last_result"
+if ui_question "Capture sealed (manifest.sha256 + provenance.json).
+
+Record it as an exhibit in case $(ns_case) now?"; then
+  desc=$(ui_entry "Short description of this exhibit:" "Web capture of ${set_one:-$(basename "$out")}") || desc=""
+  [ -n "$desc" ] && { r=$(ns_evidence exhibit "$(ns_case_dir)" "$out" "$desc"); echo "$r"
+                      ns_audit ns-evidence "$(basename "$out")" "exhibit: $(printf '%s' "$r" | head -1)"; }
+fi
+# archive.today needs a CAPTCHA, so it's opened for you to finish by hand
+[ -n "${set_one:-}" ] && ui_open "https://archive.ph/?url=$(ns_enc "$set_one")"
+ns_finish "$out"

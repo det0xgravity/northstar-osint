@@ -9,6 +9,7 @@ NS_LAUNCHERS="northstar|Northstar|system-search|All northstar OSINT menus
 ns-username|Username & Email|avatar-default|Find accounts by username or email
 ns-domain|Domain Recon|network-workgroup|Subdomains, DNS, crawling, archives, lookalikes
 ns-media|Media Download|video-x-generic|Collect video, images, galleries and streams
+ns-archive|Capture Web Pages|document-save|Evidence-grade page captures: single-file copy, screenshot, headers, Wayback
 ns-metadata|Metadata|document-properties|View, export and strip file metadata
 ns-image|Image Analysis|image-x-generic|Reverse image search and EXIF/GPS
 ns-country|Country Search|applications-internet|Public-records searches for Canada, the US, UK, Europe, Asia-Pacific and more

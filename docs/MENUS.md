@@ -53,6 +53,19 @@ You can paste a full URL as the domain. The scheme, path and `www.` are stripped
 
 Addresses must start with `http://` or `https://`, so nothing typed in can be mistaken for a command-line option.
 
+## ns-archive
+
+Evidence-grade web page capture. Each page gets its own folder:
+
+| File | Contents |
+|---|---|
+| `page.html` | Single-file copy (monolith), **isolated**: opening it can't contact the internet |
+| `screenshot*.jpeg`, `gowitness.jsonl` | Full-page screenshot and its details (gowitness) |
+| `headers.txt`, `capture.txt` | Response headers; UTC capture time, HTTP status, final URL after redirects, server IP, Wayback result |
+| `rdap.json` | Who held the domain at capture time |
+
+Options: capture one page, capture a list of URLs from a text file, or look up existing archived copies (Wayback, archive.today, Memento TimeTravel). The folder is sealed, you can record it as an exhibit straight away, and archive.today opens so you can add an independent public copy (it needs a CAPTCHA). Pages are fetched over your own connection: use a VPN if your work needs it.
+
 ## ns-metadata
 
 | Option | Runs | Output |

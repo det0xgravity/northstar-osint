@@ -259,6 +259,7 @@ ns_run() {
 # ns_seal_result <outdir>   hash every file into manifest.sha256 + provenance.json
 ns_seal_result() {
   ns_cmd ns_evidence || return 0
+  [ -f "$1/manifest.sha256" ] && return 0      # sealed once: an exhibit's fingerprint must stay valid
   ns_evidence seal "$1" "$(cat "$NS_HOME/VERSION" 2>/dev/null || echo unknown)" 2>/dev/null \
     && ns_audit ns-evidence "$(basename "$1")" "sealed: $(ns_hash_file "$1/manifest.sha256")"
 }
