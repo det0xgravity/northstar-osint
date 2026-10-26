@@ -39,6 +39,10 @@ Recording an exhibit can also create `manifest.sha256.ots`: a proof, anchored in
 - The proof completes after a few hours. Run `ots upgrade manifest.sha256.ots` in the folder later to make it self-contained.
 - To verify it, open [opentimestamps.org](https://opentimestamps.org) and drop in `manifest.sha256` and its `.ots` file. Verifying it locally needs a Bitcoin node, which northstar doesn't install.
 
+## Notes and reports
+
+Case notes (**Case → Add a note**) are chained the same way as the audit log, and **Case → Build a report** pulls the exhibit list, with each exhibit's fingerprint, into the report. See [MENUS.md](MENUS.md#ns-case).
+
 ## Good practice
 
 - **Seal before you analyse.** Record important captures as exhibits straight away, then work on copies.

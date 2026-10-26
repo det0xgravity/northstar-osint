@@ -125,6 +125,19 @@ Tor connection check, onion search (Ahmia), text-only capture of an onion page, 
 
 Add, check or remove API keys (Have I Been Pwned, Intelligence X, DeHashed, LeakCheck). Keys are typed into a hidden field, stored in `~/.config/northstar/keys.env` (readable only by you), and never logged.
 
+## ns-case
+
+Case records (main menu: **Case: notes, details, report, close**; **Switch / create case** opens the same flow).
+
+| Option | What it does | Output (in the case folder) |
+|---|---|---|
+| Open or switch case | A new case asks for its intake details: client or matter reference, who authorised it, purpose and lawful basis, scope and subjects, review or retention date. An existing case is switched to, never overwritten | `case.json`, `scope.md` |
+| Add a note | A contemporaneous note, saved with the UTC time and operator, and hash-chained so later edits show | `notes.md` |
+| Case details | Shows the intake record and status | |
+| Build a report | A Word document (pandoc): case details, a Summary for your findings, methodology (the tools and sources actually used, from the audit log), the exhibit list with fingerprints, notes, and the audit log as an appendix | `reports/report_<UTC>.docx` (and its `.md` source) |
+| Verify notes and audit log | Checks both hash chains | |
+| Close this case | Verifies the audit log, exports the case with a SHA-256 to `~/Northstar/Exports`, and marks it closed. Nothing is deleted | `case.json` status |
+
 ## ns-evidence
 
 Record result folders as numbered exhibits (optional OpenTimestamps proof), verify folders and the audit log's hash chain, list exhibits, and export the case with a SHA-256. Every result folder is sealed automatically when a search finishes. See [EVIDENCE.md](EVIDENCE.md).

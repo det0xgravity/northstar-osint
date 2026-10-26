@@ -21,6 +21,7 @@ while true; do
     "Dark web" \
     "Evidence & exhibits" \
     "API keys" \
+    "Case: notes, details, report, close" \
     "Switch / create case  (current: $case_name)" \
     "Open latest results" \
     "Open case folder" \
@@ -40,13 +41,8 @@ while true; do
     "Dark web")                ns-darkweb ;;
     "Evidence & exhibits")     ns-evidence ;;
     "API keys")                ns-keys ;;
-    "Switch / create case"*)
-      new=$(ui_entry "Case name (letters, numbers, dashes):" "$case_name") || continue
-      ns_set_case "$new"
-      ns_audit northstar "$(ns_case)" "case activated"
-      ui_info "Active case: $(ns_case)
-Results will be saved under:
-$NS_DATA/Cases/$(ns_case)" ;;
+    "Case:"*)                  ns-case ;;
+    "Switch / create case"*)   ns-case open ;;
     "Open latest results")
       last=$(cat "$NS_CONF/last_result" 2>/dev/null)
       if [ -n "$last" ] && [ -d "$last" ]; then ui_reveal "$last"; else ui_reveal "$(ns_case_dir)"; fi ;;

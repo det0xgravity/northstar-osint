@@ -1,0 +1,92 @@
+#!/usr/bin/env bash
+# ns-case — case records: open a case with an intake record (reference,
+# authority, lawful basis, scope, review date), take contemporaneous notes,
+# build a report, and close the case.
+# Usage: ns-case [open]   ("open" goes straight to opening/switching a case)
+# shellcheck source=../lib/ui.sh
+. "${NS_HOME:-$HOME/.local/share/northstar}/lib/ui.sh"
+
+open_case() {
+  local new name dir js
+  new=$(ui_entry "Case name (letters, numbers, dashes). An existing name switches to that case:" "$(ns_case)") || return 1
+  name=$(ns_slug "$new")
+  dir="$NS_DATA/Cases/$name"
+  ns_set_case "$name"
+  if [ -f "$dir/case.json" ]; then
+    ns_audit northstar "$name" "case activated"
+    ui_info "Active case: $name
+
+$(ns_casework show "$dir")"
+    return 0
+  fi
+  ui_question "Record the intake details for case \"$name\" now?
+
+(reference, who authorised it, purpose and lawful basis, scope, review date)" || {
+    ns_audit northstar "$name" "case activated (no intake record)"; return 0; }
+  js=$(python3 - "$(ui_entry "Client or matter reference:" || true)" \
+                 "$(ui_entry "Authorised by (name, role):" || true)" \
+                 "$(ui_entry "Purpose and lawful basis:" || true)" \
+                 "$(ui_entry "Scope and subjects (who or what, and what's out of scope):" || true)" \
+                 "$(ui_entry "Review or retention date (YYYY-MM-DD):" || true)" <<'PY'
+import json, sys
+keys = ["reference", "authorised_by", "purpose", "scope", "review_date"]
+print(json.dumps(dict(zip(keys, sys.argv[1:]))))
+PY
+)
+  printf '%s' "$js" | ns_casework init "$dir" >/dev/null
+  ns_audit northstar "$name" "case opened with intake record"
+  ui_info "Case $name opened.
+
+$(ns_casework show "$dir")"
+}
+
+[ "${1:-}" = open ] && { open_case; exit 0; }
+
+case_dir=$(ns_case_dir)
+choice=$(ui_list "Case: $(ns_case)" \
+  "Add a note" \
+  "Open or switch case" \
+  "Case details" \
+  "Build a report (Word document)" \
+  "Verify notes and audit log" \
+  "Close this case (verify, export, mark closed)") || exit 0
+
+case "$choice" in
+  "Add a note")
+    t=$(ui_entry "Note (saved with the UTC time; it can't be edited later without it showing):") || exit 0
+    ns_casework note "$case_dir" "$t" >/dev/null && ns_audit ns-case "note" "note added"
+    ui_notify "Note saved to case $(ns_case)" ;;
+  "Open or switch"*)
+    open_case ;;
+  "Case details")
+    r=$(ns_casework show "$case_dir"); printf '%s\n' "$r"; ui_info "$r" ;;
+  "Build a report"*)
+    ns_cmd pandoc || { ui_error "pandoc isn't installed: ./install.sh --only core"; exit 1; }
+    mkdir -p "$case_dir/reports"
+    base="$case_dir/reports/report_$(date -u '+%Y%m%dT%H%M%SZ')"
+    ns_casework report "$case_dir" "$base.md" >/dev/null
+    pandoc "$base.md" -o "$base.docx" && ns_audit ns-case "report" "$(basename "$base").docx built"
+    ui_info "Report built: $base.docx
+
+It has the case details, methodology (tools used, from the audit log), exhibits, notes and the audit log as an appendix. Write your findings in the Summary section." || true
+    ui_reveal "$case_dir/reports" ;;
+  "Verify"*)
+    r="Notes: $(ns_casework notes-verify "$case_dir" | head -1)
+Audit log: $(ns_evidence audit-verify "$case_dir/audit.log" | head -1)"
+    printf '%s\n' "$r"; ui_info "$r" ;;
+  "Close"*)
+    ui_question "Close case $(ns_case)?
+
+The audit log is verified, the whole case is exported with a SHA-256 to ~/Northstar/Exports, and the case is marked closed. Nothing is deleted." || exit 0
+    v=$(ns_evidence audit-verify "$case_dir/audit.log" | head -1)
+    e=$(ns_evidence export "$case_dir" "$NS_DATA/Exports")
+    ns_audit ns-case "close" "audit: $v; $(printf '%s' "$e" | tail -1)"
+    ns_casework close "$case_dir" >/dev/null
+    r="Case $(ns_case) closed.
+
+Audit log: $v
+$e
+
+Delete the working copy when your retention rules allow."
+    printf '%s\n' "$r"; ui_info "$r"; ui_reveal "$NS_DATA/Exports" ;;
+esac

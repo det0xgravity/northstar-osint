@@ -8,11 +8,11 @@ mod_core() {
   local rc=0
 
   if ns_is_macos; then
-    ns_brew git jq python pipx go || rc=1
+    ns_brew git jq python pipx go pandoc || rc=1
   else
     ns_apt git curl jq unzip ca-certificates python3 python3-venv python3-pip \
            pipx golang-go whois bind9-dnsutils xdg-utils zenity \
-           wl-clipboard xclip libnotify-bin flatpak file || rc=1
+           wl-clipboard xclip libnotify-bin flatpak file pandoc || rc=1
   fi
 
   pipx ensurepath >/dev/null 2>&1 || true
@@ -40,6 +40,7 @@ mod_core() {
   install -m 755 "$NS_REPO/lib/ns_breach.py" "$NS_BIN/ns_breach"
   install -m 755 "$NS_REPO/lib/ns_darkweb.py" "$NS_BIN/ns_darkweb"
   install -m 755 "$NS_REPO/lib/ns_evidence.py" "$NS_BIN/ns_evidence"
+  install -m 755 "$NS_REPO/lib/ns_case.py" "$NS_BIN/ns_casework"
   cp "$NS_REPO"/config/*.json "$NS_REPO"/config/*.txt "$NS_HOME/config/" 2>/dev/null
   rm -f "$NS_HOME"/config/countries/*.json      # drop packs removed upstream
   cp "$NS_REPO"/config/countries/*.json "$NS_HOME/config/countries/"

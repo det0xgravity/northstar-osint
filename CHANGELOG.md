@@ -4,6 +4,19 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project uses
 [Semantic Versioning](https://semver.org/).
 
+## [0.14.0] - 2026-10-26
+
+Phase 4c of the review: case intake, notes and reports.
+
+### Added
+- `ns-case` (main menu: Case): intake record for new cases (reference,
+  authority, purpose and lawful basis, scope, review date) in `case.json` and
+  `scope.md`; hash-chained contemporaneous notes (`notes.md`); a Word report
+  built with pandoc (case details, methodology from the audit log, exhibits
+  with fingerprints, notes, audit appendix); verification of notes and the
+  audit log; closing a case (verify, export with SHA-256, mark closed).
+- pandoc in the `core` module.
+
 ## [0.13.0] - 2026-10-26
 
 Phase 4b of the review: Telegram.

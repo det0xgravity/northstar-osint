@@ -25,7 +25,7 @@ Most OSINT build scripts are a long list of commands that break silently when on
 | | |
 |---|---|
 | **Menus** | `northstar` main menu plus `ns-username`, `ns-domain`, `ns-media`, `ns-metadata`, `ns-image`, `ns-country`, `ns-breach`, `ns-darkweb` and `ns-keys`. Dialogs use zenity on Linux and native dialogs on macOS. |
-| **Cases & audit trail** | Results are saved under `~/Northstar/Cases/<case>/` (private: only your account can read it), and every action is logged with a timestamp to that case's `audit.log`. |
+| **Cases & audit trail** | Each case has an intake record (reference, authority, lawful basis, scope, review date), hash-chained contemporaneous notes and a one-click Word report. Results are saved under `~/Northstar/Cases/<case>/` (private: only your account can read it), and every action is logged to that case's `audit.log`. |
 | **Countries** | `ns-country`: people, business, phone, property, courts, financial/regulatory, political and transport searches tailored to each country's public records: Canada, the US, UK, Ireland, Australia, New Zealand, Germany, France, the Netherlands, Spain, Italy, Singapore, Malaysia, the Philippines, Thailand, Indonesia and Vietnam, plus an International pack (sanctions, leaks, vessels, aircraft, crypto). Phone analysis for every country, and 250+ curated registry bookmarks. Adding a country is one JSON file. |
 | **Browsers** | Firefox, Brave, Tor Browser and Mullvad Browser. OSINT extensions and a managed bookmarks folder are delivered through **browser policy**, so they apply to every profile and every clone. |
 | **Evidence** | Every result folder is sealed with a SHA-256 manifest and provenance (UTC time, operator, tool versions); `audit.log` is hash-chained so edits show; `ns-evidence` records numbered exhibits (optional OpenTimestamps proof), verifies folders and the log, and exports a case with a checksum. |
@@ -106,6 +106,7 @@ northstar                # main menu
 ├── Dark web             # ns-darkweb
 ├── Evidence & exhibits  # ns-evidence
 ├── API keys             # ns-keys
+├── Case: notes, details, report, close   # ns-case
 ├── Switch / create case
 ├── Open latest results
 ├── Open case folder
