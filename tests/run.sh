@@ -19,7 +19,7 @@ H="$W/home"; mkdir -p "$H/lib" "$H/bin" "$H/config" "$W/data" "$W/conf"
 cp "$R/lib/ui.sh" "$R/lib/ns_country.py" "$H/lib/"
 cp "$R/config/ctf-categories.txt" "$H/config/"
 cp -R "$R/config/countries" "$H/config/"
-for e in breach darkweb evidence doctor missing watch; do ln -s "$R/lib/ns_$e.py" "$H/bin/ns_$e"; done
+for e in breach darkweb evidence doctor missing watch casemap; do ln -s "$R/lib/ns_$e.py" "$H/bin/ns_$e"; done
 ln -s "$R/lib/ns_case.py" "$H/bin/ns_casework"
 export NS_HOME="$H" NS_DATA="$W/data" XDG_CONFIG_HOME="$W/xdg" NS_UI=script NS_UI_ANSWERS="$W/answers"
 export PATH="$H/bin:$PATH"
@@ -173,6 +173,18 @@ check "first check is a baseline, unchanged page is quiet" "grep -q 'baseline re
 check "a change is detected with its new line" "grep -q 'rc 10' '$W/watch.txt' && grep -q 'safe in Kingston' '$CASE/watch/changes.log'"
 check "snapshot and diff kept" "[ \"\$(ls '$CASE'/watch/W001/*.txt | wc -l)\" -eq 2 ] && ls '$CASE'/watch/W001/*.diff >/dev/null"
 check "audit log chain intact" "python3 '$R/lib/ns_evidence.py' audit-verify '$CASE/audit.log' | grep -q ' 0 BROKEN'"
+
+section "Case map"
+mkdir -p "$CASE/geo/run1"
+printf 'rank,lat,lon,probability\n1,45.42,-75.69,0.3\n2,43.65,-79.38,0.2\n' > "$CASE/geo/run1/geoclip.csv"
+menu ns-map "Add a place" "sighting" "45.4215, -75.6972" "Rideau Centre <b>" ""
+menu ns-map "Add a place" "home" "95, 10" "Bad" ""
+check "places recorded, bad coordinates refused" "grep -q 'Rideau Centre' '$CASE/map/places.csv' && ! grep -q 'Bad' '$CASE/map/places.csv'"
+menu ns-map "Build" "no"
+md=$(find "$CASE/map" -mindepth 1 -maxdepth 1 -type d | head -1)
+check "map built from places and GeoCLIP estimates" "grep -q '1 sighting, [0-9]* AI estimate' '$W/out.txt' && [ -s '$md/case.kml' ]"
+check "GeoJSON valid, every point present" "python3 -c 'import json,sys; f=json.load(open(sys.argv[1]))[\"features\"]; assert len(f) >= 3 and any(x[\"properties\"][\"kind\"] == \"sighting\" for x in f)' '$md/case.geojson'"
+check "labels escaped in the map page" "grep -q 'Rideau Centre &lt;b&gt;' '$md/map.html' && ! grep -q 'Rideau Centre <b>' '$md/map.html'"
 
 section "Installer module selection"
 I="$W/inst"; mkdir -p "$I/modules" "$I/bin" "$I/home"

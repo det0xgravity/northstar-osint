@@ -142,6 +142,18 @@ Page monitoring: watch public pages (a subject's profile, a `t.me/s/<channel>` p
 
 Everything is kept in the case's `watch/` folder: `watches.json`, a text snapshot and a diff for every change under `watch/<ID>/` (UTC file names), and `changes.log`. Every baseline and change is also written to the hash-chained `audit.log`. Checks come from your own connection, so keep the number of watched pages and the frequency modest.
 
+## ns-map
+
+Every coordinate in the active case on one map.
+
+| Source | Shown as |
+|---|---|
+| Places you record with **Add a place** (last seen, sighting, home, work or school, vehicle, other), by address or `lat, lon` | Coloured by kind; "last seen" is pre-filled from the missing-person profile |
+| GPS in photo and video metadata anywhere in the case (exiftool) | photo GPS, with the camera-clock time |
+| GeoCLIP's top three estimates from each Photo geolocation run, named from `places.json` | AI estimate |
+
+**Build the case map** writes `case.geojson` and `case.kml` (open them offline in QGIS or Google Earth Pro), `points.csv`, and `map.html`, an interactive map with a layer for each kind. Opening `map.html` loads Leaflet from unpkg (pinned and integrity-checked) and map tiles from CARTO or OpenStreetMap, so those services see which areas you view; the menu asks first. Address lookups use OpenStreetMap Nominatim and are logged in the audit log. Recorded places are kept in the case's `map/places.csv`.
+
 ## ns-metadata
 
 | Option | Runs | Output |

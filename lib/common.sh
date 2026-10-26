@@ -5,7 +5,7 @@
 #  Sourced by install.sh and every module. Bash 3.2 compatible (macOS).
 # =============================================================================
 
-NS_VERSION="0.21.0"
+NS_VERSION="0.22.0"
 
 NS_HOME="${NS_HOME:-$HOME/.local/share/northstar}"   # tools, venvs, sources
 NS_BIN="$NS_HOME/bin"                                # all northstar binaries

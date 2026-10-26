@@ -20,6 +20,7 @@ while true; do
     "Photo geolocation" \
     "Face comparison (within this case)" \
     "Page monitoring (proof of life)" \
+    "Case map" \
     "Country search" \
     "Breach data" \
     "Dark web" \
@@ -45,6 +46,7 @@ while true; do
     "Photo geolocation")       ns-geo ;;
     "Face comparison"*)        ns-face ;;
     "Page monitoring"*)        ns-watch ;;
+    "Case map")                ns-map ;;
     "Country search")          ns-country ;;
     "Breach data")             ns-breach ;;
     "Dark web")                ns-darkweb ;;

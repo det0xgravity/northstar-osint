@@ -4,6 +4,14 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project uses
 [Semantic Versioning](https://semver.org/).
 
+## [0.22.0] - 2026-10-26
+
+### Added
+- `ns-map` (main menu: Case map): recorded places (last seen, sightings, home,
+  work…, by address or coordinates), photo EXIF GPS and GeoCLIP estimates on
+  one map. Exports `case.geojson`, `case.kml` and `points.csv`, plus an
+  interactive `map.html` (Leaflet, pinned with SRI; asks before loading tiles).
+
 ## [0.21.0] - 2026-10-26
 
 ### Added
