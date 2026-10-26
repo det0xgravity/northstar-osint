@@ -76,6 +76,7 @@ ns-update                                # pull the latest version and upgrade e
 | `core` | Base packages, pipx, Go, the northstar runtime and menus *(always installed)* |
 | `username` | sherlock, maigret, socialscan, holehe, GHunt, toutatis, blackbird |
 | `social` | telegram-tracker for Telegram channel collection (installed with its own Python 3.14 through uv) |
+| `geo` | GeoCLIP (local AI photo geolocation) and ShadowFinder |
 | `domain` | subfinder, dnsx, httpx, katana, gowitness, amass, theHarvester, waymore, dnstwist, Shodan & Censys Platform CLIs |
 | `media` | yt-dlp, gallery-dl, instaloader, streamlink, ffmpeg, exiftool, mediainfo, mat2, internetarchive |
 | `frameworks` | SpiderFoot, recon-ng, changedetection.io, search-that-hash, name-that-hash |
@@ -101,6 +102,7 @@ northstar                # main menu
 ├── Metadata             # ns-metadata
 ├── Image analysis       # ns-image
 ├── Video verification   # ns-video
+├── Photo geolocation    # ns-geo
 ├── Country search       # ns-country
 ├── Breach data          # ns-breach
 ├── Dark web             # ns-darkweb

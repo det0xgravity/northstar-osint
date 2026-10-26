@@ -12,6 +12,7 @@ ns-domain|Domain Recon|network-workgroup|Subdomains, DNS, crawling, archives, lo
 ns-media|Media Download|video-x-generic|Collect video, images, galleries and streams
 ns-archive|Capture Web Pages|document-save|Evidence-grade page captures: single-file copy, screenshot, headers, Wayback
 ns-video|Video Verification|video-x-generic|Keyframes for reverse search, offline transcript and translation
+ns-geo|Photo Geolocation|find-location|Where was this photo taken? Clues, local AI estimate, shadows, OSM search
 ns-metadata|Metadata|document-properties|View, export and strip file metadata
 ns-image|Image Analysis|image-x-generic|Reverse image search and EXIF/GPS
 ns-country|Country Search|applications-internet|Public-records searches for Canada, the US, UK, Europe, Asia-Pacific and more

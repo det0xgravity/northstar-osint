@@ -1,0 +1,107 @@
+#!/usr/bin/env bash
+# ns-geo — where was this photo taken? Collects the clues in an image (EXIF GPS
+# and time, visible text), runs a GeoCLIP location estimate on this computer,
+# and opens the tools to verify candidates: street-level imagery, OpenStreetMap
+# feature search, shadow analysis and skyline matching. Images never leave the
+# computer; only coordinates are looked up, and only if you agree.
+# shellcheck source=../lib/ui.sh
+. "${NS_HOME:-$HOME/.local/share/northstar}/lib/ui.sh"
+
+choice=$(ui_list "Photo geolocation" \
+  "Where was this photo taken? (clues + AI estimate)" \
+  "Shadow analysis: where could this shadow occur? (ShadowFinder)" \
+  "Find places by features (Bellingcat OSM Search)" \
+  "Match a skyline or landmark (PeakVisor, Google Lens)") || exit 0
+
+case "$choice" in
+"Where was this photo taken"*)
+  f=$(ui_files "Choose a photo") || exit 0
+  f=$(printf '%s\n' "$f" | head -1)
+  [ -f "$f" ] || exit 0
+  base=$(basename "$f")
+  out=$(ns_outdir geo "$base")
+  cp -p "$f" "$out/"
+  printf 'Original: %s\nSHA-256: %s\n' "$f" "$(ns_hash_file "$f")" > "$out/source_url.txt"
+  summary=""
+
+  # 1. Metadata: GPS and time beat any estimate when they survive
+  if ns_cmd exiftool; then
+    ns_audit exiftool "$base" "metadata"
+    exiftool -a -G1 -s "$out/$base" > "$out/exif.txt" 2>/dev/null
+    gps=$(exiftool -n -p '$GPSLatitude,$GPSLongitude' "$out/$base" 2>/dev/null)
+    taken=$(exiftool -s3 -DateTimeOriginal "$out/$base" 2>/dev/null)
+    [ -n "$gps" ] && summary="${summary}GPS in the photo's metadata: $gps
+"
+    [ -n "$taken" ] && summary="${summary}Taken (camera clock): $taken
+"
+  fi
+
+  # 2. Visible text: signs, shopfronts and plates name places and languages
+  if ns_cmd tesseract; then
+    langs=$(tesseract --list-langs 2>/dev/null | tail -n +2 | grep -v '^osd$' | paste -sd+ -)
+    ns_run "$out" tesseract "$base" text -l "${langs:-eng}" >/dev/null
+    if [ -s "$out/text.txt" ] && grep -q '[[:alnum:]]' "$out/text.txt"; then
+      summary="${summary}Visible text found: see text.txt
+"
+    fi
+  fi
+
+  # 3. AI estimate from the scene itself
+  if ns_cmd ns_geo && ui_question "Run the AI location estimate (GeoCLIP)?
+
+It runs on this computer: the photo isn't uploaded. The first run downloads the model (about 2 GB) and takes a few minutes."; then
+    ns_run "$out" ns_geo estimate "$base" 10
+    if [ -s "$out/geoclip.csv" ] && ui_question "Look up place names for the top 5 candidates?
+
+Only the coordinates are sent to OpenStreetMap, never the photo."; then
+      ns_run "$out" ns_geo places 5
+    fi
+  fi
+
+  urls=()
+  [ -n "${gps:-}" ] && urls+=("https://www.google.com/maps/search/?api=1&query=$gps")
+  if [ -s "$out/geoclip.csv" ]; then
+    summary="${summary}AI candidates: geoclip.csv$( [ -s "$out/places.json" ] && echo ' (place names in places.json)')
+"
+    while IFS=, read -r rank lat lon _; do
+      [ "$rank" = rank ] && continue
+      urls+=("https://www.google.com/maps/@$lat,$lon,12z" "https://www.mapillary.com/app/?lat=$lat&lng=$lon&z=13")
+    done <<EOF
+$(head -4 "$out/geoclip.csv")
+EOF
+  fi
+  urls+=("https://osm-search.bellingcat.com/" "https://lens.google.com/")
+  ns_seal_result "$out" >/dev/null
+  ui_info "${summary:-No GPS, text or AI estimate.}
+Click OK to open maps for the strongest leads, Mapillary street-level imagery, Bellingcat OSM Search and Google Lens.
+
+Treat AI candidates as leads: confirm them with street-level imagery, landmarks and shadows before relying on them."
+  ui_open "${urls[@]}"
+  ns_finish "$out" ;;
+
+"Shadow analysis"*)
+  ns_cmd shadowfinder || { ui_error "ShadowFinder isn't installed: ./install.sh --only geo"; exit 1; }
+  h=$(ui_entry "Height of an upright object (any unit, e.g. 1.8):") || exit 0
+  l=$(ui_entry "Length of its shadow (same unit):") || exit 0
+  d=$(ui_entry "Date the photo was taken (YYYY-MM-DD):") || exit 0
+  t=$(ui_entry "Time in UTC (HH:MM:SS):") || exit 0
+  num='^[0-9]+([.][0-9]+)?$'
+  printf '%s' "$h" | grep -Eq "$num" && printf '%s' "$l" | grep -Eq "$num" &&
+    printf '%s' "$d" | grep -Eq '^[0-9]{4}-[0-9]{2}-[0-9]{2}$' &&
+    printf '%s' "$t" | grep -Eq '^[0-9]{2}:[0-9]{2}:[0-9]{2}$' ||
+    { ui_error "Use numbers for the lengths, YYYY-MM-DD for the date and HH:MM:SS for the time."; exit 1; }
+  out=$(ns_outdir shadow "${d}_${t}")
+  ns_run "$out" shadowfinder find "$h" "$l" "$d" "$t" --time_format=utc
+  echo "The map shows everywhere this shadow length could occur at that moment."
+  ui_reveal "$out"
+  ns_finish "$out" ;;
+
+"Find places by features"*)
+  ns_audit osm-search "" "Bellingcat OSM Search opened"
+  ui_info "Bellingcat OSM Search finds places where features occur together, for example a church within 200 m of a river and a fuel station. Start from what you can see in the photo." || true
+  ui_open "https://osm-search.bellingcat.com/" ;;
+
+"Match a skyline"*)
+  ns_audit skyline "" "PeakVisor, Google Lens opened"
+  ui_open "https://peakvisor.com/" "https://lens.google.com/" ;;
+esac

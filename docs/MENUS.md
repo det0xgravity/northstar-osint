@@ -92,6 +92,19 @@ Video verification, from a URL (downloaded with yt-dlp, plus its info JSON, desc
 
 Transcription runs entirely on your computer. The first time, it downloads a ~500 MB speech model; after that, nothing is sent anywhere. At the end, the reverse image search pages and the frames folder open so you can drag in the most distinctive frames.
 
+## ns-geo
+
+Photo geolocation. **Images never leave your computer.** Only coordinates are looked up, and only if you agree.
+
+| Option | What it does | Output |
+|---|---|---|
+| Where was this photo taken? | Copies the photo (recording the original's SHA-256), reads EXIF GPS and capture time, reads visible text with OCR, then optionally runs [GeoCLIP](https://github.com/VicenteVivan/geo-clip), an AI model that estimates the location from the scene, on your computer. Optionally looks up place names for the top 5 candidates (OpenStreetMap; coordinates only). Opens maps and Mapillary street-level imagery for the strongest leads, plus Bellingcat OSM Search and Google Lens | `exif.txt`, `text.txt`, `geoclip.csv` (top 10: lat, lon, probability), `places.json` |
+| Shadow analysis | [ShadowFinder](https://github.com/bellingcat/ShadowFinder): from an object's height, its shadow's length and the UTC time, maps everywhere on Earth that shadow could occur | `shadow_finder_*.png` |
+| Find places by features | Bellingcat OSM Search: places where features occur together (e.g. a church near a river and a fuel station) | |
+| Match a skyline or landmark | PeakVisor (mountains and ridgelines) and Google Lens | |
+
+GeoCLIP is often right to the country or region, sometimes the city, rarely the street. Treat its candidates as leads, and confirm them with street-level imagery, landmarks and shadows. The first run downloads its model (about 2 GB). Never upload victim photos, especially of minors, to online services; this menu keeps them on your machine.
+
 ## ns-metadata
 
 | Option | Runs | Output |

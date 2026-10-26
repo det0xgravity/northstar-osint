@@ -87,6 +87,28 @@ check "option-like URL refused" "grep -q 'starting with https' '$W/out.txt' && [
 PATH="$W/stub:$PATH" menu ns-media "Video" "https://example.com/v"
 check "-- precedes the URL" "grep -q -- '-- https://example.com/v' '$W/out.txt'"
 
+section "Photo geolocation (stubbed model)"
+echo general > "$XDG_CONFIG_HOME/northstar/active_case"     # the case tests switched cases
+G="$W/geostub"; mkdir -p "$G"
+cat > "$G/ns_geo" <<'STUB'
+#!/bin/sh
+case "$1" in
+  estimate) printf 'rank,lat,lon,probability\n1,45.42153,-75.69719,0.31\n2,48.85661,2.35222,0.12\n' > geoclip.csv ;;
+  places)   echo '[]' > places.json ;;
+esac
+STUB
+printf '#!/bin/sh\necho "shadowfinder $*"\n' > "$G/shadowfinder"; chmod +x "$G/"*
+printf 'fake' > "$W/photo.jpg"
+PATH="$G:$PATH" menu ns-geo "Where was this photo taken" "$W/photo.jpg" "yes" "yes"
+gd=$(find "$CASE/geo" -mindepth 1 -maxdepth 1 -type d | head -1)
+check "AI candidates saved and folder sealed" "[ -s '$gd/geoclip.csv' ] && [ -f '$gd/manifest.sha256' ]"
+check "maps open for the top candidates" "grep -q 'maps/@45.42153,-75.69719' '$W/out.txt' && grep -q 'mapillary.com/app/?lat=48.85661' '$W/out.txt'"
+check "photo copied with its original hash recorded" "grep -q 'SHA-256' '$gd/source_url.txt'"
+PATH="$G:$PATH" menu ns-geo "Shadow analysis" "1.8" "abc" "2026-06-01" "12:00:00"
+check "bad shadow input refused" "grep -q 'Use numbers' '$W/out.txt'"
+PATH="$G:$PATH" menu ns-geo "Shadow analysis" "1.8" "2.4" "2026-06-01" "12:00:00"
+check "shadow inputs passed to ShadowFinder" "grep -q 'shadowfinder find 1.8 2.4 2026-06-01 12:00:00 --time_format=utc' '$W/out.txt'"
+
 section "Installer module selection"
 I="$W/inst"; mkdir -p "$I/modules" "$I/bin" "$I/home"
 cp "$R/install.sh" "$I/" && cp -R "$R/lib" "$I/"

@@ -4,6 +4,18 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project uses
 [Semantic Versioning](https://semver.org/).
 
+## [0.16.0] - 2026-10-26
+
+### Added
+- `ns-geo` (main menu: Photo geolocation): EXIF GPS and time, OCR of visible
+  text, a GeoCLIP location estimate run locally (top 10 candidates), optional
+  place names (coordinates only, OpenStreetMap), and maps, Mapillary, OSM
+  Search and Google Lens for verification. Shadow analysis with ShadowFinder,
+  and skyline matching. Photos never leave the computer.
+- `geo` module: GeoCLIP in a private venv (CPU PyTorch on x86_64), and
+  ShadowFinder.
+- 5 more tests (30 in total).
+
 ## [0.15.0] - 2026-10-26
 
 Phase 4d of the review: health check and automated tests.

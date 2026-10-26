@@ -61,6 +61,13 @@ System packages (git, curl, jq, Python, pipx, Go, whois, dig, zenity, clipboard 
 | [search-that-hash](https://github.com/HashPals/Search-That-Hash) | `sth` | Look up hashes in public databases |
 | [name-that-hash](https://github.com/HashPals/Name-That-Hash) | `nth` | Identify hash types |
 
+## geo
+
+| Tool | Purpose |
+|---|---|
+| [GeoCLIP](https://github.com/VicenteVivan/geo-clip) | AI location estimate from a photo's scene, run locally (private venv with CPU PyTorch; ~2 GB model on first use) |
+| [ShadowFinder](https://github.com/bellingcat/ShadowFinder) | Where on Earth a shadow of a given length occurs at a given time |
+
 ## browsers
 
 | Browser | Purpose |
