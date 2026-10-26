@@ -76,17 +76,42 @@ fi
 
 in_csv() { case ",$2," in *",$1,"*) return 0 ;; esac; return 1; }
 
-# Updates default to the modules installed previously (recorded below)
-if [ "$NS_UPDATE" = 1 ] && [ -z "$ONLY" ] && [ -z "$SKIP" ] && [ -s "$NS_CONF/modules" ]; then
-  ONLY=$(cat "$NS_CONF/modules")
-fi
+is_module() {
+  local m
+  for m in "${NS_MOD_NAMES[@]}"; do [ "$m" = "$1" ] && return 0; done
+  return 1
+}
 
 # Validate module names given to --only / --skip
 for n in $(printf '%s' "$ONLY,$SKIP" | tr ',' ' '); do
-  found=0
-  for m in "${NS_MOD_NAMES[@]}"; do [ "$m" = "$n" ] && found=1; done
-  [ $found = 1 ] || ns_die "Unknown module: $n (see --list)"
+  is_module "$n" || ns_die "Unknown module: $n (see --list)"
 done
+
+# The installer records the modules the user chose NOT to install. Updates run
+# everything else, so modules added in a new release get installed too.
+SKIPPED_FILE="$NS_CONF/skipped"
+HAVE_STATE=0; SAVED_SKIP=""
+if [ -f "$SKIPPED_FILE" ]; then
+  HAVE_STATE=1
+  for n in $(tr ',' ' ' < "$SKIPPED_FILE"); do
+    is_module "$n" && SAVED_SKIP="${SAVED_SKIP:+$SAVED_SKIP,}$n"   # drop modules that no longer exist
+  done
+elif [ -s "$NS_CONF/modules" ]; then
+  # v0.2 and earlier recorded the installed modules instead
+  HAVE_STATE=1
+  installed=$(cat "$NS_CONF/modules")
+  i=0
+  while [ $i -lt ${#NS_MOD_NAMES[@]} ]; do
+    n="${NS_MOD_NAMES[$i]}"
+    if [ "$n" != core ] && ns_mod_supported "${NS_MOD_PLATS[$i]}" && ! in_csv "$n" "$installed"; then
+      SAVED_SKIP="${SAVED_SKIP:+$SAVED_SKIP,}$n"
+    fi
+    i=$((i+1))
+  done
+fi
+if [ "$NS_UPDATE" = 1 ] && [ -z "$ONLY" ] && [ -z "$SKIP" ]; then
+  SKIP="$SAVED_SKIP"
+fi
 
 # Build the run list
 RUN_IDX=()
@@ -138,12 +163,26 @@ for i in "${RUN_IDX[@]}"; do
   ns_step "${NS_MOD_NAMES[$i]}: ${NS_MOD_DESCS[$i]}" "${NS_MOD_FUNCS[$i]}"
 done
 
-# Remember which modules are installed so 'ns-update' upgrades the same set
-saved=$(cat "$NS_CONF/modules" 2>/dev/null)
-for i in "${RUN_IDX[@]}"; do
-  in_csv "${NS_MOD_NAMES[$i]}" "$saved" || saved="${saved:+$saved,}${NS_MOD_NAMES[$i]}"
+# Remember which modules the user chose not to install. A module counts as
+# skipped when it didn't run and: this is the first install (--only/--skip
+# picked the set), it was skipped before, or --skip named it outside an update.
+# Anything that ran is no longer skipped.
+new_skip=""
+i=0
+while [ $i -lt ${#NS_MOD_NAMES[@]} ]; do
+  n="${NS_MOD_NAMES[$i]}"
+  ran=0
+  for j in "${RUN_IDX[@]}"; do [ "$j" = "$i" ] && ran=1; done
+  if [ $ran = 0 ] && [ "$n" != core ] && ns_mod_supported "${NS_MOD_PLATS[$i]}"; then
+    if [ $HAVE_STATE = 0 ] || in_csv "$n" "$SAVED_SKIP" \
+       || { [ "$NS_UPDATE" != 1 ] && in_csv "$n" "$SKIP"; }; then
+      new_skip="${new_skip:+$new_skip,}$n"
+    fi
+  fi
+  i=$((i+1))
 done
-printf '%s\n' "$saved" > "$NS_CONF/modules"
+printf '%s\n' "$new_skip" > "$SKIPPED_FILE"
+rm -f "$NS_CONF/modules"
 
 echo
 echo "============================================================"

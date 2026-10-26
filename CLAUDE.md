@@ -74,7 +74,6 @@ on x86_64 (Proxmox) and on arm64 (UTM on Apple Silicon).
 
 ## Publishing
 
-- Repo: https://github.com/det0xgravity/northstar-osint (created private;
-  make it public once CI is green and the README reads well).
+- Repo: https://github.com/det0xgravity/northstar-osint (public).
 - Commit as `det0xgravity <170262817+det0xgravity@users.noreply.github.com>`
   (set in this repo's local git config), never a personal address.

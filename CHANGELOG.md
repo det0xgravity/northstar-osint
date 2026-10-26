@@ -4,6 +4,22 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project uses
 [Semantic Versioning](https://semver.org/).
 
+## [0.3.0] - 2026-10-26
+
+### Added
+- User extension list: `~/.config/northstar/firefox-extensions.local.txt` is
+  merged into the Firefox policy, so users no longer edit the checkout.
+- `docs/KASM.md`: how to roll out updates to persistent VMs and pools.
+
+### Changed
+- The installer records the modules a user chose to skip
+  (`~/.config/northstar/skipped`) instead of the ones installed, so
+  `ns-update` installs modules added in later releases. Older
+  `~/.config/northstar/modules` files are converted automatically.
+- `ns-update` explains a failed `git pull` (which files were edited and how to
+  fix it), repeats the warning at the end and exits non-zero, instead of
+  continuing with a one-line note.
+
 ## [0.2.0] - 2026-10-26
 
 ### Added

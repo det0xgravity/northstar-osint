@@ -71,7 +71,7 @@ See [CANADA.md](CANADA.md).
 
 ## ns-update
 
-Pulls the latest northstar-osint and runs `install.sh --update --yes` for the modules you installed.
+Pulls the latest northstar-osint and runs `install.sh --update --yes` for every module except the ones you chose to skip, so modules added in a new release are installed too. If the download fails (usually because files in the checkout were edited by hand), it says so clearly, still upgrades the installed tools, and exits with an error.
 
 ## ns-seal *(Linux, run with sudo)*
 

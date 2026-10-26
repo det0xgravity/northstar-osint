@@ -57,7 +57,8 @@ def main():
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--bookmarks", required=True)
     ap.add_argument("--local", help="optional user bookmarks file, merged in")
-    ap.add_argument("--extensions", required=True)
+    ap.add_argument("--extensions", required=True, action="append",
+                    help="add-on slug list; repeat to add files (missing files are skipped)")
     ap.add_argument("--out", required=True)
     ap.add_argument("--folder", default="OSINT", help="top-level bookmark folder name")
     args = ap.parse_args()
@@ -70,7 +71,14 @@ def main():
         print(f"   merged local bookmarks from {args.local}")
 
     extensions, missing = {}, []
-    for slug in read_slugs(args.extensions):
+    slugs = []
+    for path in args.extensions:
+        if not os.path.isfile(path):
+            continue
+        for slug in read_slugs(path):
+            if slug not in slugs:
+                slugs.append(slug)
+    for slug in slugs:
         try:
             guid = resolve(slug)
         except Exception as exc:  # network errors, 404s, bad JSON

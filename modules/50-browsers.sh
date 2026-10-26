@@ -21,6 +21,7 @@ ns_install_policies() {
     --bookmarks  "$NS_REPO/config/bookmarks.json" \
     --local      "$NS_CONF/bookmarks.local.json" \
     --extensions "$NS_REPO/config/firefox-extensions.txt" \
+    --extensions "$NS_CONF/firefox-extensions.local.txt" \
     --out        "$tmp"
   rc=$?
   [ -s "$tmp/firefox-policies.json" ] || { rm -rf "$tmp"; return 1; }

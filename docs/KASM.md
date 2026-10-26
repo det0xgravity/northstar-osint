@@ -53,6 +53,13 @@ Keep the previous template until the new one is proven. Rolling back is then jus
 
 Anything left inside a pool clone is destroyed when the session ends. Before closing, copy case folders out to shared storage (NFS, Nextcloud, a Git repo), or set `NS_DATA` to a mounted share in `~/.profile` on the master, so every clone writes its cases there.
 
+## Updating
+
+When a new northstar-osint release comes out:
+
+- **Option A (persistent VM):** run `ns-update` inside the VM, or pick *Update northstar* in the main menu.
+- **Option B (pool):** clones are discarded after each session, so updating one changes nothing lasting. Update the **master** with `ns-update`, then build and roll out a new template as described above. Kasm's pool picks up the change once it points at the new template.
+
 ## Over-the-browser tips
 
 - Flameshot and clipboard tools use X11 under xrdp, so they work with no prompts.

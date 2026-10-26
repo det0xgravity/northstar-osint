@@ -83,7 +83,7 @@ Firefox, Brave and every other module work normally on arm64.
 ./install.sh --yes                  Don't prompt
 ```
 
-The installer records which modules you installed in `~/.config/northstar/modules`. `ns-update` upgrades that same set unless you pass `--only`/`--skip`.
+The installer records the modules you chose **not** to install in `~/.config/northstar/skipped`. `ns-update` upgrades everything else, so a module added in a new release is installed automatically. To install a module you skipped earlier, run `./install.sh --only <module>`. To stop installing one, run `./install.sh --skip <module>`.
 
 ## Where things go
 
@@ -103,7 +103,9 @@ The installer records which modules you installed in `~/.config/northstar/module
 ## Customising
 
 - **Your own bookmarks**: create `~/.config/northstar/bookmarks.local.json` with the same structure as `config/bookmarks.json` (a list of folders). It's merged into the managed folder on the next run, and repository updates never overwrite it.
-- **Extensions**: edit `config/firefox-extensions.txt` in your checkout, then run `./install.sh --only browsers`.
+- **Extensions**: list extra Firefox add-ons in `~/.config/northstar/firefox-extensions.local.txt`, one addons.mozilla.org slug per line (the part of the add-on's URL after `/addon/`). They're added to northstar's own list on the next run. Apply them now with `./install.sh --only browsers`.
+
+Don't edit files inside your northstar-osint checkout. `ns-update` downloads new versions with `git pull`, which fails if repository files were changed by hand. Your files in `~/.config/northstar/` are never touched by updates.
 - **Output location**: set `NS_DATA=/path` in your shell profile to keep cases somewhere other than `~/Northstar`.
 
 ## Updating
