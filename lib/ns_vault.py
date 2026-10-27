@@ -23,13 +23,17 @@ Commands:
 Working notes are editable. The tamper-evident record stays in notes.md
 (Case → Add a note), audit.log and the sealed result folders.
 """
+import contextlib
 import csv
 import datetime
+import fcntl
 import hashlib
+import itertools
 import json
 import os
 import re
 import sys
+import tempfile
 import time
 import urllib.parse
 
@@ -268,12 +272,52 @@ def utc(fmt="%Y-%m-%d %H:%M UTC"):
 
 
 def write(path, text):
-    """Case notes are readable only by you, like the rest of the case."""
-    os.makedirs(os.path.dirname(path), mode=0o700, exist_ok=True)
-    fd = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
-    with os.fdopen(fd, "w", encoding="utf-8") as fh:
-        fh.write(text)
-    os.chmod(path, 0o600)
+    """Atomic and private: a reader (Obsidian, another northstar run) never sees a
+    half-written note, and case notes are readable only by you."""
+    d = os.path.dirname(path)
+    os.makedirs(d, mode=0o700, exist_ok=True)
+    fd, tmp = tempfile.mkstemp(dir=d, prefix=".ns-", suffix=".tmp")      # mkstemp files are mode 600
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8") as fh:
+            fh.write(text)
+        os.replace(tmp, path)
+    except BaseException:
+        with contextlib.suppress(OSError):
+            os.unlink(tmp)
+        raise
+
+
+@contextlib.contextmanager
+def case_lock(case_dir):
+    """One northstar writer per case at a time."""
+    d = os.path.join(case_dir, ".northstar")
+    os.makedirs(d, mode=0o700, exist_ok=True)
+    with open(os.path.join(d, "vault.lock"), "w") as fh:
+        fcntl.flock(fh, fcntl.LOCK_EX)
+        try:
+            yield
+        finally:
+            fcntl.flock(fh, fcntl.LOCK_UN)
+
+
+ANSI = re.compile(r"\x1b\[[0-9;?]*[A-Za-z]|\x1b\][^\x07]*\x07")
+
+
+def read_text(path, limit=2 * 1024 * 1024, tail=False):
+    """Up to `limit` bytes of a text file (the end, for logs). Never follows symlinks."""
+    try:
+        if os.path.islink(path):
+            return ""
+        with open(path, "rb") as fh:
+            if tail:
+                fh.seek(0, 2)
+                fh.seek(max(0, fh.tell() - limit))
+            data = fh.read(limit)
+    except OSError:
+        return ""
+    if b"\x00" in data[:4096]:
+        return ""                                  # binary, not text
+    return ANSI.sub("", data.decode("utf-8", "replace"))
 
 
 def write_if_missing(path, text):
@@ -295,10 +339,35 @@ def cell(v, limit=120):
     s = re.sub(r"\s+", " ", str(v if v is not None else "")).strip()
     if len(s) > limit:
         s = s[:limit - 1] + "…"
-    for a, b in (("\\", "\\\\"), ("|", "\\|"), ("<", "&lt;"), (">", "&gt;"), ("[", "\\["), ("]", "\\]"),
-                 ("`", "'"), ("*", "\\*"), ("_", "\\_")):
+    s = ANSI.sub("", s)
+    for a, b in (("\\", "\\\\"), ("&", "&amp;"), ("|", "\\|"), ("<", "&lt;"), (">", "&gt;"), ("[", "\\["),
+                 ("]", "\\]"), ("`", "'"), ("*", "\\*"), ("_", "\\_"), ("#", "\\#"), ("$", "\\$"), ("%", "\\%"),
+                 ("=", "\\="), ("~", "\\~")):
         s = s.replace(a, b)
     return s
+
+
+def alias(v, limit=80):
+    """Display text inside [[link|alias]]: plain characters only."""
+    s = re.sub(r"[\[\]|#^<>`\\\n\r\t]", " ", ANSI.sub("", str(v)))
+    return re.sub(r"\s+", " ", s).strip()[:limit] or "file"
+
+
+UNSAFE_LINK = re.compile(r"[\[\]|#^<>\\\n\r\t%]")
+UNTRUSTED_PAGE = (".html", ".htm", ".xhtml", ".svg", ".mhtml", ".shtml")
+
+
+def flink(vault_path, label=None, table=False, embed=False, width=None):
+    """Link or embed a file collected from the web. A name that could break out of
+    [[...]] (brackets, pipes, # ^, < >) is shown as text, never as a link; captured
+    web pages are listed but not linked, since opening one runs it in the browser."""
+    name = os.path.basename(vault_path)
+    if UNSAFE_LINK.search(vault_path) or vault_path.lower().endswith(UNTRUSTED_PAGE):
+        return code(name, 120) + ("" if not vault_path.lower().endswith(UNTRUSTED_PAGE)
+                                  else " (web page: open it from the folder, ideally offline)")
+    if embed:
+        return f"![[{vault_path}{chr(92) if table else ''}|{width or 240}]]"
+    return wlink(vault_path, label or name, table)
 
 
 def fence(text):
@@ -310,7 +379,7 @@ def fence(text):
 def wlink(vault_path, label=None, table=False):
     """[[path|label]]; inside a table the pipe must be escaped or it splits the cell."""
     label = label or os.path.basename(vault_path)
-    return f"[[{vault_path}{chr(92) + '|' if table else '|'}{cell(label, 80)}]]"
+    return f"[[{vault_path}{chr(92) + '|' if table else '|'}{alias(label)}]]"
 
 
 def code(v, limit=200):
@@ -356,7 +425,7 @@ def describe(case_dir, result_dir):
     base = os.path.basename(result_dir)
     m = STAMP.match(base)
     target = (m.group("target") if m else base).replace("_", " ").strip() or "(no target)"
-    when = (datetime.datetime.strptime(m.group("d") + m.group("t"), "%Y%m%d%H%M%S").strftime("%Y-%m-%d %H:%M")
+    when = (datetime.datetime.strptime(m.group("d") + m.group("t"), "%Y%m%d%H%M%S").strftime("%Y-%m-%d %H:%M:%S")
             if m else "")
     prov = read_json(os.path.join(result_dir, "provenance.json"), {}) or {}
     label = LABELS.get(kind) or ("Country search: " + kind.replace("-", " ").title())
@@ -364,25 +433,32 @@ def describe(case_dir, result_dir):
 
 
 def note_name(info):
-    stamp = info["when"].replace(":", "") if info["when"] else "undated"
+    stamp = info["when"].replace(":", "") if info["when"] else "undated"        # 2026-10-26 150010
     safe = re.sub(r'[\\/:*?"<>|#^\[\]]', "-", f"{stamp} {info['label']} - {info['target']}")
     return re.sub(r"\s+", " ", safe)[:150].strip() + ".md"
 
 
 def csv_table(path, rows=12, cols=6):
+    """The first rows of a CSV, read as a stream (crawl output can be gigabytes)."""
+    if os.path.islink(path):
+        return "", 0
     try:
+        csv.field_size_limit(1024 * 1024)
         with open(path, newline="", encoding="utf-8", errors="replace") as fh:
-            data = list(csv.reader(fh))
-    except OSError:
+            reader = csv.reader(fh)
+            head = next(reader, None)
+            if not head:
+                return "", 0
+            head = head[:cols]
+            body = list(itertools.islice(reader, rows))
+            total = len(body) + sum(1 for _ in reader)
+    except (OSError, csv.Error):
         return "", 0
-    if not data:
-        return "", 0
-    head, body = data[0][:cols], data[1:]
     lines = ["| " + " | ".join(cell(h, 40) for h in head) + " |", "|" + "---|" * len(head)]
-    for r in body[:rows]:
+    for r in body:
         r = (r + [""] * len(head))[:len(head)]
         lines.append("| " + " | ".join(cell(c, 80) for c in r) + " |")
-    return "\n".join(lines), len(body)
+    return "\n".join(lines), total
 
 
 SECRET_KEY = re.compile(r"pass|hash|secret|token|cookie|session|api.?key|credential|salt", re.I)
@@ -391,6 +467,11 @@ SECRET_KEY = re.compile(r"pass|hash|secret|token|cookie|session|api.?key|credent
 def json_table(path, limit=25):
     """Top-level fields only. Nested records are never expanded, and anything that
     looks like a credential is masked: notes must never carry secrets."""
+    try:
+        if os.path.islink(path) or os.path.getsize(path) > 20 * 1024 * 1024:
+            return ""
+    except OSError:
+        return ""
     data = read_json(path)
     if not isinstance(data, dict):
         return ""
@@ -425,19 +506,28 @@ def found_accounts(console):
 
 def result_note(case_dir, result_dir):
     info = describe(case_dir, result_dir)
-    files = []
-    for root, dirs, names in os.walk(result_dir):
+    files, sizes = [], {}
+    for root, dirs, names in os.walk(result_dir):          # os.walk doesn't follow symlinked folders
         dirs[:] = [d for d in sorted(dirs) if not d.startswith(".")]
         for n in sorted(names):
-            if not n.startswith("."):
-                files.append(os.path.relpath(os.path.join(root, n), result_dir))
-    sealed = os.path.exists(os.path.join(result_dir, "manifest.sha256"))
+            full = os.path.join(root, n)
+            if n.startswith(".") or os.path.islink(full):
+                continue
+            try:
+                sizes[os.path.relpath(full, result_dir)] = os.lstat(full).st_size
+            except OSError:
+                continue
+            files.append(os.path.relpath(full, result_dir))
+    sealed = "manifest.sha256" in sizes
     fp = ""
     if sealed:
         h = hashlib.sha256()
-        with open(os.path.join(result_dir, "manifest.sha256"), "rb") as fh:
-            h.update(fh.read())
-        fp = h.hexdigest()
+        try:
+            with open(os.path.join(result_dir, "manifest.sha256"), "rb") as fh:
+                h.update(fh.read())
+            fp = h.hexdigest()
+        except OSError:
+            sealed = False
     prov = info["prov"]
     vp = lambda f: vpath(case_dir, info["rel"].replace(os.sep, "/"), f.replace(os.sep, "/"))
     tools = ", ".join(f"{t} {v}".strip() for t, v in (prov.get("tools") or {}).items()) or "—"
@@ -465,12 +555,11 @@ tags: [result, {re.sub(r'[^a-z0-9-]', '-', info['kind'].lower())}]
 """]
     # A tool's own summary comes first
     if "summary.md" in files:
-        text = open(os.path.join(result_dir, "summary.md"), encoding="utf-8", errors="replace").read()
-        out.append("## Summary\n\n" + fence(text[:20000]))
+        text = read_text(os.path.join(result_dir, "summary.md"), 20000)
+        if text.strip():
+            out.append("## Summary\n\n" + fence(text))
 
-    console = ""
-    if "console.log" in files:
-        console = open(os.path.join(result_dir, "console.log"), encoding="utf-8", errors="replace").read()
+    console = read_text(os.path.join(result_dir, "console.log"), 512 * 1024, tail=True) if "console.log" in files else ""
     accts = found_accounts(console)
     if accts:
         out.append(f"## Accounts found ({len(accts)})\n\n| Site | Profile |\n|---|---|\n"
@@ -482,7 +571,7 @@ tags: [result, {re.sub(r'[^a-z0-9-]', '-', info['kind'].lower())}]
         table, n = csv_table(os.path.join(result_dir, f))
         if table:
             more = f" (first 12 of {n} rows)" if n > 12 else f" ({n} rows)"
-            out.append(f"## {cell(os.path.basename(f), 60)}{more}\n\n{table}\n\n{wlink(vp(f), 'Open the full table')}")
+            out.append(f"## {cell(os.path.basename(f), 60)}{more}\n\n{table}\n\n{flink(vp(f), 'Open the full table')}")
     for f in ([] if breach else [x for x in files if x.endswith(".json") and x != "provenance.json"][:6]):
         table = json_table(os.path.join(result_dir, f))
         if table:
@@ -493,15 +582,13 @@ tags: [result, {re.sub(r'[^a-z0-9-]', '-', info['kind'].lower())}]
     texts.sort(key=lambda x: (PRIORITY_TEXT.index(os.path.basename(x)) if os.path.basename(x) in PRIORITY_TEXT
                               else len(PRIORITY_TEXT), x))
     for f in texts[:6]:
-        try:
-            body = open(os.path.join(result_dir, f), encoding="utf-8", errors="replace").read()
-        except OSError:
-            continue
+        body = read_text(os.path.join(result_dir, f), 1024 * 1024)
         lines = [l for l in body.splitlines() if l.strip()]
         if not lines:
             continue
         shown = "\n".join(lines[:40])
-        more = f", first 40 of {len(lines)} lines" if len(lines) > 40 else ""
+        more = (f", first 40 of {len(lines)}{'+' if sizes.get(f, 0) > 1024 * 1024 else ''} lines"
+                if len(lines) > 40 else "")
         fold = "+" if f == texts[0] else "-"
         out.append(f"> [!note]{fold} {cell(os.path.basename(f), 60)} ({len(lines)} lines{more})\n"
                    + "\n".join("> " + l for l in fence(shown).splitlines()))
@@ -510,35 +597,67 @@ tags: [result, {re.sub(r'[^a-z0-9-]', '-', info['kind'].lower())}]
     if images:
         crops = [x for x in images if x.startswith("crops" + os.sep)]
         pick = (crops[:12] if info["kind"] == "face" else []) or images[:8]
-        out.append(f"## Images ({len(images)})\n\n" + "\n".join(f"![[{vp(x)}|240]]" for x in pick)
+        out.append(f"## Images ({len(images)})\n\n" + "\n".join(flink(vp(x), embed=True) for x in pick)
                    + (f"\n\n{len(images) - len(pick)} more in the folder." if len(images) > len(pick) else ""))
 
     if console.strip() and not breach:
         tail = "\n".join(console.strip().splitlines()[-30:])
         out.append("> [!example]- Console output (last 30 lines)\n" + "\n".join("> " + l for l in fence(tail).splitlines()))
 
-    listing = [f"| {wlink(vp(f), f, True)} | {os.path.getsize(os.path.join(result_dir, f)):,} |" for f in files[:150]]
+    listing = [f"| {flink(vp(f), f, True)} | {sizes[f]:,} |" for f in files[:150]]
     out.append(f"## Files ({len(files)})\n\n| File | Bytes |\n|---|---|\n" + "\n".join(listing)
                + (f"\n\n{len(files) - 150} more in the folder." if len(files) > 150 else ""))
     out.append(f"---\n*Generated by northstar from {code(info['rel'])}. The folder is the evidence; this note is a "
                "view of it and is rebuilt on refresh. Write your own analysis in the case note or a working note.*")
     path = os.path.join(case_dir, "Results", note_name(info))
+    for old in notes_for_folder(case_dir, info["rel"]):       # earlier note names for this folder
+        if os.path.basename(old) != os.path.basename(path):
+            with contextlib.suppress(OSError):
+                os.unlink(old)
     write(path, "\n\n".join(out) + "\n")
     return path, info
 
 
+def front(path, size=2000):
+    """Simple frontmatter reader (key: value lines; JSON-quoted values decoded)."""
+    text = read_text(path, size)
+    if not text.startswith("---\n"):
+        return {}
+    meta = {}
+    for line in text[4:].split("\n---", 1)[0].splitlines():
+        m = re.match(r"^([A-Za-z_][\w-]*):[ \t]*(.*)$", line)
+        if m:
+            v = m.group(2).strip()
+            if v.startswith('"'):
+                with contextlib.suppress(ValueError):
+                    v = json.loads(v)
+            meta[m.group(1)] = v
+    return meta
+
+
+def notes_for_folder(case_dir, rel):
+    rdir = os.path.join(case_dir, "Results")
+    out = []
+    for n in os.listdir(rdir) if os.path.isdir(rdir) else []:
+        if n.endswith(".md") and front(os.path.join(rdir, n)).get("folder") == rel:
+            out.append(os.path.join(rdir, n))
+    return out
+
+
 # --- dashboards ---------------------------------------------------------------------------
 def results_index(case_dir):
+    """(when, tool, target, note file), newest first, undated last; read from each note's properties."""
     rows = []
     rdir = os.path.join(case_dir, "Results")
-    for n in sorted(os.listdir(rdir), reverse=True) if os.path.isdir(rdir) else []:
+    for n in os.listdir(rdir) if os.path.isdir(rdir) else []:
         if not n.endswith(".md"):
             continue
-        m = re.match(r"^(\d{4}-\d{2}-\d{2} \d{4}|undated) (.+?) - (.*)\.md$", n)
-        when, tool, target = (m.groups() if m else ("", n[:-3], ""))
-        if when != "undated" and len(when) == 15:
-            when = f"{when[:13]}:{when[13:]}"
-        rows.append((when, tool, target, n))
+        meta = front(os.path.join(rdir, n))
+        if meta.get("type") != "result":
+            continue
+        when = str(meta.get("captured_utc") or "").replace("T", " ").replace("Z", "")[:16]
+        rows.append((when, str(meta.get("tool", "")), str(meta.get("target", "")), n))
+    rows.sort(key=lambda r: (r[0] != "", r[0], r[3]), reverse=True)
     return rows
 
 
@@ -552,7 +671,7 @@ def lead_status(case_dir, name):
         head = open(os.path.join(case_dir, "Leads", name + ".md"), encoding="utf-8").read(600)
     except OSError:
         return ""
-    m = re.search(r"^status:\s*(\S+)", head, re.M)
+    m = re.search(r"^status:[ \t]*(\S*)", head, re.M)
     return m.group(1) if m else ""
 
 
@@ -607,8 +726,10 @@ def auto_block(case_dir):
         kr.append(f"- {wlink(vpath(case_dir, 'Results', maps[0][3][:-3]), 'Latest case map')}")
     if os.path.exists(os.path.join(case_dir, "exhibits.csv")):
         kr.append(f"- {wlink(vpath(case_dir, 'exhibits.csv'), 'Exhibits register')}")
-    if os.path.isdir(os.path.join(case_dir, "reports")):
-        kr.append(f"- {wlink(vpath(case_dir, 'reports'), 'Reports')}")
+    reps = sorted(n for n in os.listdir(os.path.join(case_dir, "reports")) if n.endswith((".docx", ".md"))) \
+        if os.path.isdir(os.path.join(case_dir, "reports")) else []
+    if reps:
+        kr.append(f"- {flink(vpath(case_dir, 'reports', reps[-1]), 'Latest report: ' + reps[-1])} ({len(reps)} report files)")
     b.append("## Key records\n\n" + "\n".join(kr))
     ch = os.path.join(case_dir, "watch", "changes.log")
     if os.path.exists(ch):
@@ -632,22 +753,69 @@ Hypotheses, what supports or contradicts them, and what would settle them.
 """
 
 
+FM_MANAGED = ("type", "case", "reference", "status")
+
+
+def split_front(text):
+    """(frontmatter entries as [(key, raw lines)], body). Unparsed text stays in the body."""
+    if not text.startswith("---\n") or "\n---" not in text[4:]:
+        return [], text
+    fm, body = text[4:].split("\n---", 1)
+    body = body[1:] if body.startswith("\n") else body
+    entries = []
+    for line in fm.splitlines():
+        m = re.match(r"^([A-Za-z_][\w -]*):", line)
+        if m or not entries:
+            entries.append((m.group(1).strip() if m else "", [line]))
+        else:
+            entries[-1][1].append(line)                  # list items and continuation lines
+    return entries, body
+
+
 def cmd_case(case_dir, quiet=False):
+    with case_lock(case_dir):
+        update_case(case_dir)
+    if not quiet:
+        refresh_shared(os.path.dirname(os.path.abspath(case_dir)))
+        print("Case dashboard updated.")
+    return 0
+
+
+def update_case(case_dir):
+    """Rewrite only the generated block of Case.md. Everything else the analyst wrote
+    (properties, text above and below the block) is kept; a Case.md without the markers
+    is kept whole below the block, with a backup in .northstar/."""
     name = os.path.basename(os.path.abspath(case_dir))
     meta = read_json(os.path.join(case_dir, "case.json"), {}) or {}
     path = os.path.join(case_dir, "Case.md")
-    head = (f"---\ntype: case\ncase: {json.dumps(name)}\nreference: {json.dumps(meta.get('reference', ''))}\n"
-            f"status: {json.dumps(meta.get('status', 'open'))}\ntags: [case]\n---\n# Case {cell(name)}\n\n")
-    user = USER_PART
+    managed = [("type", "case"), ("case", json.dumps(name)), ("reference", json.dumps(meta.get("reference", ""))),
+               ("status", json.dumps(meta.get("status", "open")))]
+    keep_fm, above, below = [], "", USER_PART
+    title = f"# Case {cell(name)}"
     if os.path.exists(path):
-        old = open(path, encoding="utf-8").read()
-        if AUTO_END in old:
-            user = old.split(AUTO_END, 1)[1]
-        else:                                    # earlier layout: keep what the analyst wrote
-            m = re.search(r"## Summary(.*?)(## Key records|$)", old, re.S)
-            if m:
-                user = "\n## Summary" + m.group(1).rstrip() + "\n"
-    write(path, head + auto_block(case_dir) + "\n" + user.lstrip("\n").join(["\n", ""]))
+        old = read_text(path, 8 * 1024 * 1024)
+        entries, body = split_front(old)
+        keep_fm = [lines for key, lines in entries if key not in FM_MANAGED]
+        if AUTO_START in body and AUTO_END in body:
+            pre, rest = body.split(AUTO_START, 1)
+            below = rest.split(AUTO_END, 1)[1]
+            pre_lines = pre.strip("\n").splitlines()
+            if pre_lines and pre_lines[0].startswith("# "):
+                title, pre_lines = pre_lines[0], pre_lines[1:]
+            above = "\n".join(pre_lines).strip("\n")
+        elif body.strip():
+            bdir = os.path.join(case_dir, ".northstar")
+            os.makedirs(bdir, mode=0o700, exist_ok=True)
+            write(os.path.join(bdir, f"Case.md.{utc('%Y%m%dT%H%M%SZ')}.bak"), old)
+            kept = re.sub(r"\n?" + re.escape(MARK) + r"\n?", "\n", body).strip("\n")
+            below = ("\n## Previous content\n*Kept by northstar when the dashboard was added "
+                     "(a copy is in .northstar/).*\n\n" + kept + "\n")
+    if not any(k == "tags" for k, _ in [(l[0].split(":")[0], l) for l in keep_fm]):
+        keep_fm.append(["tags: [case]"])
+    fm = "\n".join([f"{k}: {v}" for k, v in managed] + ["\n".join(l) for l in keep_fm])
+    text = (f"---\n{fm}\n---\n{title}\n\n" + (above + "\n\n" if above else "")
+            + auto_block(case_dir) + "\n" + ("\n" + below.lstrip("\n") if below.strip() else "\n"))
+    write(path, text)
     rows = results_index(case_dir)
     write(os.path.join(case_dir, "Results.md"),
           f"---\ntype: index\ntags: [results]\n---\n# Results: {cell(name)}\n\n{MARK}\n\n"
@@ -655,10 +823,6 @@ def cmd_case(case_dir, quiet=False):
              "| When (UTC) | Tool | Target |\n|---|---|---|\n"
              + "\n".join(f"| {cell(w)} | {cell(t)} | {wlink(vpath(case_dir, 'Results', n[:-3]), tg or n[:-3], True)} |" for w, t, tg, n in rows)
              if rows else "No results yet.") + "\n")
-    if not quiet:
-        refresh_shared(os.path.dirname(os.path.abspath(case_dir)))
-        print("Case dashboard updated.")
-    return 0
 
 
 def is_case(path):
@@ -740,18 +904,24 @@ def cmd_setup(data_dir):
         # refresh our own templates; a template you've edited is left alone
         if not os.path.exists(p) or open(p, encoding="utf-8").read().endswith(MARK + "\n"):
             write(p, text + "\n" + MARK + "\n")
-    made = 0
+    made, failed = 0, []
     for case in sorted(os.listdir(root)):
         cp = os.path.join(root, case)
         if not is_case(cp):
             continue
-        existing = set(os.listdir(os.path.join(cp, "Results"))) if os.path.isdir(os.path.join(cp, "Results")) else set()
-        for rd in result_dirs(cp):
-            if note_name(describe(cp, rd)) not in existing:
-                result_note(cp, rd)
-                made += 1
-        cmd_case(cp, quiet=True)
+        try:                                     # one broken case doesn't stop the others
+            with case_lock(cp):
+                have = {front(os.path.join(cp, "Results", n)).get("folder")
+                        for n in (os.listdir(os.path.join(cp, "Results")) if os.path.isdir(os.path.join(cp, "Results")) else [])}
+                for rd in result_dirs(cp):
+                    if os.path.relpath(rd, cp) not in have:
+                        made += safe_note(cp, rd)
+                update_case(cp)
+        except Exception as exc:                 # noqa: BLE001 - report and carry on
+            failed.append(f"{case}: {exc}")
     refresh_shared(root)
+    for f in failed:
+        print(f"! {f}", file=sys.stderr)
     print(f"Vault ready: {root}" + (f" ({made} result notes written)" if made else ""))
     return 0
 
@@ -778,12 +948,37 @@ def cmd_register(data_dir, config_json):
     return 0
 
 
-def cmd_result(case_dir, result_dir):
-    rel = os.path.relpath(os.path.abspath(result_dir), os.path.abspath(case_dir))
-    if rel.startswith("..") or not os.path.isdir(result_dir):
+def safe_note(case_dir, result_dir):
+    """Write one result note; a broken result folder is reported, not fatal."""
+    try:
+        result_note(case_dir, result_dir)
+        return 1
+    except Exception as exc:                     # noqa: BLE001
+        print(f"! {os.path.relpath(result_dir, case_dir)}: {exc}", file=sys.stderr)
         return 0
-    path, _ = result_note(case_dir, result_dir)
-    cmd_case(case_dir, quiet=True)
+
+
+def owning_case(result_dir):
+    """The case a result folder belongs to: …/Cases/<case>/<kind>/<result>."""
+    p = os.path.abspath(result_dir)
+    while os.path.dirname(p) != p:
+        parent = os.path.dirname(p)
+        if os.path.basename(parent) == "Cases" and is_case(p):
+            return p
+        p = parent
+    return ""
+
+
+def cmd_result(case_dir, result_dir):
+    if not os.path.isdir(result_dir):
+        return 0
+    case_dir = owning_case(result_dir) or case_dir          # the result's own case, even if the active one changed
+    rel = os.path.relpath(os.path.abspath(result_dir), os.path.abspath(case_dir))
+    if rel.startswith(".."):
+        return 0
+    with case_lock(case_dir):
+        path, _ = result_note(case_dir, result_dir)
+        update_case(case_dir)
     refresh_shared(os.path.dirname(os.path.abspath(case_dir)))
     print(path)
     return 0
@@ -791,10 +986,10 @@ def cmd_result(case_dir, result_dir):
 
 def cmd_refresh(case_dir):
     n = 0
-    for rd in result_dirs(case_dir):
-        result_note(case_dir, rd)
-        n += 1
-    cmd_case(case_dir, quiet=True)
+    with case_lock(case_dir):
+        for rd in result_dirs(case_dir):
+            n += safe_note(case_dir, rd)
+        update_case(case_dir)
     refresh_shared(os.path.dirname(os.path.abspath(case_dir)))
     print(f"{n} result notes rebuilt.")
     return 0
@@ -814,7 +1009,8 @@ def cmd_new(case_dir, kind, title):
     text = (tpl.replace("{{title}}", title).replace("{{date:YYYY-MM-DD}}", utc("%Y-%m-%d"))
             .replace("{{date}}", utc("%Y-%m-%d")).replace("{{time}}", utc("%H:%M")))
     write_if_missing(path, text)
-    cmd_case(case_dir, quiet=True)
+    with case_lock(case_dir):
+        update_case(case_dir)
     print(path)
     return 0
 

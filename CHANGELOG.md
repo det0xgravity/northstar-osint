@@ -4,6 +4,31 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project uses
 [Semantic Versioning](https://semver.org/).
 
+## [0.27.2] - 2026-10-27
+
+Phase 1 of the case-hub review (investigator, OSINT specialist, QC).
+
+### Security
+- A file name from the web could break out of an Obsidian link and inject HTML
+  that loads a remote image (revealing your IP). Names that could do this are
+  now shown as text, never linked; captured web pages are listed, not linked.
+- Collected text is fully escaped (`& # $ % = ~` too), so it can't become maths,
+  tags, hidden comments or entities; terminal colour codes are stripped.
+
+### Fixed
+- Case.md never loses the analyst's work: text above and below the generated
+  block and added properties are kept; an older Case.md without the markers is
+  kept whole (and backed up to `.northstar/`). Notes are written atomically, and
+  a lock keeps two northstar runs from writing a case at once.
+- A broken symlink or unreadable file no longer stops the notes for that case or
+  for every other case; large CSV and text files are read as streams.
+- Two results in the same minute no longer share one note (names have seconds).
+- The results index reads each note's properties: country labels are right
+  and undated results sort last. The Reports link opens the latest report; an
+  empty lead status no longer hides the lead.
+- A result's note goes into the result's own case even if the active case
+  changed during a long run.
+
 ## [0.27.1] - 2026-10-27
 
 ### Security

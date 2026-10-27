@@ -256,6 +256,24 @@ python3 "$R/lib/ns_vault.py" register "$W/data" "$W/obs/obsidian.json" > /dev/nu
 python3 "$R/lib/ns_vault.py" register "$W/data" "$W/obs/obsidian.json" > /dev/null
 check "vault registered once with Obsidian" "python3 -c 'import json,sys; assert len(json.load(open(sys.argv[1]))[\"vaults\"]) == 1' '$W/obs/obsidian.json'"
 
+section "Case hub hardening"
+V="$W/vault2"; VA="$V/Cases/alpha"; VB="$V/Cases/beta"
+mkdir -p "$VA/gallery/x_20261026-150010" "$VA/username/jdoe_20261026-150010" "$VA/username/jdoe_20261026-150040" "$VB/media/v_20261026-170000"
+for c in "$VA" "$VB"; do echo '{"status":"open"}' > "$c/case.json"; echo x > "$c/audit.log"; done
+GX="$VA/gallery/x_20261026-150010"; touch "$GX/console.log" "$VA/username/jdoe_20261026-150010/console.log" "$VA/username/jdoe_20261026-150040/console.log"
+printf x > "$GX/a]] <img src=https:evil.example> [[b.jpg"; printf '<html>' > "$GX/page.html"; ln -s /nonexistent "$GX/broken.txt"
+ln -s /nonexistent "$VB/media/v_20261026-170000/broken.json"; touch "$VB/media/v_20261026-170000/console.log"
+printf -- '---\ntype: case\npriority: high\n---\n# Case alpha\n\nTOPNOTE\n\n## Findings\nAlias BOB.\n' > "$VA/Case.md"
+python3 "$R/lib/ns_vault.py" setup "$V" > /dev/null 2>&1
+python3 "$R/lib/ns_vault.py" case "$VA" > /dev/null 2>&1
+check "old-layout Case.md, text above the block and own properties all survive" \
+  "grep -q TOPNOTE '$VA/Case.md' && grep -q 'Alias BOB' '$VA/Case.md' && grep -q 'priority: high' '$VA/Case.md' && ls '$VA'/.northstar/Case.md.*.bak >/dev/null"
+check "a hostile file name is shown as text, never linked or embedded" \
+  "! grep -q '\[\[[^]]*evil' '$VA'/Results/*Gallery*.md && grep -q '\`a\]\] <img' '$VA'/Results/*Gallery*.md"
+check "captured web pages are listed but not linked" "grep -q '\`page.html\` (web page' '$VA'/Results/*Gallery*.md"
+check "two results in the same minute keep separate notes" "[ \"\$(ls '$VA'/Results/*Username*.md | wc -l)\" -eq 2 ]"
+check "a broken file doesn't stop other cases" "[ -f '$VB/Case.md' ] && ls '$VB'/Results/*Media*.md >/dev/null"
+
 section "Telegram (stubbed engine)"
 printf '#!/bin/sh\necho "ns_telegram $*" > called.txt\necho "ns_telegram $*"\n' > "$G/ns_telegram"; chmod +x "$G/ns_telegram"
 PATH="$G:$PATH" menu ns-telegram "Look up" "https://t.me/s/durov/123"
