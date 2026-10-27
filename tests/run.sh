@@ -310,6 +310,26 @@ echo tampered >> "$FR/console.log"
 check "tampered evidence is flagged in the report" "python3 '$R/lib/ns_vault.py' report-sections '$F' '$W/rs' | grep -q 'no longer match its manifest'"
 echo general > "$XDG_CONFIG_HOME/northstar/active_case"
 
+section "Selectors, accounts and the link chart"
+SC="$W/data/Cases/sel-case"; mkdir -p "$SC/username/jdoe_20261027-100000" "$SC/domain/example.com_20261027-130000" "$SC/People" "$SC/Accounts"
+echo '{"status":"open"}' > "$SC/case.json"; echo x > "$SC/audit.log"
+printf '▶ sherlock jdoe\n[+] GitHub: https://github.com/jdoe\n[+] Reddit: https://www.reddit.com/user/JDoe\n▶ maigret jdoe\n[+] GitHub: https://github.com/jdoe\n[+] Bad: https://evil.example/[[x]]<img src=x>\n' > "$SC/username/jdoe_20261027-100000/console.log"
+touch "$SC/domain/example.com_20261027-130000/console.log"
+printf 'www.example.com\nmail.example.com\n' > "$SC/domain/example.com_20261027-130000/subdomains.txt"
+printf 'Registrant: admin@example.com, +1 613 555 0123\n' > "$SC/domain/example.com_20261027-130000/rdap.txt"
+printf -- '---\ntype: person\n---\n# Jane Doe\n' > "$SC/People/Jane Doe.md"
+printf -- '---\ntype: account\nplatform: reddit.com\nusername: "jdoe"\nowner: "[[Jane Doe]]"\n---\n# My reddit note\n' > "$SC/Accounts/reddit.com - jdoe.md"
+python3 "$R/lib/ns_vault.py" refresh "$SC" > /dev/null
+check "selectors are collected and typed" "grep -q '^| \`jdoe\` | 2 (maigret, sherlock)' '$SC/Selectors.md' && grep -q 'admin@example.com' '$SC/Selectors.md' && grep -q '+16135550123' '$SC/Selectors.md' && grep -q 'mail.example.com' '$SC/Selectors.md'"
+check "pivots already run are marked done" "grep '^| \`jdoe\`' '$SC/Selectors.md' | grep -q '✓ Username'"
+check "an account reported by two tools gets an Account note" "grep -q 'Reported by 2 tools (unverified)' '$SC/Accounts/github.com - jdoe.md'"
+check "an Account note you wrote is left alone" "grep -q '^# My reddit note' '$SC/Accounts/reddit.com - jdoe.md' && ! grep -q 'northstar:auto' '$SC/Accounts/reddit.com - jdoe.md'"
+check "the link chart is valid JSON Canvas linking accounts to people" \
+  "python3 -c 'import json,sys; d=json.load(open(sys.argv[1])); assert any(e[\"label\"]==\"owned by\" for e in d[\"edges\"])' '$SC/Link chart.canvas'"
+echo '{"nodes":[],"edges":[]}' > "$SC/Link chart.canvas"; python3 "$R/lib/ns_vault.py" refresh "$SC" > /dev/null
+check "an edited link chart is kept; a generated copy is written beside it" "grep -qx '{\"nodes\":\[\],\"edges\":\[\]}' '$SC/Link chart.canvas' && [ -s '$SC/Link chart (generated).canvas' ]"
+check "hostile selectors stay inert" "! grep -q '<img' '$SC/Selectors.md' '$SC/Accounts.md' && ! grep -q '\[\[x' '$SC/Selectors.md'"
+
 section "Telegram (stubbed engine)"
 printf '#!/bin/sh\necho "ns_telegram $*" > called.txt\necho "ns_telegram $*"\n' > "$G/ns_telegram"; chmod +x "$G/ns_telegram"
 PATH="$G:$PATH" menu ns-telegram "Look up" "https://t.me/s/durov/123"

@@ -250,6 +250,7 @@ ns_run() {
     return 127
   fi
   printf '\n\033[1m▶ %s\033[0m\n' "$*"
+  printf '▶ %s\n' "$*" >> "$out/console.log"     # which tool printed what follows (for the case notes)
   ns_audit "$1" "$(basename "$out")" "$*"
   printf '%s\n' "$1" >> "$out/.ns-tools"          # provenance.json lists each tool's version
   ( cd "$out" && "$@" ) 2>&1 | tee -a "$out/console.log"

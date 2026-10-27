@@ -4,6 +4,22 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project uses
 [Semantic Versioning](https://semver.org/).
 
+## [0.29.0] - 2026-10-27
+
+Phase 3 of the case-hub review: selectors, accounts and the link chart.
+
+### Added
+- `Selectors.md`: identifiers from every result (usernames, emails, phones,
+  domains, IP and onion addresses, Telegram IDs, coordinates, profile URLs),
+  with how many tools saw each, first seen, source notes, and next searches
+  (✓ when already run). Each result note lists the selectors seen in it.
+- `Accounts.md`: account hits merged across tools; accounts reported by two
+  or more tools get a generated, unverified Account note.
+- `Link chart.canvas`: people, accounts and multi-tool selectors on an
+  Obsidian Canvas, kept as a generated copy once you edit the chart.
+- `ns_run` marks each tool's output in console.log, so hits are credited to
+  the tool that reported them.
+
 ## [0.28.0] - 2026-10-27
 
 Phase 2 of the case-hub review: findings and the report.
