@@ -4,12 +4,34 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project uses
 [Semantic Versioning](https://semver.org/).
 
-## [Unreleased]
+## [0.33.0] - 2026-10-27
 
 ### Added
 - **docs/INVESTIGATION-GUIDE.md:** a whole investigation step by step, from a
   new VM to a report ready for submission, with a worked example, grading,
   verification traps, a pre-submission checklist and common mistakes.
+- **docs/CASE-EXAMPLES.md:** two fictional cases worked through end to end: a
+  dark-web vendor traced from a username and what they leak, and a photo
+  geolocated and traced to its origin and the person in it.
+- **Edit case details (intake)** in the Case menu: each change is written to
+  the notes with its old and new value; intake recorded late is marked so.
+- **Reopen this case:** a closed case can be reopened, with a reason in the notes.
+- **Flags become Findings:** logging a flag in Missing person offers to create
+  a lead Finding with the URL, explanation, date and evidence hash, so it can
+  reach the Word report.
+
+### Changed
+- **Closing a case** first lists what isn't finished (records that don't
+  verify, no report or one older than the findings, no review of the current
+  findings and summary, incomplete intake, open leads). Closing anyway writes
+  them to the notes. A closed case takes no more notes, reviews or reports.
+- **Supervisor reviews** also fingerprint the summary, analysis and next steps
+  in Case.md; the report warns when they change after the review.
+- **Exhibits and findings:** a finding linked to a result that was recorded as
+  an exhibit is checked against the exhibit register; New finding from the
+  latest result fills in the exhibit ID; recording an exhibit updates its
+  result note.
+- The report warns when the intake record is missing or incomplete.
 
 ### Fixed
 - docs/MENUS.md: the ns-case table described the old report location.

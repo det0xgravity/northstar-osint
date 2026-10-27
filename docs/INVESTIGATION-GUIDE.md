@@ -2,6 +2,8 @@
 
 This guide takes you through a whole investigation on the northstar VM, step by step: preparing the VM, opening a case, collecting, sealing evidence, analysing in Obsidian, writing findings, review, and the report you hand over. It uses one fictional worked example throughout, a missing adult called **Jane Doe**, but the same steps work for due diligence, fraud or threat cases.
 
+For two more complete cases (a dark-web vendor identified from their username, and a photo traced to where it was taken and who is in it), see [CASE-EXAMPLES.md](CASE-EXAMPLES.md).
+
 It draws on reviews by an experienced case manager (evidence, supervision, handover) and a senior OSINT specialist (collection, verification, OPSEC).
 
 You don't need to know the command line. Everything here is in the **northstar** menu (the compass icon in the dock, or type `northstar` in a terminal). Menu names in **bold** are exactly what you'll see.
@@ -89,6 +91,8 @@ The case becomes **active**: every menu now saves into it. The current case is s
 📷 *The "Case … opened" message with the intake record.*
 
 **Never reuse a case for a different matter.** Each matter gets its own case, so its audit log and exhibits stand on their own.
+
+**If the details change** (the scope widens, the review date moves, you skipped the intake): Case → **Edit case details (intake)**. Each change is recorded in the notes with the old and new value, and intake recorded after the case was opened is marked as late. The report warns if the intake record is missing or incomplete.
 
 ---
 
@@ -231,7 +235,7 @@ It can't watch pages that need a login or are built entirely by JavaScript, whic
 
 ### 4.12 Search-party events: flags
 
-At a Trace Labs-style event, log each submission as you find it with **Missing person** → **Log a finding (flag)** (category, URL, why it matters, optional screenshot), then **Export findings** for the event platform. These flags are a separate log for the event: **they don't go into the Word report**. For a case that ends in a report, record conclusions as Obsidian **Findings** (step 7).
+At a Trace Labs-style event, log each submission as you find it with **Missing person** → **Log a finding (flag)** (category, URL, why it matters, optional screenshot), then **Export findings** for the event platform. These flags are the event's log; the Word report is built from Obsidian **Findings** (step 7). When you log a flag, northstar offers to **make it a Finding too**: it starts as a lead with the URL, explanation, date and evidence hash filled in, so you can capture the page, grade it and corroborate it before it goes into a report.
 
 ### 4.13 Log nil results
 
@@ -244,7 +248,7 @@ A search that finds nothing is still a result. On that result note in Obsidian, 
 Every result folder is already sealed. **Record the ones you'll rely on as exhibits:** main menu → **Evidence & exhibits** → **Record a result folder as an exhibit**, choose the folder and describe it (`Capture of Instagram profile janedoe90, 2026-10-27`). It gets a number such as `2026-031-JANE-DOE-EX-001`, and its fingerprint goes in `exhibits.csv`. If it's offered, you can add an OpenTimestamps proof.
 
 - Record captures as exhibits **as soon as you take them**, not at the end.
-- Copy the exhibit ID: you'll type it into the `exhibits` list of the findings that rely on it.
+- A Finding made with **New finding from the latest result** gets the result's exhibit ID filled in. A finding that links a result under `results` is checked against that result's exhibit too, so you only type exhibit IDs for evidence you didn't link.
 - Work on copies. Don't open and save files inside result folders: any change shows as a broken seal.
 - **Verify a folder (has anything changed?)** before you rely on an older one.
 
@@ -294,7 +298,7 @@ Give it a title that states the conclusion: *Jane Doe posted from Kingston on 20
 | **Observed** | Only what the source shows, with the date and where it was seen. No interpretation |
 | **Assessment** | What you conclude and why, and **the alternative explanations you considered** |
 | `results` | Links to the result notes it rests on |
-| `exhibits` | The exhibit IDs (`…-EX-001`). The report re-checks each one's fingerprint |
+| `exhibits` | The exhibit IDs (`…-EX-001`), filled in when you start from a recorded result. The report re-checks each one's fingerprint |
 | `when_utc` | When it happened, if it has a time. It joins the chronology |
 | `source_grade` | How reliable the **source** is: A always · B usually · C fairly · D not usually · E unreliable · F can't be judged |
 | `info_grade` | How credible **this information** is: 1 confirmed elsewhere · 2 probably true · 3 possibly true · 4 doubtful · 5 improbable · 6 can't be judged |
@@ -349,7 +353,7 @@ Before the report, someone other than you checks the work. If you work alone (a 
 2. The reviewer reads Case.md, the reportable findings and their evidence. The **Integrity** box on Case.md must say *all records intact*.
 3. Main menu → **Case** → **Record a supervisor review**: reviewer's name, role, decision (*approved*, *approved with changes*, *changes requested*, *not approved*) and comments.
 
-The review is written to the contemporaneous notes with a fingerprint of the findings as they stood. **If you change a reportable finding afterwards, the report warns you that findings changed since the review,** so make the changes and record a new review.
+The review is written to the contemporaneous notes with two fingerprints: the reportable findings, and what you wrote in Case.md (summary, analysis, next steps). **If either changes afterwards, the report warns you,** so make the changes and record a new review.
 
 ---
 
@@ -365,6 +369,8 @@ If anything doesn't hold up, northstar lists **warnings** first and asks whether
 | Missing grades | Fill in `source_grade` and `info_grade` |
 | An exhibit or file no longer matches | Something changed after sealing. Find out why, and write a note. Don't re-seal over it |
 | Findings changed since the review / no review | Record a review (step 8) |
+| No intake record, or intake incomplete | Case → **Edit case details (intake)**. Missing intake recorded now is marked late in the notes |
+| The summary, analysis or next steps changed since the review | Record a new review |
 | Exhibit isn't in the exhibits register | Check the ID you typed in `exhibits` against **List exhibits** |
 | Marked reportable but still a lead | Corroborate it first, or set `reportable: false` |
 | Discounted without a reason | Fill in `discount_reason` |
@@ -393,7 +399,11 @@ The report's hash is written to the contemporaneous notes. **Read the whole .doc
 2. **Evidence & exhibits** → **Export the case (archive + SHA-256)**: a `.tar.gz` of the whole case in `~/Northstar/Exports/`, readable only by you, with a `.sha256` beside it.
 3. Submit `report.docx` with `hashes.sha256` (and the export, if the recipient needs the evidence) through your organisation's approved channel, and send the SHA-256 values separately so they can check what they received.
 4. If someone else takes over, give them **Handover.md**: intake and lawful basis, integrity, findings and report status, the last review, open leads and owners, next steps and decisions.
-5. Case → **Close this case (verify, export, mark closed)**. Nothing is deleted, and scheduled page checks skip closed cases. Delete the working copy when your retention date allows, and revert the VM to its clean snapshot.
+5. Case → **Close this case (verify, export, mark closed)**. Before closing, northstar checks that the notes, audit log and exhibits verify, a report has been built since the last change to findings, a review covers the current findings and summary, the intake is complete and no leads are open. Anything not done is listed; if you close anyway, the open points are written to the notes. Nothing is deleted, and scheduled page checks skip closed cases.
+
+   A closed case takes no more notes, reviews or reports. To work on it again, Case → **Reopen this case**, with a reason (recorded in the notes).
+
+   Delete the working copy when your retention date allows, and revert the VM to its clean snapshot.
 
 ---
 

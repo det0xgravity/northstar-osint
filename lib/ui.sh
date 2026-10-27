@@ -33,7 +33,8 @@ ui_list() {
   printf '%s\n' "$r"
 }
 
-# ui_entry "Prompt" ["default"]   -> prints the text entered (fails on cancel/empty)
+# ui_entry "Prompt" ["default"]   -> prints the text entered (fails on cancel/empty;
+#                                    with NS_ALLOW_EMPTY=1 only cancel fails)
 ui_entry() {
   local r
   if ui_mac; then
@@ -42,7 +43,7 @@ ui_entry() {
     r=$(zenity --entry --title="$NS_TITLE" --width=460 --text="$1" --entry-text="${2:-}" 2>/dev/null) || return 1
   fi
   r=$(printf '%s' "$r" | sed 's/^[[:space:]]*//; s/[[:space:]]*$//')
-  [ -n "$r" ] || return 1
+  [ -n "$r" ] || [ -n "${NS_ALLOW_EMPTY:-}" ] || return 1
   printf '%s\n' "$r"
 }
 
@@ -314,7 +315,7 @@ if [ "${NS_UI:-}" = script ]; then
     for o in "$@"; do case "$o" in "$want"*) printf '%s\n' "$o"; return 0 ;; esac; done
     return 1
   }
-  ui_entry()    { local a; a=$(_ui_next) || return 1; [ "$a" = "<default>" ] && a="${2:-}"; printf '%s\n' "$a"; }
+  ui_entry()    { local a; a=$(_ui_next) || return 1; [ "$a" = "<default>" ] && a="${2:-}"; [ "$a" = "<empty>" ] && a=""; printf '%s\n' "$a"; }
   ui_secret()   { _ui_next; }
   ui_files()    { _ui_next; }
   ui_dir()      { _ui_next; }

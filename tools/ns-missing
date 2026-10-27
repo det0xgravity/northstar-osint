@@ -34,7 +34,14 @@ case "$choice" in
     fi
     r=$(ns_missing finding-add "$case_dir" "$cat" "$url" "$why" "${ev:-}")
     ns_audit ns-missing "$url" "finding: $cat"
-    printf '%s\n' "$r"; ui_notify "$r" ;;
+    printf '%s\n' "$r"; ui_notify "$r"
+    # Flags are the event's log; a Finding note is what reaches the Word report
+    id=$(printf '%s' "$r" | sed -n 's/^\(F[0-9]*\) logged.*/\1/p')
+    if [ -n "$id" ] && ns_cmd ns_vault && ui_question "Also make it a Finding in the case notes, so it can go into the report?
+
+It starts as a lead: capture the page, grade it and corroborate it before marking it reportable."; then
+      ns_vault from-flag "$case_dir" "$id" >/dev/null && ns_audit ns-notes "finding" "finding created from flag $id"
+    fi ;;
 
   "Subject profile"*)
     # key|question (each pre-filled with the current value)

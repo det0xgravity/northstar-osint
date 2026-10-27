@@ -191,7 +191,7 @@ Results are saved under `translation/` in the case and sealed. Machine translati
 | Option | What it does |
 |---|---|
 | Open this case's notes | Opens `Case.md` |
-| New finding from the latest result | A Finding note already linked to the result you just ran |
+| New finding from the latest result | A Finding note already linked to the result you just ran, with its exhibit ID if you've recorded it as one |
 | New note: finding / person / account / organisation / place / event / lead | A note from its template |
 | Discount a finding | Marks it discounted with your reason (also written to the contemporaneous notes). Findings are never deleted: the report lists discounted and unreported findings as unused material, and flags finding notes that have been deleted |
 | Open the Cases vault | `Home.md`: every case with status, reference, results and last activity |
@@ -202,7 +202,7 @@ Results are saved under `translation/` in the case and sealed. Machine translati
 
 1. Record conclusions as **Findings**, linked to the result notes and exhibits that support them. Grade the source (A–F) and the information (1–6).
 2. When a finding is corroborated or confirmed, set **reportable: true**.
-3. A supervisor records a review (Case → **Record a supervisor review**). The review is written to the hash-chained notes with the fingerprint of the findings it covered.
+3. A supervisor records a review (Case → **Record a supervisor review**). The review is written to the hash-chained notes with the fingerprints of the findings and of the summary, analysis and next steps in Case.md.
 4. **Build a report** (Case menu) writes `reports/v<n>_<time>/`, which contains:
 
    | File | Contents |
@@ -224,7 +224,7 @@ Results are saved under `translation/` in the case and sealed. Machine translati
 - the latest review;
 - then methodology, exhibits, notes and the audit log.
 
-**Warnings:** anything that doesn't hold up is listed at the top, and you're asked before the report is built. That covers a reportable finding with no sealed evidence, missing grades, an exhibit or file that no longer matches, findings changed since the review, no review at all, or a deleted finding.
+**Warnings:** anything that doesn't hold up is listed at the top, and you're asked before the report is built. That covers a missing or incomplete intake record, a reportable finding with no sealed evidence, missing grades, an exhibit or file that no longer matches, findings or the Case.md summary changed since the review, no review at all, or a deleted finding. A finding that links a result recorded as an exhibit is checked against the exhibit register.
 
 Each result note opens with **Highlights** for its tool (hits and the tools that reported them, subdomain and live-host counts and registration details, breach summary lines, Telegram IDs and member or message counts, top face-comparison scores with the similarity caveat, top GeoCLIP estimates with the caveat that they're leads, dark-web page details, downloaded media titles). Notes for result folders that have been deleted are removed, or kept with **folder_missing: true** if you wrote in them.
 
@@ -281,12 +281,14 @@ Case records (main menu: **Case: notes, details, report, close**; **Switch / cre
 | Option | What it does | Output (in the case folder) |
 |---|---|---|
 | Open or switch case | A new case asks for its intake details: client or matter reference, who authorised it, purpose and lawful basis, scope and subjects, review or retention date. An existing case is switched to, never overwritten | `case.json`, `scope.md` |
-| Add a note | A contemporaneous note, saved with the UTC time and operator, and hash-chained so later edits show | `notes.md` |
+| Add a note | A contemporaneous note, saved with the UTC time and operator, and hash-chained so later edits show. Not possible on a closed case | `notes.md` |
 | Case details | Shows the intake record and status | |
-| Build a report | A Word document (pandoc) from the case details, your Summary and Analysis in Case.md, the reportable findings and their checked exhibits, nil returns, unused material, the latest review, methodology (the tools and sources actually used, from the audit log), exhibits, notes and the audit log. Warnings are listed first. See [From findings to the report](#from-findings-to-the-report) | `reports/v<n>_<UTC>/`: `report.docx`, `report.md`, `findings-frozen.md`, `hashes.sha256` |
+| Edit case details (intake) | Changes the reference, authority, lawful basis, scope or review date (empty a field to clear it; Cancel changes nothing). Each change goes into the notes with its old and new value; intake recorded after the case was opened is marked late | `case.json`, `scope.md`, `notes.md` |
+| Build a report | A Word document (pandoc) from the case details, your Summary and Analysis in Case.md, the reportable findings and their checked exhibits, nil returns, unused material, the latest review, methodology (the tools and sources actually used, from the audit log), exhibits, notes and the audit log. Warnings are listed first. See [From findings to the report](#from-findings-to-the-report) | `reports/v<n>_<UTC>/`: `report.docx`, `report.md`, `findings-section.md`, `findings-frozen.md`, `hashes.sha256` |
 | Record a supervisor review | Reviewer, role, decision and comments, written to the notes with the fingerprint of the findings reviewed | `notes.md` |
 | Verify notes and audit log | Checks both hash chains | |
-| Close this case | Verifies the audit log, exports the case with a SHA-256 to `~/Northstar/Exports`, and marks it closed. Nothing is deleted | `case.json` status |
+| Close this case | First lists anything unfinished: notes, audit log or exhibits that don't verify, no report or one older than the findings, no review covering the current findings and summary, an incomplete intake, open leads. Closing anyway writes those points to the notes. Then it verifies the audit log, exports the case with a SHA-256 to `~/Northstar/Exports`, and marks it closed. Nothing is deleted | `case.json` status |
+| Reopen this case | Shown instead of Close on a closed case. Asks for the reason, which goes into the notes | `case.json` status |
 
 ## ns-evidence
 

@@ -19,6 +19,13 @@ Commands:
   refresh CASEDIR                rebuild every result note in the case
   new CASEDIR TYPE TITLE         a working note from a template; prints its path
   uri PATH                       obsidian:// link that opens PATH
+  report-sections CASEDIR OUTDIR the report's vault sections, frozen findings and warnings
+  review-hashes CASEDIR          fingerprints a supervisor review covers (findings, Case.md narrative)
+  findings-hash CASEDIR          the findings fingerprint alone
+  discount CASEDIR NAME REASON   mark a finding discounted
+  from-flag CASEDIR FLAG_ID      a lead Finding from a flag logged in Missing person → Log a finding
+  close-check CASEDIR            what still needs doing before the case is closed
+  integrity CASEDIR              check the notes, audit log and exhibits
 
 Working notes are editable. The tamper-evident record stays in notes.md
 (Case → Add a note), audit.log and the sealed result folders.
@@ -1771,6 +1778,7 @@ def findings(case_dir):
     out = []
     fdir = os.path.join(case_dir, "Findings")
     ex_rows = {r.get("exhibit_id"): r for r in exhibits(case_dir)}
+    ex_by_folder = {str(r.get("folder", "")).rstrip("/"): r for r in exhibits(case_dir)}
     for n in sorted(os.listdir(fdir)) if os.path.isdir(fdir) else []:
         if not n.endswith(".md"):
             continue
@@ -1801,12 +1809,22 @@ def findings(case_dir):
             rp = props(note)
             folder = str(rp.get("folder") or "")
             sha = manifest_sha(os.path.join(case_dir, folder)) if folder else ""
-            f["evidence"].append({"ref": rp.get("exhibit") or os.path.basename(note)[:-3], "folder": folder, "sha": sha,
-                                  "ok": bool(sha), "desc": f"{rp.get('tool', '')}: {rp.get('target', '')}"})
-            if not sha:
-                f["issues"].append(f"result {os.path.basename(note)[:-3]} isn't sealed")
+            row = ex_by_folder.get(folder.rstrip("/")) if folder else None
+            if row:                                    # a recorded exhibit: check it against the register
+                ok = bool(sha) and sha == row.get("manifest_sha256")
+                f["evidence"].append({"ref": row.get("exhibit_id"), "folder": folder, "sha": row.get("manifest_sha256", ""),
+                                      "ok": ok, "desc": row.get("description", "")})
+                if not ok:
+                    f["issues"].append(f"exhibit {row.get('exhibit_id')} no longer matches its recorded fingerprint" if sha else
+                                       f"exhibit {row.get('exhibit_id')}: its folder or manifest is missing")
+            else:
+                f["evidence"].append({"ref": rp.get("exhibit") or os.path.basename(note)[:-3], "folder": folder, "sha": sha,
+                                      "ok": bool(sha), "desc": f"{rp.get('tool', '')}: {rp.get('target', '')}"})
+                if not sha:
+                    f["issues"].append(f"result {os.path.basename(note)[:-3]} isn't sealed")
             if str(rp.get("tool", "")).startswith("Face comparison"):
                 f["issues"].append("cites a face comparison: report it as similarity for human review, never as identification")
+        f["issues"] = list(dict.fromkeys(f["issues"]))   # an exhibit linked both ways is reported once
         if status not in STATUSES:
             f["issues"].append(f"status '{status}' isn't one of {', '.join(STATUSES)}")
         if f["reportable"]:
@@ -1860,14 +1878,39 @@ def deleted_findings(case_dir, fs):
     return gone
 
 
-def last_review(case_dir):
-    """The latest supervisor review from the hash-chained notes: (line text, findings hash)."""
+def last_review(case_dir, with_narrative=False):
+    """The latest supervisor review from the hash-chained notes: (line text, findings hash), plus the
+    Case.md narrative hash when asked (empty for reviews recorded before it was included)."""
     text = read_text(os.path.join(case_dir, "notes.md"), 16 * 1024 * 1024)
-    revs = [l for l in text.splitlines() if "[REVIEW]" in l]
+    revs = [l for l in text.splitlines() if re.match(r"- \*\*[^*]+\*\* \([^)]*\): \[REVIEW\] ", l)]
     if not revs:
-        return "", ""
-    m = re.search(r"findings sha256 ([0-9a-f]{64})", revs[-1])
-    return re.sub(r" `h:[0-9a-f]{64}`$", "", revs[-1]).lstrip("- "), (m.group(1) if m else "")
+        return ("", "", "") if with_narrative else ("", "")
+    line = re.sub(r" `h:[0-9a-f]{64}`$", "", revs[-1]).lstrip("- ")
+    # anchored at the end, so a reviewer's comment can't supply the hashes
+    m = re.search(r"Reviewed findings sha256 ([0-9a-f]{64})(?:, summary sha256 ([0-9a-f]{64}))?$", line)
+    n = m.group(2) if m and m.group(2) else ""
+    if with_narrative:
+        return line, (m.group(1) if m else ""), n
+    return line, (m.group(1) if m else "")
+
+
+def narrative(case_dir):
+    """What the analyst wrote in Case.md below the generated block (it goes into the report)."""
+    case_md = read_text(os.path.join(case_dir, "Case.md"), 8 * 1024 * 1024)
+    return case_md.split(AUTO_END, 1)[1] if AUTO_END in case_md else ""
+
+
+def narrative_hash(case_dir):
+    return hashlib.sha256(plain(narrative(case_dir)).encode("utf-8")).hexdigest()
+
+
+def intake_gaps(case_dir):
+    meta = read_json(os.path.join(case_dir, "case.json"), {}) or {}
+    if not meta:
+        return ["no intake record: the reference, authorisation and lawful basis aren't recorded (Case → Edit case details)"]
+    missing = [label for k, label in (("reference", "reference"), ("authorised_by", "authorised by"),
+                                      ("purpose", "purpose and lawful basis"), ("scope", "scope")) if not str(meta.get(k) or "").strip()]
+    return [f"intake record incomplete: {', '.join(missing)} (Case → Edit case details)"] if missing else []
 
 
 PLACEHOLDERS = ("What is known so far, in a few lines.",
@@ -1905,16 +1948,19 @@ def report_sections(case_dir):
     gone = deleted_findings(case_dir, fs)
     warnings = [f"{f['name']}: {i}" for f in fs if f["reportable"] or f["status"] == "discounted" for i in f["issues"]]
     warnings += [f"finding note deleted: {g} (discount findings instead of deleting them)" for g in gone]
-    review, rhash = last_review(case_dir)
+    warnings = intake_gaps(case_dir) + warnings
+    review, rhash, nhash = last_review(case_dir, with_narrative=True)
     if not review:
         warnings.append("no supervisor review recorded (Case → Record a supervisor review)")
-    elif rhash != fhash:
-        warnings.append("findings have changed since the last review")
+    else:
+        if rhash != fhash:
+            warnings.append("findings have changed since the last review")
+        if nhash and nhash != narrative_hash(case_dir):
+            warnings.append("the summary, analysis or next steps in Case.md have changed since the last review")
     r = []
     if warnings:
         r += ["## Report warnings", "", "Resolve these before the report is relied on:", ""] + [f"- {cell(w, 300)}" for w in warnings] + [""]
-    case_md = read_text(os.path.join(case_dir, "Case.md"), 8 * 1024 * 1024)
-    analyst = case_md.split(AUTO_END, 1)[1] if AUTO_END in case_md else ""
+    analyst = narrative(case_dir)
     r += ["## Summary and analysis", "", plain(analyst) or "*No summary written in Case.md.*", ""]
     inc = sorted((f for f in fs if f["included"]), key=lambda f: (f["when"] or "~", f["name"]))
     r += ["## Findings", ""]
@@ -2017,6 +2063,80 @@ def cmd_findings_hash(case_dir):
     return 0
 
 
+def cmd_review_hashes(case_dir):
+    print(f"findings={findings_hash(findings(case_dir))}\nsummary={narrative_hash(case_dir)}")
+    return 0
+
+
+def cmd_close_check(case_dir):
+    """One line per thing that isn't finished, as 'problem=…'; nothing printed when all is in order."""
+    out = [f"{n}: {st}" for n, st, ok in integrity(case_dir) if not ok]
+    changed = [x.get("exhibit_id", "") for x in exhibits(case_dir) if verify_files(case_dir, x.get("folder", "")) is False]
+    if changed:
+        out.append(f"Exhibits: files changed since sealing in {', '.join(changed[:10])}")
+    out += intake_gaps(case_dir)
+    reports = sorted(d for d in os.listdir(os.path.join(case_dir, "reports")) if d.startswith("v")) \
+        if os.path.isdir(os.path.join(case_dir, "reports")) else []
+    notes = read_text(os.path.join(case_dir, "notes.md"), 16 * 1024 * 1024).splitlines()
+    built = [l for l in notes if ": REPORT v" in l]
+    if not reports:
+        out.append("no report has been built")
+    else:
+        m = re.search(r"findings sha256 ([0-9a-f]{64})", built[-1]) if built else None
+        if not m:
+            out.append("the latest report isn't recorded in the notes with its findings fingerprint; build it again")
+        elif m.group(1) != findings_hash(findings(case_dir)):
+            out.append("findings have changed since the latest report was built")
+    review, rhash, nhash = last_review(case_dir, with_narrative=True)
+    if not review:
+        out.append("no supervisor review recorded")
+    elif rhash != findings_hash(findings(case_dir)) or (nhash and nhash != narrative_hash(case_dir)):
+        out.append("findings or the Case.md narrative changed since the last review")
+    leads = [n for n in notes_in(case_dir, "Leads") if lead_status(case_dir, n) in ("open", "")]
+    if leads:
+        out.append(f"{len(leads)} lead(s) still open: {', '.join(leads[:5])}")
+    for o in out:
+        print(f"problem={o}")
+    return 0
+
+
+def cmd_from_flag(case_dir, flag_id):
+    """A lead Finding from a flag logged in Missing person → Log a finding, so it can reach the report."""
+    rows = []
+    try:
+        with open(os.path.join(case_dir, "subject", "findings.csv"), encoding="utf-8", newline="") as fh:
+            rows = [r for r in csv.DictReader(fh) if r.get("id") == flag_id]
+    except OSError:
+        pass
+    if not rows:
+        print(f"No flag {flag_id} in this case.", file=sys.stderr)
+        return 1
+    r = rows[-1]
+    title = f"{flag_id} {r.get('category', '')} - {' '.join(str(r.get('explanation', '')).split()[:10])}"
+    safe = re.sub(r'[\\/:*?"<>|#^\[\]%]', "-", title).strip()[:120] or flag_id
+    path = os.path.join(case_dir, "Findings", f"{safe}.md")
+    if os.path.exists(path):
+        print(path)
+        return 0
+    when = r.get("when_utc", "")
+    ev = (f"- Evidence file: {code('subject/evidence/' + r['evidence'])}, SHA-256 {code(r.get('evidence_sha256', ''))}\n"
+          if r.get("evidence") else "")
+    text = (f"---\ntype: finding\nstatus: lead\nreportable: false\nsource_grade:\ninfo_grade:\n"
+            f"when_utc: {json.dumps(when) if when else ''}\nsubjects: []\nresults: []\nexhibits: []\ndiscount_reason:\n"
+            f"flag: {json.dumps(flag_id)}\ntags: [finding, flag]\ncreated: {utc('%Y-%m-%d')}\n---\n"
+            f"# {cell(title, 200)}\n\n"
+            f"> [!finding] From flag {cell(flag_id)} ({cell(r.get('category', ''))}), logged {cell(r.get('logged_utc', ''))}\n"
+            "> Capture the page (Capture web pages), record it as an exhibit and link it under **results** or **exhibits**, "
+            "then grade it, before marking it reportable.\n\n"
+            f"## Observed\n- URL: {code(r.get('url', ''), 400)}\n- {cell(r.get('explanation', ''), 1000)}\n{ev}\n"
+            "## Assessment\nWhat you conclude from it, and why. Alternative explanations you considered.\n\n## Sources\n- \n")
+    with case_lock(case_dir):
+        write_if_missing(path, text)
+        update_case(case_dir)
+    print(path)
+    return 0
+
+
 def set_props(path, updates):
     """Change properties in place, keeping everything else in the note."""
     text = read_text(path, 8 * 1024 * 1024)
@@ -2053,7 +2173,8 @@ def main(argv):
     cmds = {"setup": (cmd_setup, 1), "register": (cmd_register, 2), "case": (cmd_case, 1),
             "result": (cmd_result, 2), "refresh": (cmd_refresh, 1), "new": (cmd_new, 3), "uri": (cmd_uri, 1),
             "report-sections": (cmd_report_sections, 2), "findings-hash": (cmd_findings_hash, 1),
-            "discount": (cmd_discount, 3), "integrity": (cmd_integrity, 1)}
+            "discount": (cmd_discount, 3), "integrity": (cmd_integrity, 1), "review-hashes": (cmd_review_hashes, 1),
+            "close-check": (cmd_close_check, 1), "from-flag": (cmd_from_flag, 2)}
     if len(argv) < 2 or argv[1] not in cmds or len(argv) - 2 != cmds[argv[1]][1]:
         print(__doc__)
         return 2

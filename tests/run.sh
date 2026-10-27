@@ -71,6 +71,15 @@ check "notes chain verifies" "ns_casework notes-verify '$TC' > /dev/null"
 sed 's/second note/SECOND note/' "$TC/notes.md" > "$W/n" && mv "$W/n" "$TC/notes.md"
 check "an edited note is detected" "! ns_casework notes-verify '$TC' > /dev/null"
 check "report source builds" "ns_casework report '$TC' '$W/r.md' > /dev/null && grep -q 'REF-1' '$W/r.md'"
+menu ns-case "Edit case details" "REF-1" "Counsel" "Litigation support" "Acme and its directors" "2031-01-01"
+menu ns-case "Edit case details" "REF-1" "Counsel" "Litigation support" "Acme and its directors" "<empty>"
+check "a field can be cleared, and the clearing is recorded" "grep -q '\"review_date\": \"\"' '$TC/case.json' && grep -q 'Review / retention date: \"2031-01-01\" changed to \"(empty)\"' '$TC/notes.md'"
+mkdir -p "$W/data/Cases/late-case"; printf '2026-10-20T08:00:00Z\tlate-case\tx\ty\tz\top\th\n' > "$W/data/Cases/late-case/audit.log"
+echo '{"reference": "L-1", "authorised_by": "A", "purpose": "B", "scope": "C", "review_date": ""}' | ns_casework amend "$W/data/Cases/late-case" > /dev/null
+check "intake recorded late keeps the real opening time and says it was late" \
+  "grep -q '\"opened_utc\": \"2026-10-20T08:00:00Z\"' '$W/data/Cases/late-case/case.json' && grep -q 'INTAKE RECORDED LATE: Client / matter reference: L-1' '$W/data/Cases/late-case/notes.md'"
+check "intake changes are saved and recorded in the notes with old and new values" \
+  "grep -q '\"scope\": \"Acme and its directors\"' '$TC/case.json' && grep -q 'INTAKE AMENDED: Scope and subjects: \"Acme\" changed to \"Acme and its directors\"' '$TC/notes.md' && ! grep -q 'INTAKE AMENDED: Client' '$TC/notes.md'"
 
 section "Secrets"
 CANARY="canary-key-0123456789abcdef"
@@ -132,7 +141,9 @@ echo general > "$XDG_CONFIG_HOME/northstar/active_case"
 menu ns-missing "Subject profile" "Jane Doe" "JD" "1999" "2026-10-01 18:30" "Ottawa bus station" "5'6, red jacket" "janed99" "" "" "" ""
 check "profile saved" "grep -q '\"name\": \"Jane Doe\"' '$CASE/subject/subject.json'"
 printf 'shot' > "$W/shot.png"
-menu ns-missing "Log a finding" "Friends" "https://example.com/p/1" "Friend posted with her on 2026-10-03" "yes" "$W/shot.png"
+menu ns-missing "Log a finding" "Friends" "https://example.com/p/1" "Friend posted with her on 2026-10-03" "yes" "$W/shot.png" "yes"
+check "a flag can become a lead Finding for the report" \
+  "f=\$(ls '$CASE'/Findings/F001*.md) && grep -q '^status: lead' \"\$f\" && grep -q '^flag: \"F001\"' \"\$f\" && grep -q 'when_utc: \"2026-10-03' \"\$f\" && grep -q 'example.com/p/1' \"\$f\""
 menu ns-missing "Log a finding" "Location" "https://example.com/p/1/" "Same post, location tag" "no"
 check "finding logged with evidence hash" "grep -q '^F001,.*Friends.*shot.png,[0-9a-f]\{64\}' '$CASE/subject/findings.csv'"
 check "duplicate URL warned" "grep -q 'already logged as F001' '$W/out.txt'"
@@ -143,6 +154,9 @@ check "timeline marks last seen and later events" "grep -q 'LAST SEEN at Ottawa 
 check "timeline includes media metadata and dated findings" "grep -q 'Post by janed99: Night out' '$CASE/subject/timeline.csv' && grep -q 'Friend posted' '$CASE/subject/timeline.csv'"
 menu ns-missing "Export findings"
 check "findings export grouped by category" "grep -q '## Friends (1)' '$CASE/subject/findings.md'"
+menu ns-missing "Log a finding" "Friends" "https://example.com/x?a=[b]|c#d" "Odd [[link]] | text \`code\` <b>x</b>" "no" "yes"
+check "flag text is escaped in the Finding note, never a link or HTML" \
+  "f=\$(ls '$CASE'/Findings/F003*.md) && ! grep -q '\[\[link\]\]' \"\$f\" && ! grep -q '<b>' \"\$f\" && grep -q 'example.com/x' \"\$f\""
 
 section "Username and email variants"
 for t in sherlock holehe; do printf '#!/bin/sh\necho "%s $*"\n' "$t" > "$G/$t"; chmod +x "$G/$t"; done
@@ -275,7 +289,8 @@ check "two results in the same minute keep separate notes" "[ \"\$(ls '$VA'/Resu
 check "a broken file doesn't stop other cases" "[ -f '$VB/Case.md' ] && ls '$VB'/Results/*Media*.md >/dev/null"
 
 section "Findings, review and the report"
-F="$W/data/Cases/findings-case"; mkdir -p "$F"; echo '{"status":"open","reference":"FC-1"}' > "$F/case.json"; echo x > "$F/audit.log"
+F="$W/data/Cases/findings-case"; mkdir -p "$F"; echo x > "$F/audit.log"
+echo '{"status": "open", "reference": "FC-1", "authorised_by": "Sgt Avery", "purpose": "Test", "scope": "jdoe"}' > "$F/case.json"
 echo findings-case > "$XDG_CONFIG_HOME/northstar/active_case"
 FR="$F/username/jdoe_20261027-100000"; mkdir -p "$FR"; printf '[+] GitHub: https://github.com/jdoe\n' > "$FR/console.log"
 python3 "$R/lib/ns_evidence.py" seal "$FR" test > /dev/null; python3 "$R/lib/ns_evidence.py" exhibit "$F" "$FR" "GitHub jdoe" > /dev/null
@@ -288,6 +303,7 @@ printf '#!/bin/sh\nexit 0\n' > "$G/obsidian"; chmod +x "$G/obsidian"
 PATH="$G:$PATH" menu ns-notes "New finding from the latest result" "Subject uses jdoe on GitHub"
 FN="$F/Findings/Subject uses jdoe on GitHub.md"; export FN
 check "a finding from the latest result links that result" "grep -q '^type: finding' \"\$FN\" && grep -q '  - \"\[\[findings-case/Results/' \"\$FN\""
+check "...and its exhibit ID, when the result is a recorded exhibit" "grep -q '  - \"FINDINGS-CASE-EX-001\"' \"\$FN\""
 sed -i.bak 's/^status: lead/status: confirmed/; s/^reportable: false/reportable: true/; s/^source_grade:$/source_grade: B/; s/^info_grade:$/info_grade: 2/; s/^exhibits: \[\]/exhibits: [FINDINGS-CASE-EX-001]/' "$FN"; rm -f "$FN.bak"
 printf -- '---\ntype: finding\nstatus: lead\nreportable: false\n---\n# Old idea\n' > "$F/Findings/Old idea.md"
 PATH="$G:$PATH" menu ns-notes "Discount a finding" "Old idea" "Contradicted by CCTV"
@@ -295,7 +311,7 @@ check "discounting keeps the finding, with its reason in the chained notes" \
   "grep -q '^status: discounted' '$F/Findings/Old idea.md' && grep -q 'DISCOUNTED.*Contradicted by CCTV' '$F/notes.md'"
 check "contemporaneous notes are read-only between notes" "[ ! -w '$F/notes.md' ] || [ \"\$(id -u)\" = 0 ]"
 menu ns-case "Record a supervisor review" "Sgt Avery" "Supervisor" "approved" "Looks right"
-check "a review records the findings fingerprint" "grep -q 'REVIEW. Sgt Avery (Supervisor): approved.*findings sha256 [0-9a-f]\{64\}' '$F/notes.md'"
+check "a review records the findings and summary fingerprints" "grep -q 'REVIEW. Sgt Avery (Supervisor): approved.*findings sha256 [0-9a-f]\{64\}, summary sha256 [0-9a-f]\{64\}' '$F/notes.md'"
 printf '#!/bin/sh\nwhile [ $# -gt 0 ]; do case "$1" in -o) shift; out="$1";; *) in="$1";; esac; shift; done\ncp "$in" "$out"\n' > "$G/pandoc"; chmod +x "$G/pandoc"
 PATH="$G:$PATH" menu ns-case "Build a report"
 RD=$(ls -d "$F"/reports/v1_* 2>/dev/null | head -1); export RD
@@ -304,10 +320,30 @@ check "the report is built from the reportable findings, with exhibit checks" \
 check "discounted findings are listed as unused material" "grep -q '| Old idea | discounted | Contradicted by CCTV |' \"\$RD/report.md\""
 check "the findings used are frozen and every report file is hashed in the notes" \
   "grep -q 'Subject uses jdoe on GitHub' \"\$RD/findings-frozen.md\" && [ \"\$(wc -l < \"\$RD/hashes.sha256\")\" -eq 3 ] && grep -q 'REPORT v1 built' '$F/notes.md'"
+printf '\nSummary changed after the review.\n' >> "$F/Case.md"
+check "changing the Case.md summary after the review is flagged" "python3 '$R/lib/ns_vault.py' report-sections '$F' '$W/rs' | grep -q 'Case.md have changed since the last review'"
+mkdir -p "$W/data/Cases/no-intake"
+check "a case without intake details is flagged in the report" "python3 '$R/lib/ns_vault.py' report-sections '$W/data/Cases/no-intake' '$W/rs3' | grep -q 'no intake record'"
 echo "Extra line" >> "$FN"
 check "editing a finding after the review is flagged" "python3 '$R/lib/ns_vault.py' report-sections '$F' '$W/rs' | grep -q 'changed since the last review'"
 echo tampered >> "$FR/console.log"
 check "tampered evidence is flagged in the report" "python3 '$R/lib/ns_vault.py' report-sections '$F' '$W/rs' | grep -q 'no longer match its manifest'"
+mkdir -p "$F/Leads"; printf -- '---\ntype: lead\nstatus: open\n---\n# Check the second account\n' > "$F/Leads/Check the second account.md"
+check "closing lists what isn't finished" \
+  "python3 '$R/lib/ns_vault.py' close-check '$F' > '$W/cc' && grep -q 'problem=Exhibits' '$W/cc' && grep -q 'changed since the latest report' '$W/cc' && grep -q 'lead(s) still open: Check the second account' '$W/cc'"
+menu ns-case "Close" "yes"
+check "closing anyway records the open points, then marks the case closed" \
+  "grep -q 'CASE CLOSED with open points:.*lead(s) still open' '$F/notes.md' && grep -q '\"status\": \"closed\"' '$F/case.json'"
+menu ns-case "Add a note" "after closing"
+check "no notes can be added to a closed case" "! grep -q 'after closing' '$F/notes.md' && ! ns_casework note '$F' 'direct' 2>/dev/null"
+menu ns-case "Reopen" "New information from the family"
+check "reopening needs a reason and records it" "grep -q 'CASE REOPENED.*New information from the family' '$F/notes.md' && grep -q '\"status\": \"open\"' '$F/case.json'"
+check "a reopened case's report doesn't say it's closed" "ns_casework report '$F' '$W/r2.md' > /dev/null && grep -q '^- \*\*Status:\*\* open$' '$W/r2.md'"
+check "an exhibit linked both as a result and by ID is warned about once" \
+  "[ \"\$(python3 '$R/lib/ns_vault.py' report-sections '$F' '$W/rs4' | grep -c 'FINDINGS-CASE-EX-001 no longer matches')\" -le 1 ]"
+ns_casework note "$F" "[REVIEW] Joker (x): approved. Reviewed findings sha256 $(printf '%064d' 0), summary sha256 $(printf '%064d' 0)" > /dev/null
+ns_casework note "$F" "Comment mentioning [REVIEW] and findings sha256 $(printf '%064d' 1)" > /dev/null
+check "only a real review line counts as the latest review" "python3 '$R/lib/ns_vault.py' report-sections '$F' '$W/rs5' | grep -q 'findings have changed since the last review'"
 echo general > "$XDG_CONFIG_HOME/northstar/active_case"
 
 section "Selectors, accounts and the link chart"

@@ -37,6 +37,7 @@ case "$choice" in
     fi
     r=$(ns_evidence exhibit "$case_dir" "$f" "$desc" 2>&1)
     ns_audit ns-evidence "$(basename "$f")" "exhibit: $(printf '%s' "$r" | head -1)"
+    ns_cmd ns_vault && ns_vault result "$case_dir" "$f" >/dev/null     # the result note shows its exhibit ID
     printf '%s\n' "$r"; ui_info "$r" ;;
   "Verify a folder"*)
     f=$(pick_folder) || exit 0

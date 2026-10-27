@@ -41,28 +41,78 @@ PY
 $(ns_casework show "$dir")"
 }
 
+# Change the intake details; every change (old and new value) goes into the notes
+edit_case() {
+  local cur js
+  cur=$(python3 -c 'import json,sys
+try: d = json.load(open(sys.argv[1]))
+except (OSError, ValueError): d = {}
+print(json.dumps(d))' "$case_dir/case.json")
+  get() { printf '%s' "$cur" | python3 -c 'import json,sys; print(json.load(sys.stdin).get(sys.argv[1], ""))' "$1"; }
+  local ref auth purp scope rev
+  # An emptied field is cleared; Cancel stops without changing anything
+  ref=$(NS_ALLOW_EMPTY=1 ui_entry "Client or matter reference:" "$(get reference)") || return 0
+  auth=$(NS_ALLOW_EMPTY=1 ui_entry "Authorised by (name, role):" "$(get authorised_by)") || return 0
+  purp=$(NS_ALLOW_EMPTY=1 ui_entry "Purpose and lawful basis:" "$(get purpose)") || return 0
+  scope=$(NS_ALLOW_EMPTY=1 ui_entry "Scope and subjects (who or what, and what's out of scope):" "$(get scope)") || return 0
+  rev=$(NS_ALLOW_EMPTY=1 ui_entry "Review or retention date (YYYY-MM-DD):" "$(get review_date)") || return 0
+  js=$(python3 - "$ref" "$auth" "$purp" "$scope" "$rev" <<'PY'
+import json, sys
+keys = ["reference", "authorised_by", "purpose", "scope", "review_date"]
+print(json.dumps(dict(zip(keys, sys.argv[1:]))))
+PY
+)
+  r=$(printf '%s' "$js" | ns_casework amend "$case_dir" 2>&1)
+  ns_audit ns-case "intake" "$(printf '%s' "$r" | tail -1)"
+  ns_cmd ns_vault && ns_vault case "$case_dir" >/dev/null
+  ui_info "$r"
+}
+
+# Notes can't be added to a closed case
+need_open() {
+  [ "$(ns_casework status "$case_dir")" = closed ] || return 0
+  ui_error "Case $(ns_case) is closed. Reopen it first (Case → Reopen this case)."
+  return 1
+}
+
 [ "${1:-}" = open ] && { open_case; exit 0; }
 
 case_dir=$(ns_case_dir)
+last_item="Close this case (verify, export, mark closed)"
+[ "$(ns_casework status "$case_dir")" = closed ] && last_item="Reopen this case"
 choice=$(ui_list "Case: $(ns_case)" \
   "Add a note" \
   "Open or switch case" \
   "Case details" \
+  "Edit case details (intake)" \
   "Build a report (Word document)" \
   "Record a supervisor review" \
   "Verify notes and audit log" \
-  "Close this case (verify, export, mark closed)") || exit 0
+  "$last_item") || exit 0
 
 case "$choice" in
   "Add a note")
+    need_open || exit 1
     t=$(ui_entry "Note (saved with the UTC time; it can't be edited later without it showing):") || exit 0
-    ns_casework note "$case_dir" "$t" >/dev/null && ns_audit ns-case "note" "note added"
+    ns_casework note "$case_dir" "$t" >/dev/null || { ui_error "The note couldn't be saved."; exit 1; }
+    ns_audit ns-case "note" "note added"
     ui_notify "Note saved to case $(ns_case)" ;;
+  "Edit case details"*)
+    need_open || exit 1
+    edit_case ;;
+  "Reopen this case")
+    why=$(ui_entry "Why is the case being reopened? (recorded in the notes)") || exit 0
+    [ -n "$why" ] || exit 0
+    r=$(ns_casework reopen "$case_dir" "$why" 2>&1)
+    ns_audit ns-case "reopen" "$why"
+    ns_cmd ns_vault && ns_vault case "$case_dir" >/dev/null
+    ui_info "$r" ;;
   "Open or switch"*)
     open_case ;;
   "Case details")
     r=$(ns_casework show "$case_dir"); printf '%s\n' "$r"; ui_info "$r" ;;
   "Build a report"*)
+    need_open || exit 1
     ns_cmd pandoc || { ui_error "pandoc isn't installed: ./install.sh --only core"; exit 1; }
     # Each version gets its own folder: the report, and a frozen copy of the findings it used
     n=$(find "$case_dir/reports" -mindepth 1 -maxdepth 1 -type d -name 'v*' 2>/dev/null | wc -l | tr -d ' ')
@@ -94,13 +144,15 @@ They're listed at the top of the report. Build it anyway?"; then
 It has the case details, your Summary and Analysis from Case.md, the reportable findings with their exhibits and fingerprint checks, searches with no result, unused material, the latest review, methodology, exhibits, notes and the audit log. The findings it used are frozen in findings-frozen.md, and the hashes are in the contemporaneous notes." || true
     ui_reveal "$rdir" ;;
   "Record a supervisor review")
+    need_open || exit 1
     ns_cmd ns_vault || { ui_error "The notes engine isn't installed: ./install.sh --only core"; exit 1; }
     who=$(ui_entry "Reviewer's name:") || exit 0
     role=$(ui_entry "Reviewer's role:") || exit 0
     dec=$(ui_list "Decision" "approved" "approved with changes" "changes requested" "not approved") || exit 0
     com=$(ui_entry "Comments (optional):") || com=""
-    fsha=$(ns_vault findings-hash "$case_dir")
-    ns_casework note "$case_dir" "[REVIEW] $who ($role): $dec. ${com:+$com. }Reviewed findings sha256 $fsha" >/dev/null
+    hs=$(ns_vault review-hashes "$case_dir")
+    fsha=$(printf '%s\n' "$hs" | sed -n 's/^findings=//p'); nsha=$(printf '%s\n' "$hs" | sed -n 's/^summary=//p')
+    ns_casework note "$case_dir" "[REVIEW] $who ($role): $dec. ${com:+$com. }Reviewed findings sha256 $fsha, summary sha256 $nsha" >/dev/null
     ns_audit ns-case "review" "$dec by $who"
     ns_vault case "$case_dir" >/dev/null
     ui_notify "Review recorded: $dec" ;;
@@ -109,9 +161,23 @@ It has the case details, your Summary and Analysis from Case.md, the reportable 
 Audit log: $(ns_evidence audit-verify "$case_dir/audit.log" | head -1)"
     printf '%s\n' "$r"; ui_info "$r" ;;
   "Close"*)
-    ui_question "Close case $(ns_case)?
+    # The pre-close check; if it can't run, say so rather than claim all is well
+    if ! ns_cmd ns_vault || ! cc=$(ns_vault close-check "$case_dir" 2>/dev/null); then
+      cc="problem=the pre-close check couldn't run, so nothing has been checked"
+    fi
+    probs=$(printf '%s\n' "$cc" | sed -n 's/^problem=/- /p')
+    if [ -n "$probs" ]; then
+      ui_question "Case $(ns_case) isn't ready to close:
 
-The audit log is verified, the whole case is exported with a SHA-256 to ~/Northstar/Exports, and the case is marked closed. Nothing is deleted." || exit 0
+$probs
+
+Close it anyway? The open points are recorded in the notes." || exit 0
+    else
+      ui_question "Close case $(ns_case)?
+
+Notes, audit log and exhibits verify, a report has been built and reviewed, and no leads are open. The whole case is exported with a SHA-256 to ~/Northstar/Exports, and the case is marked closed. Nothing is deleted." || exit 0
+    fi
+    ns_casework note "$case_dir" "CASE CLOSED$( [ -n "$probs" ] && printf ' with open points: %s' "$(printf '%s' "$probs" | sed 's/^- //' | paste -sd ';' -)")" >/dev/null
     v=$(ns_evidence audit-verify "$case_dir/audit.log" | head -1)
     e=$(ns_evidence export "$case_dir" "$NS_DATA/Exports")
     ns_audit ns-case "close" "audit: $v; $(printf '%s' "$e" | tail -1)"

@@ -55,6 +55,11 @@ choice=$(ui_list "Notes (Obsidian): case $(ns_case)" \
   "Refresh this case's notes (rebuild result notes)" \
   "Add a contemporaneous note (tamper-evident)") || exit 0
 
+closed() {
+  [ "$(ns_casework status "$case_dir")" = closed ] || return 1
+  ui_error "Case $(ns_case) is closed. Reopen it first (Case → Reopen this case)."
+}
+
 case "$choice" in
   "Open this case"*)
     open_note "$case_dir/Case.md" ;;
@@ -66,16 +71,23 @@ case "$choice" in
     [ -n "$title" ] || exit 0
     p=$(ns_vault new "$case_dir" finding "$title") || { ui_error "Couldn't create the finding."; exit 1; }
     link=$(printf '%s' "${rn#"$NS_DATA/Cases/"}" | sed 's/\.md$//')
-    python3 - "$p" "[[$link]]" <<'PYEOF2'
+    exid=$(python3 -c 'import csv, sys
+try: rows = list(csv.DictReader(open(sys.argv[1], encoding="utf-8", newline="")))
+except OSError: rows = []
+print(([r["exhibit_id"] for r in rows if r.get("folder", "").rstrip("/") == sys.argv[2]] or [""])[-1])' "$case_dir/exhibits.csv" "${last#"$case_dir/"}")
+    python3 - "$p" "[[$link]]" "$exid" <<'PYEOF2'
 import json, re, sys
 path, link = sys.argv[1], sys.argv[2]
 t = open(path, encoding="utf-8").read()
 t = re.sub(r"(?m)^results: \[\]$", "results:\n  - " + json.dumps(link), t, count=1)
+if len(sys.argv) > 3 and sys.argv[3]:          # the result is a recorded exhibit
+    t = re.sub(r"(?m)^exhibits: \[\]$", "exhibits:\n  - " + json.dumps(sys.argv[3]), t, count=1)
 open(path, "w", encoding="utf-8").write(t)
 PYEOF2
     ns_audit ns-notes "finding" "finding created from $(basename "$last")"
     open_note "$p" ;;
   "Discount a finding")
+    closed && exit 1
     items=()
     for f in "$case_dir"/Findings/*.md; do
       [ -f "$f" ] || continue
@@ -86,7 +98,8 @@ PYEOF2
     why=$(ui_entry "Why is it discounted? (recorded in the contemporaneous notes)") || exit 0
     [ -n "$why" ] || exit 0
     ns_vault discount "$case_dir" "$pick" "$why" >/dev/null || { ui_error "Couldn't discount it."; exit 1; }
-    ns_casework note "$case_dir" "[DISCOUNTED] Finding '$pick': $why" >/dev/null
+    ns_casework note "$case_dir" "[DISCOUNTED] Finding '$pick': $why" >/dev/null \
+      || ui_error "The finding is discounted, but the note recording it couldn't be saved: add it with Add a contemporaneous note." 
     ns_audit ns-notes "discount" "$pick"
     ui_notify "Finding discounted: $pick" ;;
   "New note: "*)
@@ -104,7 +117,9 @@ PYEOF2
     ns_vault setup "$NS_DATA" >/dev/null
     open_note "$NS_DATA/Cases/Home.md" ;;
   "Add a contemporaneous"*)
+    closed && exit 1
     t=$(ui_entry "Note (saved with the UTC time; it can't be edited later without it showing):") || exit 0
-    ns_casework note "$case_dir" "$t" >/dev/null && ns_audit ns-case "note" "note added"
+    ns_casework note "$case_dir" "$t" >/dev/null || { ui_error "The note couldn't be saved."; exit 1; }
+    ns_audit ns-case "note" "note added"
     ui_notify "Note saved to case $(ns_case)" ;;
 esac
