@@ -159,13 +159,43 @@ ns_flatpak() {
 
 # --- Python tools ----------------------------------------------------------------
 # ns_pip_progress <log> <pip> <args...>   For big installs (PyTorch): the full
-# output goes to the log, and each package is shown as it downloads so a long
-# install doesn't look stuck.
+# output goes to the log while a status line shows the current download with a
+# progress bar, elapsed time and the space used so far, so a long install
+# doesn't look stuck. Without a terminal (CI, piped) it prints each download.
 ns_pip_progress() {
-  local log="$1"; shift
-  "$@" --progress-bar off 2>&1 | tee -a "$log" \
-    | sed -n -u 's#^ *Downloading \([^ ]*/\)\{0,1\}\([^/ ]*\) (\(.*\))#        ↓ \2 (\3)#p' 2>/dev/null
-  return "${PIPESTATUS[0]}"
+  local log="$1" pip="$2" venv pid rc start now file size cur tot pct bar mb width last=""
+  shift
+  venv=$(dirname "$(dirname "$pip")")
+  "$@" --progress-bar raw >>"$log" 2>&1 &
+  pid=$!
+  start=$(date +%s)
+  while kill -0 "$pid" 2>/dev/null; do
+    sleep 1
+    file=$(tail -n 400 "$log" | sed -n 's#^ *Downloading \([^ ]*/\)\{0,1\}\([^/ ]*\) (\(.*\))#\2|\3#p' | tail -1)
+    if [ ! -t 1 ]; then
+      [ -n "$file" ] && [ "$file" != "$last" ] && printf '        ↓ %s (%s)\n' "${file%%|*}" "${file#*|}"
+      last="$file"; continue
+    fi
+    now=$(( $(date +%s) - start ))
+    mb=$(du -sm "$venv" 2>/dev/null | cut -f1)
+    cur=$(tail -n 5 "$log" | sed -n 's/^Progress \([0-9]*\) of \([0-9]*\).*/\1 \2/p' | tail -1)
+    tot=${cur#* }; cur=${cur% *}
+    if [ -n "$cur" ] && [ "${tot:-0}" -gt 0 ] 2>/dev/null; then
+      pct=$(( cur * 100 / tot )); width=$(( pct / 5 ))
+      bar=$(printf '%*s' "$width" '' | tr ' ' '#')$(printf '%*s' $((20 - width)) '' | tr ' ' '-')
+    else
+      pct=""; bar="resolving packages.."
+    fi
+    size=${file#*|}; file=${file%%|*}; file=${file%%-[0-9]*}
+    if tail -n 3 "$log" | grep -q '^Installing collected packages'; then
+      bar="installing packages."; pct=""; file="(unpacking)"; size=""
+    fi
+    printf '\r\033[K        [%s] %3s%%  %-22.22s %-9s  %02d:%02d elapsed, %s MB so far' \
+      "$bar" "${pct:- }" "${file:-preparing}" "${size:+($size)}" $((now / 60)) $((now % 60)) "${mb:-0}"
+  done
+  wait "$pid"; rc=$?
+  [ -t 1 ] && printf '\r\033[K'
+  return $rc
 }
 
 # ns_pipx <command-it-provides> [pip spec]
