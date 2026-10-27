@@ -10,9 +10,9 @@ All notable changes to this project are documented here. The format follows
 - **docs/INVESTIGATION-GUIDE.md:** a whole investigation step by step, from a
   new VM to a report ready for submission, with a worked example, grading,
   verification traps, a pre-submission checklist and common mistakes.
-- **docs/CASE-EXAMPLES.md:** two fictional cases worked through end to end: a
-  dark-web vendor traced from a username and what they leak, and a photo
-  geolocated and traced to its origin and the person in it.
+- **Worked examples** in the investigation guide: two fictional cases end to
+  end, a dark-web vendor traced from a username and what they leak, and a
+  photo geolocated and traced to its origin and the person in it.
 - **Edit case details (intake)** in the Case menu: each change is written to
   the notes with its old and new value; intake recorded late is marked so.
 - **Reopen this case:** a closed case can be reopened, with a reason in the notes.
