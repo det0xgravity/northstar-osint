@@ -86,7 +86,7 @@ if command -v pandoc >/dev/null 2>&1; then
   python3 "$R/lib/ns_guides.py" build "$R/docs" "$W/guides" > /dev/null
   check "every guide is rendered, with the investigation guide first in the index" \
     "[ \$(ls '$W'/guides/*.html | wc -l) -gt \$(ls '$R'/docs/*.md | wc -l) ] && grep -o 'href=\"[A-Z-]*.html\"' '$W/guides/index.html' | head -1 | grep -q INVESTIGATION-GUIDE"
-  check "links between guides point to the HTML copies" "grep -q 'href=\"MENUS.html#ns-case\"' '$W/guides/INVESTIGATION-GUIDE.html' && ! grep -qE 'href=\"[A-Z-]+\\.md' '$W'/guides/*.html"
+  check "links between guides point to the HTML copies" "grep -q 'href=\"MENUS.html#ns-case\"' '$W/guides/EVIDENCE.html' && ! grep -qE 'href=\"[A-Z-]+\\.md' '$W'/guides/*.html"
   check "every link inside the investigation guide reaches its section" "python3 - '$W/guides/INVESTIGATION-GUIDE.html' <<'PY'
 import re, sys
 t = open(sys.argv[1], encoding='utf-8').read()
