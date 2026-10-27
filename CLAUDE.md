@@ -91,6 +91,9 @@ Kali, Parrot, macOS. See CHANGELOG.md for the current version.
    ship 3.14. SpiderFoot is unmaintained (last commit Nov 2023) and installed
    with lifted version caps (`modules/40-frameworks.sh`); if it breaks, look for
    a maintained fork or drop it.
+   `lib/ns_translate.py` forces `ARGOS_COMPUTE_TYPE=float32` on x86_64: the
+   automatic int8 type gave repeated garbage on CI runners (Oct 2026). Retest
+   with `auto` after CTranslate2 updates; float32 is slower.
 
 ## Future ideas (not started)
 
