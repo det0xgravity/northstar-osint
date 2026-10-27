@@ -11,11 +11,12 @@ mod_translate() {
   log=$(mktemp)
   if ! "$venv/bin/python" -c 'import argostranslate' 2>/dev/null || [ "$NS_UPDATE" = 1 ]; then
     "$venv/bin/pip" install -q --upgrade pip >"$log" 2>&1
+    ns_info "Installing Argos Translate and PyTorch (several hundred MB the first time: this can take a while)…"
     # x86_64 Linux: PyTorch's CPU build (stanza needs torch; PyPI's default is a GPU build)
     if ns_is_linux && [ "$NS_ARCH" = amd64 ]; then
-      "$venv/bin/pip" install -q torch --index-url https://download.pytorch.org/whl/cpu >>"$log" 2>&1 || rc=1
+      ns_pip_progress "$log" "$venv/bin/pip" install torch --index-url https://download.pytorch.org/whl/cpu || rc=1
     fi
-    if [ $rc = 0 ] && "$venv/bin/pip" install -q --upgrade argostranslate >>"$log" 2>&1; then
+    if [ $rc = 0 ] && ns_pip_progress "$log" "$venv/bin/pip" install --upgrade argostranslate; then
       ns_info "Argos Translate installed (language models download the first time you use a language)"
     else
       ns_warn "Argos Translate install failed"; ns_show_tail "$log"; rc=1

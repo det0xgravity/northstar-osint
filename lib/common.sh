@@ -158,6 +158,16 @@ ns_flatpak() {
 }
 
 # --- Python tools ----------------------------------------------------------------
+# ns_pip_progress <log> <pip> <args...>   For big installs (PyTorch): the full
+# output goes to the log, and each package is shown as it downloads so a long
+# install doesn't look stuck.
+ns_pip_progress() {
+  local log="$1"; shift
+  "$@" --progress-bar off 2>&1 | tee -a "$log" \
+    | sed -n -u 's#^ *Downloading \([^ ]*/\)\{0,1\}\([^/ ]*\) (\(.*\))#        ↓ \2 (\3)#p' 2>/dev/null
+  return "${PIPESTATUS[0]}"
+}
+
 # ns_pipx <command-it-provides> [pip spec]
 # Presence is checked by command name because pipx package names and command
 # names often differ (sherlock-project -> sherlock). Upgrades happen in bulk via
