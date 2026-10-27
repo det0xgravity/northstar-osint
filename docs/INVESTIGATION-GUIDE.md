@@ -10,6 +10,41 @@ You don't need to know the command line. Everything here is in the **northstar**
 
 > **📷 Screenshots.** Places marked 📷 show what you should see at that step. To capture your own, press **Print Screen** in the VM (Flameshot).
 
+## Quick start checklist
+
+For diving straight in. Each step links to the full explanation for when you need it. Menu names are in the **northstar** main menu.
+
+**Before you start**
+- [ ] VM snapshot taken; VPN or research connection on if your work needs it ([1](#1-before-your-first-case))
+- [ ] **Update northstar** ends with *All modules completed.*; **Health check** shows nothing missing
+- [ ] Research accounts only, never personal ones. API keys (optional) under **API keys**
+
+**Open the case**
+- [ ] **Switch / create case**: a new name, answer **Yes**, fill in reference, who authorised it, lawful basis, scope, review date ([2](#2-open-the-case))
+- [ ] Case → **Add a note**: what you were asked to do, and your plan ([3.1](#31-write-your-first-contemporaneous-note))
+- [ ] Missing person? **Missing person** → **Subject profile** ([3.2](#32-the-subject-profile-missing-person-cases))
+
+**Collect**
+- [ ] Run the menus that fit your identifiers: **Username & email**, **Telegram**, **Domain & infrastructure**, **Photo geolocation**, **Country search**… ([4](#4-collect))
+- [ ] Found something you'll rely on? **Capture web pages** now, and answer **Yes** to recording it as an exhibit ([4.3](#43-capture-what-matters-as-you-find-it), [5](#5-seal-and-record-evidence))
+- [ ] **Don't:** contact anyone, follow, like, join groups, or upload victims' photos to websites
+- [ ] Note each decision in Case → **Add a note**, starting with `DECISION:`
+
+**Make sense of it** (main menu → **Notes (Obsidian)** → **Open this case's notes**)
+- [ ] Check tool hits by hand: a username hit isn't an account until you've opened and checked it ([4.2](#42-usernames-and-emails))
+- [ ] For each conclusion: Notes → **New finding from the latest result**; write *Observed* and *Assessment*, grade it (A–F, 1–6) ([7](#7-write-findings))
+- [ ] Two independent sources → `status: corroborated`, `reportable: true`. Wrong? **Discount a finding**, never delete ([7.3](#73-corroborate))
+- [ ] Searches that found nothing: `nil_return: true` on the result note ([4.13](#413-log-nil-results))
+- [ ] Write the **Summary** and **Analysis** below the line in Case.md
+
+**Finish**
+- [ ] Case → **Record a supervisor review** ([8](#8-review))
+- [ ] Case → **Build a report (Word document)**; fix the warnings; read the whole report ([9](#9-build-the-report))
+- [ ] Case → **Verify notes and audit log**; **Evidence & exhibits** → **Export the case** ([10](#10-submit-hand-over-and-close))
+- [ ] Send the report and its hashes through your approved channel, then Case → **Close this case**
+
+Before you submit, go through the full [pre-submission checklist](#11-pre-submission-checklist).
+
 ## Contents
 
 1. [Before your first case](#1-before-your-first-case)

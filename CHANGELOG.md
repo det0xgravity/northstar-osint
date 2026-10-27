@@ -9,7 +9,8 @@ All notable changes to this project are documented here. The format follows
 ### Added
 - **docs/INVESTIGATION-GUIDE.md:** a whole investigation step by step, from a
   new VM to a report ready for submission, with a worked example, grading,
-  verification traps, a pre-submission checklist and common mistakes.
+  verification traps, a pre-submission checklist and common mistakes, opening
+  with a quick start checklist for people who want to dive straight in.
 - **Worked examples** in the investigation guide: two fictional cases end to
   end, a dark-web vendor traced from a username and what they leak, and a
   photo geolocated and traced to its origin and the person in it.
