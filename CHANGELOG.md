@@ -4,6 +4,32 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project uses
 [Semantic Versioning](https://semver.org/).
 
+## [0.28.0] - 2026-10-27
+
+Phase 2 of the case-hub review: findings and the report.
+
+### Added
+- Finding notes (`Findings/`): status (lead, corroborated, confirmed,
+  discounted), reportable, source (A-F) and information (1-6) grades, results
+  and exhibits relied on, observed fact separate from assessment. Notes → New
+  finding from the latest result, and Discount a finding (never delete).
+- The report is built from the vault: Case.md's summary and analysis, the
+  reportable findings with their grading and evidence (each exhibit's
+  fingerprint and files re-checked), searches with no result, unused material,
+  the latest review, and warnings for anything that doesn't hold up.
+- Each report version gets its own folder with a frozen copy of the findings it
+  used and SHA-256 hashes; both are recorded in the hash-chained notes.
+- Case → Record a supervisor review: name, role, decision and the findings
+  fingerprint, in the hash-chained notes; reports flag changes since then.
+- Result notes keep the analyst's notes and properties across rebuilds, show
+  the exhibit number, flag searches that saved no output, and label raw tool
+  hits as unverified.
+- The dashboard shows findings and the integrity of the notes, audit log and
+  exhibits.
+
+### Changed
+- `notes.md` is read-only between notes, so it can't be edited by accident.
+
 ## [0.27.2] - 2026-10-27
 
 Phase 1 of the case-hub review (investigator, OSINT specialist, QC).

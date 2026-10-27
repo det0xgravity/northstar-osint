@@ -251,7 +251,7 @@ bn=$(ls "$CASE"/Results/*a@b.example*.md); export bn
 check "breach records and credentials never reach the notes" "! grep -qE 'Hunter2|abc123' \"\$bn\" && grep -q 'Breaches: 1' \"\$bn\""
 check "notes are readable only by you" "[ -z \"\$(find '$CASE/Results' '$CASE/Case.md' -perm -004 2>/dev/null)\" ]"
 printf '[+] instagram.com\n[-] twitter.com\n' > "$H1/console.log"; python3 "$R/lib/ns_vault.py" result "$CASE" "$H1" > /dev/null
-check "holehe hits are listed" "grep -q 'instagram.com' \"\$hn\" && grep -q 'Accounts found (1)' \"\$hn\""
+check "holehe hits are listed" "grep -q 'instagram.com' \"\$hn\" && grep -q 'Tool hits (1, unverified)' \"\$hn\""
 python3 "$R/lib/ns_vault.py" register "$W/data" "$W/obs/obsidian.json" > /dev/null
 python3 "$R/lib/ns_vault.py" register "$W/data" "$W/obs/obsidian.json" > /dev/null
 check "vault registered once with Obsidian" "python3 -c 'import json,sys; assert len(json.load(open(sys.argv[1]))[\"vaults\"]) == 1' '$W/obs/obsidian.json'"
@@ -273,6 +273,42 @@ check "a hostile file name is shown as text, never linked or embedded" \
 check "captured web pages are listed but not linked" "grep -q '\`page.html\` (web page' '$VA'/Results/*Gallery*.md"
 check "two results in the same minute keep separate notes" "[ \"\$(ls '$VA'/Results/*Username*.md | wc -l)\" -eq 2 ]"
 check "a broken file doesn't stop other cases" "[ -f '$VB/Case.md' ] && ls '$VB'/Results/*Media*.md >/dev/null"
+
+section "Findings, review and the report"
+F="$W/data/Cases/findings-case"; mkdir -p "$F"; echo '{"status":"open","reference":"FC-1"}' > "$F/case.json"; echo x > "$F/audit.log"
+echo findings-case > "$XDG_CONFIG_HOME/northstar/active_case"
+FR="$F/username/jdoe_20261027-100000"; mkdir -p "$FR"; printf '[+] GitHub: https://github.com/jdoe\n' > "$FR/console.log"
+python3 "$R/lib/ns_evidence.py" seal "$FR" test > /dev/null; python3 "$R/lib/ns_evidence.py" exhibit "$F" "$FR" "GitHub jdoe" > /dev/null
+echo "$FR" > "$XDG_CONFIG_HOME/northstar/last_result"
+printf '\n## Analyst notes\nChecked by hand: matches.\n' >> "$(python3 "$R/lib/ns_vault.py" result "$F" "$FR")"
+python3 "$R/lib/ns_vault.py" refresh "$F" > /dev/null
+check "analyst notes on a result note survive a rebuild" "grep -q 'Checked by hand' '$F'/Results/*.md && grep -q 'exhibit: \"FINDINGS-CASE-EX-001\"' '$F'/Results/*.md"
+check "raw tool hits are labelled unverified" "grep -q 'Tool hits (1, unverified)' '$F'/Results/*.md"
+printf '#!/bin/sh\nexit 0\n' > "$G/obsidian"; chmod +x "$G/obsidian"
+PATH="$G:$PATH" menu ns-notes "New finding from the latest result" "Subject uses jdoe on GitHub"
+FN="$F/Findings/Subject uses jdoe on GitHub.md"; export FN
+check "a finding from the latest result links that result" "grep -q '^type: finding' \"\$FN\" && grep -q '  - \"\[\[findings-case/Results/' \"\$FN\""
+sed -i.bak 's/^status: lead/status: confirmed/; s/^reportable: false/reportable: true/; s/^source_grade:$/source_grade: B/; s/^info_grade:$/info_grade: 2/; s/^exhibits: \[\]/exhibits: [FINDINGS-CASE-EX-001]/' "$FN"; rm -f "$FN.bak"
+printf -- '---\ntype: finding\nstatus: lead\nreportable: false\n---\n# Old idea\n' > "$F/Findings/Old idea.md"
+PATH="$G:$PATH" menu ns-notes "Discount a finding" "Old idea" "Contradicted by CCTV"
+check "discounting keeps the finding, with its reason in the chained notes" \
+  "grep -q '^status: discounted' '$F/Findings/Old idea.md' && grep -q 'DISCOUNTED.*Contradicted by CCTV' '$F/notes.md'"
+check "contemporaneous notes are read-only between notes" "[ ! -w '$F/notes.md' ] || [ \"\$(id -u)\" = 0 ]"
+menu ns-case "Record a supervisor review" "Sgt Avery" "Supervisor" "approved" "Looks right"
+check "a review records the findings fingerprint" "grep -q 'REVIEW. Sgt Avery (Supervisor): approved.*findings sha256 [0-9a-f]\{64\}' '$F/notes.md'"
+printf '#!/bin/sh\nwhile [ $# -gt 0 ]; do case "$1" in -o) shift; out="$1";; *) in="$1";; esac; shift; done\ncp "$in" "$out"\n' > "$G/pandoc"; chmod +x "$G/pandoc"
+PATH="$G:$PATH" menu ns-case "Build a report"
+RD=$(ls -d "$F"/reports/v1_* 2>/dev/null | head -1); export RD
+check "the report is built from the reportable findings, with exhibit checks" \
+  "grep -q '### F1. Subject uses jdoe on GitHub' \"\$RD/report.md\" && grep -q 'B2 (source usually reliable' \"\$RD/report.md\" && grep -q '| matches |' \"\$RD/report.md\""
+check "discounted findings are listed as unused material" "grep -q '| Old idea | discounted | Contradicted by CCTV |' \"\$RD/report.md\""
+check "the findings used are frozen and every report file is hashed in the notes" \
+  "grep -q 'Subject uses jdoe on GitHub' \"\$RD/findings-frozen.md\" && [ \"\$(wc -l < \"\$RD/hashes.sha256\")\" -eq 3 ] && grep -q 'REPORT v1 built' '$F/notes.md'"
+echo "Extra line" >> "$FN"
+check "editing a finding after the review is flagged" "python3 '$R/lib/ns_vault.py' report-sections '$F' '$W/rs' | grep -q 'changed since the last review'"
+echo tampered >> "$FR/console.log"
+check "tampered evidence is flagged in the report" "python3 '$R/lib/ns_vault.py' report-sections '$F' '$W/rs' | grep -q 'no longer match its manifest'"
+echo general > "$XDG_CONFIG_HOME/northstar/active_case"
 
 section "Telegram (stubbed engine)"
 printf '#!/bin/sh\necho "ns_telegram $*" > called.txt\necho "ns_telegram $*"\n' > "$G/ns_telegram"; chmod +x "$G/ns_telegram"

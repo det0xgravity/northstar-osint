@@ -174,26 +174,58 @@ Results are saved under `translation/` in the case and sealed. Machine translati
 
 ## ns-notes
 
-**Notes (Obsidian)**: `~/Northstar/Cases` is one [Obsidian](https://obsidian.md) vault that works as the case hub.
+**Notes (Obsidian)**: `~/Northstar/Cases` is one [Obsidian](https://obsidian.md) vault that works as the case hub, from intake to the final report.
 
 | In each case | What it is |
 |---|---|
-| `Case.md` | The dashboard: case details, counts (results, people, accounts, organisations, places, open leads), the latest results, links to every working note, key records (contemporaneous notes, subject profile, findings, timeline, latest case map, exhibits, reports) and the latest page-monitoring changes. northstar regenerates the top part; write your summary, analysis and next steps below the end marker and they're kept |
-| `Results/` | One note per result folder, written when a search finishes: provenance (time, operator, tool versions, query) and integrity (sealed, manifest SHA-256), the tool's findings as tables (CSV and JSON files), accounts found, key text files, embedded screenshots and photos, the console output, and links to every raw file |
-| `Results.md` | Every result, newest first |
+| `Case.md` | The dashboard: case details; counts; findings with their status, grading and checks; latest results; working notes; key records (contemporaneous notes, subject profile, timeline, case map, exhibits, latest report and review); integrity of the notes, audit log and exhibits; page-monitoring changes. Your summary, analysis and next steps go below the generated block, and become the report's summary and analysis |
+| `Findings/` | Your conclusions, one note each: status (lead, corroborated, confirmed, discounted), reportable, source and information grades, the results and exhibits it rests on, and what was observed kept apart from your assessment |
+| `Results/` | One note per result folder: provenance, exhibit number, integrity, the tool's output as tables and text, tool hits (unverified), images, files. Your **Analyst notes** below the generated part, and properties you add (`relevance`, `reviewed`, `nil_return`), are kept when it's rebuilt |
 | `People/`, `Accounts/`, `Organisations/`, `Places/`, `Events/`, `Leads/` | Working notes from the templates in `Cases/_templates/` |
 
 | Option | What it does |
 |---|---|
 | Open this case's notes | Opens `Case.md` |
-| New note: person / account / organisation / place / event / lead | Creates the note from its template and opens it |
+| New finding from the latest result | A Finding note already linked to the result you just ran |
+| New note: finding / person / account / organisation / place / event / lead | A note from its template |
+| Discount a finding | Marks it discounted with your reason (also written to the contemporaneous notes). Findings are never deleted: the report lists discounted and unreported findings as unused material, and flags finding notes that have been deleted |
 | Open the Cases vault | `Home.md`: every case with status, reference, results and last activity |
-| Refresh this case's notes | Rebuilds every result note (for results from before this version, or after a tool's output changed) |
-| Add a contemporaneous note | The tamper-evident note, as in Case → Add a note |
+| Refresh this case's notes | Rebuilds every result note (your analyst notes are kept) |
+| Add a contemporaneous note | The tamper-evident note |
 
-**Look:** a northstar theme snippet (headings, tables, callouts for evidence, findings and cautions) and a second snippet that hides the raw tool folders and case files from the file list, so the vault shows notes, not output. Links and embeds into the raw folders still work; to browse them, turn off **northstar-hide-raw** in Settings → Appearance → CSS snippets. Templates are yours to edit: northstar stops updating any template you've changed.
+### From findings to the report
 
-**Safety:** result notes are views of the sealed folders, rebuilt on refresh, so nothing in them is evidence on its own. Content collected from the web (pages, profiles, dark-web text) is shown escaped or in code blocks: it can't render as HTML or load remote images in Obsidian. Obsidian's community plugins stay off (restricted mode) unless you turn them on: plugins can read the whole vault, case data included.
+1. Record conclusions as **Findings**, linked to the result notes and exhibits that support them. Grade the source (A–F) and the information (1–6).
+2. When a finding is corroborated or confirmed, set **reportable: true**.
+3. A supervisor records a review (Case → **Record a supervisor review**). The review is written to the hash-chained notes with the fingerprint of the findings it covered.
+4. **Build a report** (Case menu) writes `reports/v<n>_<time>/`, which contains:
+
+   | File | Contents |
+   |---|---|
+   | `report.docx` | The report |
+   | `report.md` | Its source |
+   | `findings-frozen.md` | A verbatim copy of the findings it used |
+   | `hashes.sha256` | SHA-256 of each of the files above |
+
+   The report's hash and the findings fingerprint are written to the contemporaneous notes.
+
+**What the report contains:**
+- your Summary and Analysis;
+- each reportable finding with its grading, what was observed, your assessment, and its evidence. Every exhibit's fingerprint and files are re-checked;
+- searches with no result: notes you marked `nil_return: true`, plus searches that saved no output and haven't been checked yet;
+- unused material;
+- the latest review;
+- then methodology, exhibits, notes and the audit log.
+
+**Warnings:** anything that doesn't hold up is listed at the top, and you're asked before the report is built. That covers a reportable finding with no sealed evidence, missing grades, an exhibit or file that no longer matches, findings changed since the review, no review at all, or a deleted finding.
+
+**Look:** a northstar theme snippet, and a snippet that hides raw tool folders and case files from the file list. Links and embeds still work; to browse them, turn off **northstar-hide-raw** in Settings → Appearance → CSS snippets.
+
+**Safety:**
+- **Result notes are views of the sealed folders;** your conclusions live in Findings.
+- **Web content is escaped or fenced, and file names that could break a link are shown as text,** so nothing collected can render as HTML or load remote images in Obsidian. Captured web pages are listed but not linked.
+- **`notes.md` is read-only on disk,** so Obsidian can't edit it by accident. Add to it through Case → Add a note.
+- **Community plugins stay off** unless you turn them on.
 
 ## ns-metadata
 

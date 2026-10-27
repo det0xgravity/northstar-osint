@@ -42,6 +42,9 @@ Install Obsidian later with: $repo/install.sh --only notes"
 
 choice=$(ui_list "Notes (Obsidian): case $(ns_case)" \
   "Open this case's notes" \
+  "New finding from the latest result" \
+  "New note: finding" \
+  "Discount a finding" \
   "New note: person" \
   "New note: account" \
   "New note: organisation" \
@@ -55,6 +58,37 @@ choice=$(ui_list "Notes (Obsidian): case $(ns_case)" \
 case "$choice" in
   "Open this case"*)
     open_note "$case_dir/Case.md" ;;
+  "New finding from the latest result")
+    last=$(cat "$NS_CONF/last_result" 2>/dev/null)
+    [ -n "$last" ] && [ -d "$last" ] || { ui_error "No recent result in this case: run a search first, or use New note: finding."; exit 0; }
+    rn=$(ns_vault result "$case_dir" "$last" | tail -1)
+    title=$(ui_entry "Finding (a short statement, e.g. \"Subject posted from Kingston on 2 Oct\"):") || exit 0
+    [ -n "$title" ] || exit 0
+    p=$(ns_vault new "$case_dir" finding "$title") || { ui_error "Couldn't create the finding."; exit 1; }
+    link=$(printf '%s' "${rn#"$NS_DATA/Cases/"}" | sed 's/\.md$//')
+    python3 - "$p" "[[$link]]" <<'PYEOF2'
+import json, re, sys
+path, link = sys.argv[1], sys.argv[2]
+t = open(path, encoding="utf-8").read()
+t = re.sub(r"(?m)^results: \[\]$", "results:\n  - " + json.dumps(link), t, count=1)
+open(path, "w", encoding="utf-8").write(t)
+PYEOF2
+    ns_audit ns-notes "finding" "finding created from $(basename "$last")"
+    open_note "$p" ;;
+  "Discount a finding")
+    items=()
+    for f in "$case_dir"/Findings/*.md; do
+      [ -f "$f" ] || continue
+      grep -q '^status: discounted' "$f" || items+=("$(basename "$f" .md)")
+    done
+    [ ${#items[@]} -gt 0 ] || { ui_info "No findings to discount."; exit 0; }
+    pick=$(ui_list "Discount which finding? (it stays on record as unused material)" "${items[@]}") || exit 0
+    why=$(ui_entry "Why is it discounted? (recorded in the contemporaneous notes)") || exit 0
+    [ -n "$why" ] || exit 0
+    ns_vault discount "$case_dir" "$pick" "$why" >/dev/null || { ui_error "Couldn't discount it."; exit 1; }
+    ns_casework note "$case_dir" "[DISCOUNTED] Finding '$pick': $why" >/dev/null
+    ns_audit ns-notes "discount" "$pick"
+    ui_notify "Finding discounted: $pick" ;;
   "New note: "*)
     kind=${choice#New note: }
     title=$(ui_entry "Title for the $kind note (for example a name or username):") || exit 0

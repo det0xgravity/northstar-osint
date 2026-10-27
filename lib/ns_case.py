@@ -7,7 +7,9 @@ Commands:
   show CASEDIR            print the case details
   note CASEDIR TEXT       append a timestamped, hash-chained note to notes.md
   notes-verify CASEDIR    check the notes' hash chain
-  report CASEDIR OUTFILE  write a Markdown report (ns-case converts it with pandoc)
+  report CASEDIR OUTFILE [SECTIONS]
+                          write a Markdown report (ns-case converts it with pandoc); SECTIONS
+                          is the findings part built from the Obsidian vault (ns_vault report-sections)
   close CASEDIR           mark the case closed in case.json
 
 Notes chain: every note line ends with `h:<sha256>`, the hash of the previous
@@ -91,11 +93,14 @@ def cmd_note(case_dir, text):
     t, op = utc_now(), getpass.getuser()
     h = hashlib.sha256(f"{last_note_hash(path)}|{t}|{op}|{text}".encode("utf-8")).hexdigest()
     new = not os.path.exists(path)
+    if not new:
+        os.chmod(path, 0o600)                  # read-only between notes, so it can't be edited by accident
     with open(path, "a", encoding="utf-8") as fh:
         if new:
             fh.write(f"# Notes: case {os.path.basename(os.path.abspath(case_dir))}\n\n"
                      "Contemporaneous notes, newest last. Times are UTC. Each line's `h:` value chains it to the one before.\n\n")
         fh.write(f"- **{t}** ({op}): {text} `h:{h}`\n")
+    os.chmod(path, 0o400)
     print(f"Note saved ({t}).")
     return 0
 
@@ -126,7 +131,7 @@ def md_escape(s):
     return str(s).replace("|", "\\|").replace("\n", " ")
 
 
-def cmd_report(case_dir, out):
+def cmd_report(case_dir, out, sections=""):
     d = load(case_dir)
     case = d.get("case") or os.path.basename(os.path.abspath(case_dir))
     audit = []
@@ -143,7 +148,11 @@ def cmd_report(case_dir, out):
     r += [f"- **{label}:** {md_escape(d.get(k) or '—')}" for k, label in FIELDS]
     r += [f"- **Opened:** {d.get('opened_utc', '—')} by {d.get('opened_by', '—')}",
           f"- **Status:** {d.get('status', '—')}" + (f", closed {d['closed_utc']}" if d.get("closed_utc") else ""), ""]
-    r += ["## Summary", "", "*Write the findings here.*", "", "## Methodology", "",
+    if sections and os.path.exists(sections):
+        r += [open(sections, encoding="utf-8").read().rstrip(), ""]
+    else:
+        r += ["## Summary", "", "*Write the findings here.*", ""]
+    r += ["## Methodology", "",
           f"Open-source research recorded in a hash-chained audit log: {len(audit)} actions"
           + (f" between {min(times)} and {max(times)}" if times else "") + ". Tools and sources used:", ""]
     r += [f"- {md_escape(t)} ({n}×)" for t, n in tools.most_common()] or ["- none recorded"]
@@ -164,7 +173,8 @@ def cmd_report(case_dir, out):
     r += [f"- **{m.group('t')}** ({m.group('op')}): {m.group('text')}" for m in notes] or ["No notes recorded."]
     r += ["", "## Appendix: audit log", "", "| Time | Tool | Target | Detail |", "|---|---|---|---|"]
     r += [f"| {md_escape(f[0])} | {md_escape(f[2])} | {md_escape(f[3])[:80]} | {md_escape(f[4])[:120]} |" for f in audit]
-    open(out, "w", encoding="utf-8").write("\n".join(r) + "\n")
+    with open(out, "w", encoding="utf-8") as fh:
+        fh.write("\n".join(r) + "\n")
     print(f"Report source written: {out}")
     return 0
 
@@ -180,7 +190,8 @@ def cmd_close(case_dir):
 def main(argv):
     cmds = {"init": (cmd_init, 1), "show": (cmd_show, 1), "note": (cmd_note, 2),
             "notes-verify": (cmd_notes_verify, 1), "report": (cmd_report, 2), "close": (cmd_close, 1)}
-    if len(argv) < 2 or argv[1] not in cmds or len(argv) - 2 != cmds[argv[1]][1]:
+    extra = 1 if len(argv) > 1 and argv[1] == "report" else 0          # report takes an optional SECTIONS file
+    if len(argv) < 2 or argv[1] not in cmds or not cmds[argv[1]][1] <= len(argv) - 2 <= cmds[argv[1]][1] + extra:
         print(__doc__)
         return 2
     return cmds[argv[1]][0](*argv[2:])

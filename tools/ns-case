@@ -49,6 +49,7 @@ choice=$(ui_list "Case: $(ns_case)" \
   "Open or switch case" \
   "Case details" \
   "Build a report (Word document)" \
+  "Record a supervisor review" \
   "Verify notes and audit log" \
   "Close this case (verify, export, mark closed)") || exit 0
 
@@ -63,14 +64,46 @@ case "$choice" in
     r=$(ns_casework show "$case_dir"); printf '%s\n' "$r"; ui_info "$r" ;;
   "Build a report"*)
     ns_cmd pandoc || { ui_error "pandoc isn't installed: ./install.sh --only core"; exit 1; }
-    mkdir -p "$case_dir/reports"
-    base="$case_dir/reports/report_$(date -u '+%Y%m%dT%H%M%SZ')"
-    ns_casework report "$case_dir" "$base.md" >/dev/null
-    pandoc "$base.md" -o "$base.docx" && ns_audit ns-case "report" "$(basename "$base").docx built"
-    ui_info "Report built: $base.docx
+    # Each version gets its own folder: the report, and a frozen copy of the findings it used
+    n=$(find "$case_dir/reports" -mindepth 1 -maxdepth 1 -type d -name 'v*' 2>/dev/null | wc -l | tr -d ' ')
+    ver=$((n + 1))
+    rdir="$case_dir/reports/v${ver}_$(date -u '+%Y%m%dT%H%M%SZ')"
+    ( umask 077; mkdir -p "$rdir" )
+    info=""
+    if ns_cmd ns_vault; then
+      info=$(ns_vault report-sections "$case_dir" "$rdir")
+      warn=$(printf '%s\n' "$info" | sed -n 's/^warnings=//p')
+      if [ "${warn:-0}" -gt 0 ] && ! ui_question "The report has $warn warning(s):
 
-It has the case details, methodology (tools used, from the audit log), exhibits, notes and the audit log as an appendix. Write your findings in the Summary section." || true
-    ui_reveal "$case_dir/reports" ;;
+$(printf '%s\n' "$info" | sed -n 's/^warning=/- /p' | head -12)
+
+They're listed at the top of the report. Build it anyway?"; then
+        rm -rf "$rdir"; exit 0
+      fi
+    fi
+    ns_casework report "$case_dir" "$rdir/report.md" "$rdir/findings-section.md" >/dev/null
+    pandoc "$rdir/report.md" -o "$rdir/report.docx" || { ui_error "pandoc couldn't build the Word document."; exit 1; }
+    fsha=$(printf '%s\n' "$info" | sed -n 's/^findings_sha256=//p')
+    ( cd "$rdir" && for f in report.md report.docx findings-frozen.md; do
+        [ -f "$f" ] && printf '%s  %s\n' "$(ns_hash_file "$f")" "$f"; done > hashes.sha256 )
+    ns_casework note "$case_dir" "REPORT v$ver built ($(basename "$rdir")): report.docx sha256 $(ns_hash_file "$rdir/report.docx"), findings sha256 ${fsha:-none}" >/dev/null
+    ns_audit ns-case "report" "v$ver built: $(basename "$rdir")"
+    ns_cmd ns_vault && ns_vault case "$case_dir" >/dev/null
+    ui_info "Report v$ver built: $rdir/report.docx
+
+It has the case details, your Summary and Analysis from Case.md, the reportable findings with their exhibits and fingerprint checks, searches with no result, unused material, the latest review, methodology, exhibits, notes and the audit log. The findings it used are frozen in findings-frozen.md, and the hashes are in the contemporaneous notes." || true
+    ui_reveal "$rdir" ;;
+  "Record a supervisor review")
+    ns_cmd ns_vault || { ui_error "The notes engine isn't installed: ./install.sh --only core"; exit 1; }
+    who=$(ui_entry "Reviewer's name:") || exit 0
+    role=$(ui_entry "Reviewer's role:") || exit 0
+    dec=$(ui_list "Decision" "approved" "approved with changes" "changes requested" "not approved") || exit 0
+    com=$(ui_entry "Comments (optional):") || com=""
+    fsha=$(ns_vault findings-hash "$case_dir")
+    ns_casework note "$case_dir" "[REVIEW] $who ($role): $dec. ${com:+$com. }Reviewed findings sha256 $fsha" >/dev/null
+    ns_audit ns-case "review" "$dec by $who"
+    ns_vault case "$case_dir" >/dev/null
+    ui_notify "Review recorded: $dec" ;;
   "Verify"*)
     r="Notes: $(ns_casework notes-verify "$case_dir" | head -1)
 Audit log: $(ns_evidence audit-verify "$case_dir/audit.log" | head -1)"
