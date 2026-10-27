@@ -4,6 +4,17 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project uses
 [Semantic Versioning](https://semver.org/).
 
+## [0.27.1] - 2026-10-27
+
+### Security
+- Result notes for breach searches could copy raw breach records, including
+  passwords and hashes, out of the result folder's JSON. Breach notes now show
+  only ns_breach's masked summary; every other note masks fields that look like
+  credentials and never expands nested records. Case notes are written mode 600.
+
+### Fixed
+- holehe hits (`[+] site.com`, no URL) now appear under "Accounts found".
+
 ## [0.27.0] - 2026-10-27
 
 ### Added

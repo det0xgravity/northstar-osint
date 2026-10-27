@@ -243,6 +243,15 @@ python3 "$R/lib/ns_vault.py" result "$CASE" "$H1" > /dev/null
 hn=$(ls "$CASE"/Results/*evil.onion*.md); export hn     # used inside the check string
 check "untrusted page content can't render as HTML or load remote images" \
   "! grep -v '^>' \"\$hn\" | grep -q '<img\\|<iframe\\|!\\[x\\](http' && grep -q '&lt;iframe' \"\$hn\" && grep -q '^> \`\`\`\`text' \"\$hn\""
+B1="$CASE/breach/a@b.example_20261027-010000"; mkdir -p "$B1"; touch "$B1/console.log"
+echo '{"found":1,"result":[{"email":"a@b.example","password":"Hunter2!"}],"top_passwords":["abc123"],"api_key":"k"}' > "$B1/leakcheck.json"
+printf 'Breaches: 1\n' > "$B1/summary.txt"
+python3 "$R/lib/ns_vault.py" result "$CASE" "$B1" > /dev/null
+bn=$(ls "$CASE"/Results/*a@b.example*.md); export bn
+check "breach records and credentials never reach the notes" "! grep -qE 'Hunter2|abc123' \"\$bn\" && grep -q 'Breaches: 1' \"\$bn\""
+check "notes are readable only by you" "[ -z \"\$(find '$CASE/Results' '$CASE/Case.md' -perm -004 2>/dev/null)\" ]"
+printf '[+] instagram.com\n[-] twitter.com\n' > "$H1/console.log"; python3 "$R/lib/ns_vault.py" result "$CASE" "$H1" > /dev/null
+check "holehe hits are listed" "grep -q 'instagram.com' \"\$hn\" && grep -q 'Accounts found (1)' \"\$hn\""
 python3 "$R/lib/ns_vault.py" register "$W/data" "$W/obs/obsidian.json" > /dev/null
 python3 "$R/lib/ns_vault.py" register "$W/data" "$W/obs/obsidian.json" > /dev/null
 check "vault registered once with Obsidian" "python3 -c 'import json,sys; assert len(json.load(open(sys.argv[1]))[\"vaults\"]) == 1' '$W/obs/obsidian.json'"

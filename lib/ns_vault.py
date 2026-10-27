@@ -268,9 +268,12 @@ def utc(fmt="%Y-%m-%d %H:%M UTC"):
 
 
 def write(path, text):
+    """Case notes are readable only by you, like the rest of the case."""
     os.makedirs(os.path.dirname(path), mode=0o700, exist_ok=True)
-    with open(path, "w", encoding="utf-8") as fh:
+    fd = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
+    with os.fdopen(fd, "w", encoding="utf-8") as fh:
         fh.write(text)
+    os.chmod(path, 0o600)
 
 
 def write_if_missing(path, text):
@@ -382,28 +385,41 @@ def csv_table(path, rows=12, cols=6):
     return "\n".join(lines), len(body)
 
 
+SECRET_KEY = re.compile(r"pass|hash|secret|token|cookie|session|api.?key|credential|salt", re.I)
+
+
 def json_table(path, limit=25):
+    """Top-level fields only. Nested records are never expanded, and anything that
+    looks like a credential is masked: notes must never carry secrets."""
     data = read_json(path)
     if not isinstance(data, dict):
         return ""
-    rows = [(k, v) for k, v in data.items() if not isinstance(v, (dict, list)) or (isinstance(v, list) and len(v) < 8)]
+    rows = [(k, v) for k, v in data.items()
+            if not isinstance(v, (dict, list)) or (isinstance(v, list) and len(v) < 8
+                                                   and all(not isinstance(x, (dict, list)) for x in v))]
     if not rows:
         return ""
     lines = ["| Field | Value |", "|---|---|"]
     for k, v in rows[:limit]:
-        if isinstance(v, list):
+        if SECRET_KEY.search(str(k)):
+            v = "(withheld)"
+        elif isinstance(v, list):
             v = ", ".join(str(x) for x in v)
         lines.append(f"| {cell(k, 40)} | {cell(v)} |")
     return "\n".join(lines)
 
 
 def found_accounts(console):
-    """Username tools print found profiles as "[+] Site: URL"."""
+    """Username tools print found profiles as "[+] Site: URL"; holehe prints "[+] site.com"."""
     out = []
-    for line in console.splitlines():
+    for line in re.sub(r"\x1b\[[0-9;]*m", "", console).splitlines():
         m = re.match(r"^\s*\[\+\]\s*([^:]{1,60}):\s*(https?://\S+)", line)
         if m:
             out.append((m.group(1).strip(), m.group(2).strip()))
+            continue
+        m = re.match(r"^\s*\[\+\]\s*([a-z0-9.-]+\.[a-z]{2,})\s*$", line, re.I)
+        if m:
+            out.append((m.group(1), "(registered: no profile URL)"))
     return out
 
 
@@ -460,17 +476,20 @@ tags: [result, {re.sub(r'[^a-z0-9-]', '-', info['kind'].lower())}]
         out.append(f"## Accounts found ({len(accts)})\n\n| Site | Profile |\n|---|---|\n"
                    + "\n".join(f"| {cell(s, 50)} | {cell(u, 200)} |" for s, u in accts[:200]))
 
-    for f in [x for x in files if x.endswith(".csv")][:8]:
+    # Breach results: only ns_breach's summary.txt, which masks values; raw records stay in the folder
+    breach = info["kind"] == "breach"
+    for f in ([] if breach else [x for x in files if x.endswith(".csv")][:8]):
         table, n = csv_table(os.path.join(result_dir, f))
         if table:
             more = f" (first 12 of {n} rows)" if n > 12 else f" ({n} rows)"
             out.append(f"## {cell(os.path.basename(f), 60)}{more}\n\n{table}\n\n{wlink(vp(f), 'Open the full table')}")
-    for f in [x for x in files if x.endswith(".json") and x != "provenance.json"][:6]:
+    for f in ([] if breach else [x for x in files if x.endswith(".json") and x != "provenance.json"][:6]):
         table = json_table(os.path.join(result_dir, f))
         if table:
             out.append(f"## {cell(os.path.basename(f), 60)}\n\n{table}")
 
-    texts = [x for x in files if x.endswith(".txt") and os.path.basename(x) not in TEXT_SKIP]
+    texts = [x for x in files if x.endswith(".txt") and os.path.basename(x) not in TEXT_SKIP
+             and (not breach or os.path.basename(x) == "summary.txt")]
     texts.sort(key=lambda x: (PRIORITY_TEXT.index(os.path.basename(x)) if os.path.basename(x) in PRIORITY_TEXT
                               else len(PRIORITY_TEXT), x))
     for f in texts[:6]:
@@ -494,7 +513,7 @@ tags: [result, {re.sub(r'[^a-z0-9-]', '-', info['kind'].lower())}]
         out.append(f"## Images ({len(images)})\n\n" + "\n".join(f"![[{vp(x)}|240]]" for x in pick)
                    + (f"\n\n{len(images) - len(pick)} more in the folder." if len(images) > len(pick) else ""))
 
-    if console.strip():
+    if console.strip() and not breach:
         tail = "\n".join(console.strip().splitlines()[-30:])
         out.append("> [!example]- Console output (last 30 lines)\n" + "\n".join("> " + l for l in fence(tail).splitlines()))
 
