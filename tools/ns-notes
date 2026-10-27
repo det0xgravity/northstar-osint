@@ -10,8 +10,9 @@ case_dir=$(ns_case_dir)
 ns_vault case "$case_dir" >/dev/null
 
 have_obsidian() {
+  ns_cmd obsidian && return 0
   if ui_mac; then [ -d "${NS_OBSIDIAN_APP:-/Applications/Obsidian.app}" ]
-  else ns_cmd obsidian || flatpak info md.obsidian.Obsidian >/dev/null 2>&1; fi
+  else flatpak info md.obsidian.Obsidian >/dev/null 2>&1; fi
 }
 
 # Without Obsidian: offer to install it (the notes module), else open the note

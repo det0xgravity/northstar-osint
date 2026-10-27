@@ -10,7 +10,8 @@ trap 'rm -rf "$W"' EXIT
 PASS=0; FAIL=0
 
 ok()   { PASS=$((PASS+1)); printf '  ok    %s\n' "$1"; }
-bad()  { FAIL=$((FAIL+1)); printf '  FAIL  %s\n' "$1"; [ -n "${2:-}" ] && printf '        %s\n' "$2"; }
+bad()  { FAIL=$((FAIL+1)); printf '  FAIL  %s\n' "$1"; [ -n "${2:-}" ] && printf '        %s\n' "$2"
+         [ -n "${CI:-}" ] && [ -f "$W/out.txt" ] && sed 's/^/        | /' "$W/out.txt" | tail -15; return 0; }
 check() { if eval "$2"; then ok "$1"; else bad "$1" "$2"; fi; }
 section() { printf '\n== %s\n' "$1"; }
 
@@ -224,10 +225,10 @@ check "case dashboard lists the latest results" "grep -q '## Latest results' '$C
 check "raw tool folders hidden from the file list" "grep -q 'data-path=\"general/map\"' '$W/data/Cases/.obsidian/snippets/northstar-hide-raw.css'"
 check "theme and hide snippets enabled" "grep -q northstar-hide-raw '$W/data/Cases/.obsidian/appearance.json' && [ -s '$W/data/Cases/.obsidian/snippets/northstar.css' ]"
 printf '#!/bin/sh\nexit 0\n' > "$G/obsidian"; chmod +x "$G/obsidian"      # pretend Obsidian is installed
-PATH="$G:$PATH" menu ns-notes "New note: person" "Jane Doe"
+NS_OBSIDIAN_APP="$W/none" PATH="$G:$PATH" menu ns-notes "New note: person" "Jane Doe"
 check "person note made from the template" "grep -q '^type: person' '$CASE/People/Jane Doe.md' && grep -q '^# Jane Doe' '$CASE/People/Jane Doe.md'"
 check "note opened in Obsidian by URI" "grep -q 'obsidian://open?path=.*People%2FJane%20Doe.md' '$W/out.txt'"
-NS_OBSIDIAN_APP="$W/none" menu ns-notes "New note: lead" "Check the bus station CCTV" "no"
+rm -f "$G/obsidian"; NS_OBSIDIAN_APP="$W/none" menu ns-notes "New note: lead" "Check the bus station CCTV" "no"
 check "without Obsidian the note still opens, in the text editor" "grep -q 'ui_reveal.*Leads/Check the bus station CCTV.md' '$W/out.txt' && grep -q \"Obsidian isn't available\" '$W/out.txt'"
 printf 'my edits\n' > "$W/data/Cases/_templates/Lead.md"
 python3 "$R/lib/ns_vault.py" setup "$W/data" > /dev/null
@@ -239,7 +240,7 @@ H1="$CASE/darkweb/evil.onion_20261026-120000"; mkdir -p "$H1"; touch "$H1/consol
 printf 'hi ![x](http://evil.example/p.png) <img src=http://evil.example/t.gif> ```\n' > "$H1/page.txt"
 printf 'k,v\n<iframe src=http://evil.example>,[[x]]\n' > "$H1/t.csv"
 python3 "$R/lib/ns_vault.py" result "$CASE" "$H1" > /dev/null
-hn=$(ls "$CASE"/Results/*evil.onion*.md)
+hn=$(ls "$CASE"/Results/*evil.onion*.md); export hn     # used inside the check string
 check "untrusted page content can't render as HTML or load remote images" \
   "! grep -v '^>' \"\$hn\" | grep -q '<img\\|<iframe\\|!\\[x\\](http' && grep -q '&lt;iframe' \"\$hn\" && grep -q '^> \`\`\`\`text' \"\$hn\""
 python3 "$R/lib/ns_vault.py" register "$W/data" "$W/obs/obsidian.json" > /dev/null
