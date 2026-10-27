@@ -12,7 +12,11 @@ mod_darkweb() {
     ns_info "ns-darkweb starts Tor when you need it (brew services start tor)"
   else
     ns_apt tor torsocks || rc=1
-    sudo systemctl enable --now tor >/dev/null 2>&1 || { ns_warn "Couldn't start the tor service"; rc=1; }
+    if [ -d /run/systemd/system ]; then
+      sudo systemctl enable --now tor >/dev/null 2>&1 || { ns_warn "Couldn't start the tor service"; rc=1; }
+    else
+      ns_info "No systemd here (a container?): start Tor yourself with 'tor &' when you need it"
+    fi
     ns_info "Tor SOCKS proxy on 127.0.0.1:9050 (sudo systemctl disable --now tor to turn it off)"
   fi
   return $rc

@@ -15,14 +15,14 @@ mod_face() {
   mkdir -p "$NS_VENVS" "$NS_BIN" "$dir"
   [ -x "$venv/bin/python" ] || python3 -m venv "$venv" || return 1
   if ! "$venv/bin/python" -c 'import cv2' 2>/dev/null || [ "$NS_UPDATE" = 1 ]; then
-    "$venv/bin/pip" install -q --upgrade pip opencv-python-headless numpy >/dev/null 2>&1 \
+    ns_pip /dev/null "OpenCV" "$venv/bin/pip" install --upgrade pip opencv-python-headless numpy \
       || { ns_warn "OpenCV install failed"; return 1; }
   fi
   while IFS='|' read -r path sum; do
     [ -n "$path" ] || continue
     f="$dir/$(basename "$path")"
     [ -s "$f" ] && [ "$(ns_sha256 "$f")" = "$sum" ] && continue
-    curl -fsSL "$NS_FACE_ZOO/$path" -o "$f.tmp" || { ns_warn "download failed: $(basename "$path")"; rc=1; continue; }
+    ns_download "$NS_FACE_ZOO/$path" "$f.tmp" "download: $(basename "$path")" || { ns_warn "download failed: $(basename "$path")"; rc=1; continue; }
     if [ "$(ns_sha256 "$f.tmp")" = "$sum" ]; then mv "$f.tmp" "$f"
     else rm -f "$f.tmp"; ns_warn "$(basename "$path") failed its checksum: not installed"; rc=1; fi
   done <<LIST

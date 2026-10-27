@@ -33,7 +33,8 @@ jobs:
           chown -R ns: "$GITHUB_WORKSPACE"
           su ns -c "cd '$GITHUB_WORKSPACE' && ./install.sh --yes --skip vm" || true
       - name: End-to-end checks
-        run: su ns -c "cd '$GITHUB_WORKSPACE' && bash tests/e2e.sh"
+        # Ubuntu's Firefox is a snap, and snaps don't run in containers
+        run: su ns -c "cd '$GITHUB_WORKSPACE' && NS_E2E_EXPECTED_FAIL='${{ startsWith(matrix.image, 'ubuntu') && 'browsers' || '' }}' bash tests/e2e.sh"
       - name: Keep the install log and health report
         if: always()
         run: |

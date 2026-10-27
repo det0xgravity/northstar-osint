@@ -2,6 +2,17 @@
 
 Everything the installer does is logged to `~/.config/northstar/install.log`. Re-running `./install.sh` is always safe: finished steps are skipped and failed ones are retried.
 
+
+## The install looks stuck
+
+Each module header shows where you are (`==> [5/18] ████░░░░ geo: …`), and every long step has a status line underneath that updates each second:
+
+```
+    / [5/18] PyTorch (CPU)  03:12  ███████████░░░░░░░░░  56%  torch (104.1 MB)
+```
+
+If the spinner turns and the time counts up, it's working: PyTorch (geo, translate), Flatpak runtimes and the Go toolchain are large first downloads. If the time stops, check `tail -f ~/.config/northstar/install.log` in another terminal; the full output of every step is there. Status lines only appear in a terminal; piped or in CI, the log has everything.
+
 ## Installer
 
 **"Run as your normal user, not root or sudo."**

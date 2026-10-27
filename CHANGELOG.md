@@ -4,6 +4,20 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project uses
 [Semantic Versioning](https://semver.org/).
 
+## [0.26.0] - 2026-10-27
+
+### Added
+- Progress across the whole install: each module header shows `[n/total]`
+  and an overall bar, each module reports how long it took, and every long
+  step (apt, Flatpak, pipx, pip, go install, git, large downloads, uv) shows a
+  live status line with a spinner, elapsed time, and a progress bar for
+  downloads (pip and curl) or the step's latest output. Status lines go to the
+  terminal only; `install.log` keeps the full output.
+
+### Fixed
+- `darkweb` no longer fails where there's no systemd (containers); it says how
+  to start Tor by hand.
+
 ## [0.25.0] - 2026-10-27
 
 ### Added

@@ -5,7 +5,7 @@
 #  Sourced by install.sh and every module. Bash 3.2 compatible (macOS).
 # =============================================================================
 
-NS_VERSION="0.25.0"
+NS_VERSION="0.26.0"
 
 NS_HOME="${NS_HOME:-$HOME/.local/share/northstar}"   # tools, venvs, sources
 NS_BIN="$NS_HOME/bin"                                # all northstar binaries
@@ -33,14 +33,110 @@ ns_show_tail() { tail -n 15 "$1" | sed 's/^/        | /'; }
 
 NS_FAILED=()
 ns_step() {
-  local name="$1"; shift
-  printf '\n%s==>%s %s%s%s\n' "$C_G" "$C_0" "$C_B" "$name" "$C_0"
+  local name="$1" t0 el; shift
+  NS_STEP_I=$((NS_STEP_I + 1))
+  if [ "$NS_STEP_N" -gt 0 ]; then
+    printf '\n%s==>%s [%s/%s] %s %s%s%s\n' "$C_G" "$C_0" "$NS_STEP_I" "$NS_STEP_N" \
+      "$(ns_bar $((NS_STEP_I - 1)) "$NS_STEP_N" 18)" "$C_B" "$name" "$C_0"
+  else
+    printf '\n%s==>%s %s%s%s\n' "$C_G" "$C_0" "$C_B" "$name" "$C_0"
+  fi
+  t0=$(date +%s)
   if "$@"; then
-    printf '    %sok%s\n' "$C_G" "$C_0"
+    el=$(( $(date +%s) - t0 ))
+    printf '    %sok%s (%s)\n' "$C_G" "$C_0" "$(_ns_mmss "$el")"
   else
     printf '    %sFAILED%s: %s\n' "$C_R" "$C_0" "$name"
     NS_FAILED+=("$name")
   fi
+}
+
+# --- progress ---------------------------------------------------------------------
+# install.sh sets NS_TTY=1 and keeps the terminal on fd 4 when it runs in a
+# terminal. Status lines are drawn there only, so install.log stays readable.
+NS_TTY="${NS_TTY:-0}"
+NS_STEP_I=0; NS_STEP_N=0
+
+# ns_bar <done> <total> <width>   a bar of filled and empty blocks
+ns_bar() {
+  local d="$1" t="$2" w="$3" f i=0 out=""
+  [ "$t" -gt 0 ] 2>/dev/null || t=1
+  f=$(( d * w / t )); [ "$f" -gt "$w" ] && f=$w
+  while [ $i -lt "$w" ]; do
+    if [ $i -lt $f ]; then out="$out█"; else out="$out░"; fi
+    i=$((i+1))
+  done
+  printf '%s' "$out"
+}
+
+_ns_mmss() { printf '%02d:%02d' $(( $1 / 60 )) $(( $1 % 60 )); }
+
+# ns_bg <log> <label> <command...>   Runs a long command with its output in
+# <log>. In a terminal, a status line shows a spinner, the module counter, the
+# elapsed time, and a progress bar when the command reports one (pip's raw
+# progress, curl's percentage), otherwise its latest output line.
+ns_bg() {
+  local log="$1" label="$2" pid rc t0 el last pct cur tot n=0 cols spin='|/-\' detail room off f
+  shift 2
+  [ ${#label} -gt 48 ] && label="${label:0:45}..."
+  if [ "$NS_TTY" != 1 ]; then "$@" >>"$log" 2>&1; return $?; fi
+  cols=$(tput cols 2>/dev/null || echo 100); [ "$cols" -gt 20 ] 2>/dev/null || cols=100
+  off=1; [ -f "$log" ] && off=$(( $(wc -c < "$log") + 1 ))   # read only what this command writes
+  "$@" >>"$log" 2>&1 </dev/null &
+  pid=$!
+  t0=$(date +%s)
+  while kill -0 "$pid" 2>/dev/null; do
+    el=$(( $(date +%s) - t0 ))
+    last=$(tail -c +"$off" "$log" 2>/dev/null | tail -c 4000 | tr '\r' '\n' | LC_ALL=C sed $'s/\033\\[[0-9;?]*[A-Za-z]//g' | awk 'NF' | tail -n 3)
+    pct=""
+    cur=$(printf '%s\n' "$last" | sed -n 's/^Progress \([0-9]*\) of \([0-9]*\).*/\1 \2/p' | tail -1)
+    if [ -n "$cur" ]; then
+      tot=${cur#* }; cur=${cur% *}
+      [ "$tot" -gt 0 ] 2>/dev/null && pct=$(( cur * 100 / tot ))
+      f=$(tail -c +"$off" "$log" | tail -n 300 | sed -n 's#^ *Downloading \([^ ]*/\)\{0,1\}\([^/ ]*\) (\(.*\))#\2|\3#p' | tail -1)
+      detail=""; [ -n "$f" ] && { detail=${f%%|*}; detail="${detail%%-[0-9]*} (${f#*|})"; }
+    else
+      detail=$(printf '%s\n' "$last" | tail -1)
+      pct=$(printf '%s' "$detail" | sed -n -E 's/(^|.*[^0-9.])([0-9]{1,3})(\.[0-9]+)?%.*/\2/p')
+      [ -n "$pct" ] && printf '%s' "$detail" | grep -q '^[#= O-]*[0-9. ]*%' && detail=""
+    fi
+    room=$(( cols - ${#label} - 24 ))
+    if [ -n "$pct" ] && [ "$pct" -le 100 ] 2>/dev/null; then
+      room=$(( room - 27 ))
+      [ "$room" -gt 0 ] || room=0
+      detail="$(ns_bar "$pct" 100 20) $(printf '%3d' "$pct")%  ${detail:0:$room}"
+    else
+      [ "$room" -gt 0 ] || room=0
+      detail="${detail:0:$room}"
+    fi
+    printf '\r\033[K    %s [%s/%s] %s  %s  %s' "${spin:$((n % 4)):1}" "$NS_STEP_I" "$NS_STEP_N" "$label" \
+      "$(_ns_mmss "$el")" "$detail" >&4
+    n=$((n+1))
+    sleep 1
+  done
+  wait "$pid"; rc=$?
+  printf '\r\033[K' >&4
+  return $rc
+}
+
+# ns_pip <log> <label> <pip> <args...>   pip install with a download bar when
+# this pip supports raw progress (24.1+)
+ns_pip() {
+  local log="$1" label="$2" pip="$3"
+  shift 3
+  if [ "$NS_TTY" = 1 ] && "$pip" install --help 2>/dev/null | grep -q 'raw'; then
+    ns_bg "$log" "$label" "$pip" "$@" --progress-bar raw
+  else
+    ns_bg "$log" "$label" "$pip" "$@"
+  fi
+}
+
+# ns_download <url> <file> [label]   curl with a progress bar in a terminal
+ns_download() {
+  local log
+  log=$(mktemp)
+  if ns_bg "$log" "${3:-download: ${1##*/}}" curl -fL --progress-bar "$1" -o "$2"; then rm -f "$log"; return 0; fi
+  ns_show_tail "$log"; rm -f "$log"; return 1
 }
 
 # --- platform detection --------------------------------------------------------
@@ -113,14 +209,14 @@ ns_sudo_keepalive() {
 NS_APT_UPDATED=0
 ns_apt_update() {
   [ "$NS_APT_UPDATED" = 1 ] && return 0
-  sudo apt-get update -q && NS_APT_UPDATED=1
+  ns_bg "${NS_LOG:-/dev/null}" "apt: updating package lists" sudo apt-get update -q && NS_APT_UPDATED=1
 }
 
 # Installs packages as a batch; if the batch fails, retries one by one so a
 # single missing package (names differ between distros) doesn't sink the rest.
 ns_apt() {
   ns_apt_update || return 1
-  sudo DEBIAN_FRONTEND=noninteractive apt-get install -y -q "$@" && return 0
+  ns_bg "${NS_LOG:-/dev/null}" "apt: $*" sudo DEBIAN_FRONTEND=noninteractive apt-get install -y -q "$@" && return 0
   local p rc=0
   for p in "$@"; do
     sudo DEBIAN_FRONTEND=noninteractive apt-get install -y -q "$p" >/dev/null 2>&1 \
@@ -154,49 +250,10 @@ ns_cask() {
 ns_flatpak() {
   ns_has flatpak || return 1
   sudo flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo || return 1
-  sudo flatpak install -y --noninteractive flathub "$@"
+  ns_bg "${NS_LOG:-/dev/null}" "flatpak: $*" sudo flatpak install -y --noninteractive flathub "$@"
 }
 
 # --- Python tools ----------------------------------------------------------------
-# ns_pip_progress <log> <pip> <args...>   For big installs (PyTorch): the full
-# output goes to the log while a status line shows the current download with a
-# progress bar, elapsed time and the space used so far, so a long install
-# doesn't look stuck. Without a terminal (CI, piped) it prints each download.
-ns_pip_progress() {
-  local log="$1" pip="$2" venv pid rc start now file size cur tot pct bar mb width last=""
-  shift
-  venv=$(dirname "$(dirname "$pip")")
-  "$@" --progress-bar raw >>"$log" 2>&1 &
-  pid=$!
-  start=$(date +%s)
-  while kill -0 "$pid" 2>/dev/null; do
-    sleep 1
-    file=$(tail -n 400 "$log" | sed -n 's#^ *Downloading \([^ ]*/\)\{0,1\}\([^/ ]*\) (\(.*\))#\2|\3#p' | tail -1)
-    if [ ! -t 1 ]; then
-      [ -n "$file" ] && [ "$file" != "$last" ] && printf '        ↓ %s (%s)\n' "${file%%|*}" "${file#*|}"
-      last="$file"; continue
-    fi
-    now=$(( $(date +%s) - start ))
-    mb=$(du -sm "$venv" 2>/dev/null | cut -f1)
-    cur=$(tail -n 5 "$log" | sed -n 's/^Progress \([0-9]*\) of \([0-9]*\).*/\1 \2/p' | tail -1)
-    tot=${cur#* }; cur=${cur% *}
-    if [ -n "$cur" ] && [ "${tot:-0}" -gt 0 ] 2>/dev/null; then
-      pct=$(( cur * 100 / tot )); width=$(( pct / 5 ))
-      bar=$(printf '%*s' "$width" '' | tr ' ' '#')$(printf '%*s' $((20 - width)) '' | tr ' ' '-')
-    else
-      pct=""; bar="resolving packages.."
-    fi
-    size=${file#*|}; file=${file%%|*}; file=${file%%-[0-9]*}
-    if tail -n 3 "$log" | grep -q '^Installing collected packages'; then
-      bar="installing packages."; pct=""; file="(unpacking)"; size=""
-    fi
-    printf '\r\033[K        [%s] %3s%%  %-22.22s %-9s  %02d:%02d elapsed, %s MB so far' \
-      "$bar" "${pct:- }" "${file:-preparing}" "${size:+($size)}" $((now / 60)) $((now % 60)) "${mb:-0}"
-  done
-  wait "$pid"; rc=$?
-  [ -t 1 ] && printf '\r\033[K'
-  return $rc
-}
 
 # ns_pipx <command-it-provides> [pip spec]
 # Presence is checked by command name because pipx package names and command
@@ -210,7 +267,7 @@ ns_pipx() {
   fi
   local log
   log=$(mktemp)
-  if pipx install "$spec" >"$log" 2>&1; then
+  if ns_bg "$log" "pipx: $cmd" pipx install "$spec"; then
     ns_info "$cmd installed"
     rm -f "$log"
   else
@@ -230,12 +287,12 @@ ns_git_venv() {
   local dir="$NS_SRC/$name" venv="$NS_VENVS/$name" reqfile log
   mkdir -p "$NS_SRC" "$NS_VENVS" "$NS_BIN"
   if [ -d "$dir/.git" ]; then
-    git -C "$dir" pull -q --ff-only || ns_warn "$name: git pull failed, keeping current copy"
+    ns_bg /dev/null "git: $name" git -C "$dir" pull -q --ff-only || ns_warn "$name: git pull failed, keeping current copy"
   else
-    git clone -q --depth 1 "$repo" "$dir" || { ns_warn "$name: clone failed"; return 1; }
+    ns_bg /dev/null "git: $name" git clone -q --depth 1 "$repo" "$dir" || { ns_warn "$name: clone failed"; return 1; }
   fi
   [ -x "$venv/bin/python" ] || python3 -m venv "$venv" || return 1
-  "$venv/bin/pip" install -q --upgrade pip >/dev/null 2>&1
+  ns_bg /dev/null "pip: $name" "$venv/bin/pip" install -q --upgrade pip
   if [ -f "$dir/$req" ]; then
     reqfile="$dir/$req"
     if [ -n "$filter" ]; then
@@ -243,7 +300,7 @@ ns_git_venv() {
       sed -E "$filter" "$dir/$req" > "$reqfile" || return 1
     fi
     log=$(mktemp)
-    if ! "$venv/bin/pip" install -q -r "$reqfile" >"$log" 2>&1; then
+    if ! ns_pip "$log" "pip: $name" "$venv/bin/pip" install -r "$reqfile"; then
       ns_warn "$name: some requirements failed to install"
       ns_show_tail "$log"; rm -f "$log"
       return 1
@@ -284,7 +341,7 @@ ns_go_ensure() {
   [ -n "$sum" ] || { ns_warn "No checksum published for $file"; return 1; }
   ns_info "System Go is missing or too old — installing $ver to $NS_HOME/go"
   tmp=$(mktemp -d)
-  curl -fsSL "https://go.dev/dl/$file" -o "$tmp/go.tgz" || { rm -rf "$tmp"; return 1; }
+  ns_download "https://go.dev/dl/$file" "$tmp/go.tgz" "download: Go toolchain" || { rm -rf "$tmp"; return 1; }
   [ "$(ns_sha256 "$tmp/go.tgz")" = "$sum" ] || { ns_warn "Go download failed its checksum: not installed"; rm -rf "$tmp"; return 1; }
   tar -C "$tmp" -xzf "$tmp/go.tgz" || { rm -rf "$tmp"; return 1; }
   mkdir -p "$NS_HOME" && rm -rf "$NS_HOME/go" && mv "$tmp/go" "$NS_HOME/go"
@@ -300,7 +357,7 @@ ns_go() {
   if [ "$NS_UPDATE" != 1 ] && [ -x "$NS_BIN/$name" ]; then ns_info "$name ✓"; return 0; fi
   local log
   log=$(mktemp)
-  if GOBIN="$NS_BIN" go install "$1" >"$log" 2>&1; then
+  if ns_bg "$log" "go: $name" env GOBIN="$NS_BIN" go install "$1"; then
     ns_info "$name installed"
     rm -f "$log"
   else
@@ -323,7 +380,7 @@ ns_gh_release() {
   sums=$(printf '%s' "$json" | jq -r '.assets[] | select(.name | test("(checksums?|sha256sums?)(\\.txt)?$"; "i")) | .browser_download_url' | head -1)
   [ -n "$url" ] || { ns_warn "$bin: no release asset matched /$rx/"; return 1; }
   tmp=$(mktemp -d)
-  curl -fsSL "$url" -o "$tmp/asset" || { rm -rf "$tmp"; return 1; }
+  ns_download "$url" "$tmp/asset" "download: $bin" || { rm -rf "$tmp"; return 1; }
   if [ -n "$sums" ]; then
     name=${url##*/}
     want=$(curl -fsSL "$sums" | awk -v n="$name" '{ f=$2; sub(/^\*/, "", f) } f == n { print $1; exit }')

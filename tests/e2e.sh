@@ -30,8 +30,14 @@ PY="$NS_HOME/venvs/images/bin/python"; [ -x "$PY" ] || PY=python3
 
 section "Installation"
 if [ -f "$LOG" ]; then
-  check "installer reported no failed modules" "! grep -q 'Completed with problems' '$LOG'"
-  grep -A20 'Completed with problems' "$LOG" | sed -n '2,20p' | grep '^ *- ' | sed 's/^/        /'
+  # NS_E2E_EXPECTED_FAIL: modules that can't work where this runs (e.g. "browsers"
+  # in an Ubuntu container: Firefox is a snap there, and snaps need systemd)
+  failed=$(tail -n 60 "$LOG" | sed -n 's/^ *- \([a-z]*\):.*/\1/p' | sort -u)
+  unexpected=""
+  for m in $failed; do
+    case ",${NS_E2E_EXPECTED_FAIL:-}," in *",$m,"*) printf '        (expected here: %s)\n' "$m" ;; *) unexpected="$unexpected $m" ;; esac
+  done
+  check "installer reported no unexpected failed modules${unexpected:+:$unexpected}" "[ -z '$unexpected' ]"
   if [ "$(uname -m)" = aarch64 ] && grep -q 'Tor Browser' "$LOG"; then
     check "arm64 Tor Browser signature verified" "grep -q 'signature-verified' '$LOG'"
   fi

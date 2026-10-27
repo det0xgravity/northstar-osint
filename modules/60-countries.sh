@@ -9,7 +9,7 @@ mod_countries() {
   local venv="$NS_VENVS/core"
   mkdir -p "$NS_VENVS"
   [ -x "$venv/bin/python" ] || python3 -m venv "$venv" || return 1
-  "$venv/bin/pip" install -q --upgrade pip phonenumbers >/dev/null 2>&1 || return 1
+  ns_pip /dev/null "phonenumbers" "$venv/bin/pip" install --upgrade pip phonenumbers || return 1
   "$venv/bin/python" -c 'import phonenumbers' || return 1
   ns_info "ns-country ready: $(python3 "$NS_REPO/lib/ns_country.py" list | wc -l | tr -d ' ') country packs"
 }

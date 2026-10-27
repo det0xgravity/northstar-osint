@@ -37,7 +37,7 @@ ns_tor_browser_tarball() {
   [ "$chan" = alpha ] && ns_warn "Installing Tor Browser $ver ALPHA: there's no stable arm64 build yet. ns-update switches to stable once there is."
   ns_has gpg || ns_apt gnupg || return 1
   tmp=$(mktemp -d)
-  curl -fsSL "$bin" -o "$tmp/tb.tar.xz" && curl -fsSL "$sig" -o "$tmp/tb.tar.xz.asc" \
+  ns_download "$bin" "$tmp/tb.tar.xz" "download: Tor Browser $ver" && curl -fsSL "$sig" -o "$tmp/tb.tar.xz.asc" \
     || { ns_warn "Tor Browser download failed"; rm -rf "$tmp"; return 1; }
   mkdir -m 700 "$tmp/gnupg"
   GNUPGHOME="$tmp/gnupg" gpg --batch --quiet --auto-key-locate nodefault,wkd \

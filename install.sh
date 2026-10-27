@@ -158,6 +158,11 @@ fi
 
 mkdir -p "$NS_CONF" "$NS_HOME" "$NS_DATA"
 LOG="$NS_CONF/install.log"
+# Status lines (lib/common.sh: ns_bg) are drawn on the terminal itself, fd 4,
+# so they never clutter install.log
+if [ -t 1 ]; then NS_TTY=1; exec 4>&1; fi
+NS_LOG="$LOG"
+NS_STEP_N=${#RUN_IDX[@]}
 exec > >(tee -a "$LOG") 2>&1
 echo "=== $(date) — northstar $NS_VERSION on $NS_PLATFORM ==="
 

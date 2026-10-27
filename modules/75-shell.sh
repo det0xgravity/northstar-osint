@@ -53,7 +53,7 @@ ns_git_sync() {
     [ "$NS_UPDATE" = 1 ] && { git -C "$2" pull -q --ff-only || ns_warn "$(basename "$2"): git pull failed"; }
     return 0
   fi
-  git clone -q --depth 1 "$1" "$2" || { ns_warn "clone failed: $1"; return 1; }
+  ns_bg /dev/null "git: $(basename "$2")" git clone -q --depth 1 "$1" "$2" || { ns_warn "clone failed: $1"; return 1; }
 }
 
 ns_shell_fonts() {
@@ -139,7 +139,7 @@ ns_pay_respects() {
         | jq -r --arg a "_$arch.deb" '.assets[] | select(.name | endswith($a)) | .browser_download_url' | head -1)
   [ -n "$url" ] || return 1
   tmp=$(mktemp -d)
-  curl -fsSL "$url" -o "$tmp/pay-respects.deb" \
+  ns_download "$url" "$tmp/pay-respects.deb" "download: pay-respects" \
     && sudo DEBIAN_FRONTEND=noninteractive apt-get install -y -q "$tmp/pay-respects.deb" >/dev/null 2>&1
   local rc=$?
   rm -rf "$tmp"
