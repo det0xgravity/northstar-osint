@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="referrer" content="no-referrer">
+<title>Face search engines: read this first</title>
+<style>
+:root { --bg: #ffffff; --fg: #1f2328; --muted: #59636e; --line: #d1d9e0; --warn-bg: #fff8c5; --warn-line: #d4a72c; --stop-bg: #ffebe9; --stop-line: #cf222e; --link: #0969da; }
+@media (prefers-color-scheme: dark) {
+  :root { --bg: #0d1117; --fg: #e6edf3; --muted: #9198a1; --line: #30363d; --warn-bg: #2e2a12; --warn-line: #9e6a03; --stop-bg: #2d1416; --stop-line: #f85149; --link: #4493f8; }
+}
+body { background: var(--bg); color: var(--fg); font: 16px/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; max-width: 820px; margin: 0 auto; padding: 24px 20px 64px; }
+h1 { font-size: 1.8em; margin-bottom: .2em; }
+.box { border: 1px solid var(--warn-line); background: var(--warn-bg); border-radius: 8px; padding: 12px 18px; margin: 1.2em 0; }
+.stop { border-color: var(--stop-line); background: var(--stop-bg); }
+a { color: var(--link); }
+details { border: 1px solid var(--line); border-radius: 8px; padding: 12px 18px; margin-top: 1.5em; }
+summary { cursor: pointer; font-weight: 600; }
+ul.engines li { margin: .6em 0; }
+.muted { color: var(--muted); }
+</style>
+</head>
+<body>
+<h1>Face search engines</h1>
+<p class="muted">northstar · read this before you upload anyone's face</p>
+
+<div class="box stop">
+<strong>Stop if any of these apply.</strong>
+<ul>
+<li>The person may be <strong>under 18</strong>.</li>
+<li>The photo shows a <strong>victim</strong> (of a crime, abuse or exploitation), or it came from a victim or their family.</li>
+<li>You have <strong>no lawful basis</strong> to process this person's biometric data, or your organisation's policy forbids it.</li>
+<li>You're trying to identify someone out of curiosity, or for anyone outside an authorised case.</li>
+</ul>
+</div>
+
+<div class="box">
+<strong>What you're about to do.</strong>
+<ul>
+<li><strong>Your photo leaves this computer.</strong> These are commercial services run by third parties. They may keep, index or analyse what you upload, and some are in other jurisdictions.</li>
+<li><strong>A face is biometric data.</strong> Many laws treat it as specially protected (for example the GDPR's special-category data, or Illinois' BIPA). Some services' terms only allow searching for your own face: check them.</li>
+<li><strong>Results are look-alikes, not identifications.</strong> False matches are common, especially with small, blurred, angled, old or low-light photos, and accuracy differs between demographic groups. A match is a lead to corroborate independently, never proof of who someone is.</li>
+<li><strong>Some results are sensitive</strong>: adult sites, mugshots or offender registries. Treat them with care, and don't repeat them outside the case.</li>
+<li><strong>Record why.</strong> Use northstar → <em>Image analysis</em> → <em>Face search engines</em> instead of these links: it asks for your reason and writes it to the case notes and audit log. Opening them from here records nothing.</li>
+</ul>
+</div>
+
+<details>
+<summary>I've read this, and the search is lawful and authorised. Show the engines.</summary>
+<ul class="engines">
+<li><a href="https://pimeyes.com/en" rel="noreferrer noopener">PimEyes</a>: faces on public web pages (paid for full results).</li>
+<li><a href="https://facecheck.id/" rel="noreferrer noopener">FaceCheck.ID</a>: faces on social media, news and other sites, including mugshots.</li>
+<li><a href="https://search4faces.com/" rel="noreferrer noopener">Search4faces</a>: profile photos on Russian-language social networks (VK, Odnoklassniki) and others.</li>
+<li><a href="https://lenso.ai/en" rel="noreferrer noopener">Lenso.ai</a>: reverse image search with a separate face category.</li>
+</ul>
+<p class="muted">For photos of places and objects, use the ordinary reverse image search engines instead (TinEye, Google Lens, Bing, Yandex), or Image analysis in northstar.</p>
+</details>
+</body>
+</html>

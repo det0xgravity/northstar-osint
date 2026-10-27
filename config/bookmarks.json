@@ -200,6 +200,10 @@
       {
         "name": "YouTube Geofind (videos by location)",
         "url": "https://mattw.io/youtube-geofind/"
+      },
+      {
+        "name": "Face search engines (opens a warning first)",
+        "url": "{NS_DATA}/Guides/face-search.html"
       }
     ]
   },

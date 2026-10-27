@@ -243,7 +243,8 @@ Profiles change and posts get deleted. When you find something relevant, capture
 2. **Image analysis** → **Find the same photo across this case**: the same picture on two accounts often shows they're connected.
 3. **Image analysis** → **Reverse search an image URL** (Google Lens, Yandex, Bing, TinEye), or **Analyze a local image**, which opens Google Lens, Yandex, TinEye and FotoForensics for you to drag it into (and Google Maps if it has GPS). Never upload photos of victims or minors to online services.
 4. **Photo geolocation** → **Where was this photo taken?**: EXIF, the text visible in the photo (OCR) and, optionally, GeoCLIP's estimate, all on your computer. GeoCLIP gives **leads, not answers**: confirm them with street-level imagery, signs, landmarks or **Shadow analysis**.
-5. **Face comparison (within this case)**: compares a reference face (the official photo) with faces in photos already in the case. It asks for the lawful basis the first time. A score is similarity, never identification: treat it as a reason to look closer.
+5. **Image analysis** → **Face search engines (online; read the warning)**: PimEyes, FaceCheck.ID, Search4faces and Lenso.ai search the web for a face. The photo leaves the VM, a face is biometric data, and results are look-alikes, never identifications. northstar warns you first, won't open them for a child or a victim, and records your reason and lawful basis in the notes. Use them only when the case needs it and your basis covers it. The **Face search engines** bookmark opens the same warning as a page, but records nothing.
+6. **Face comparison (within this case)**: compares a reference face (the official photo) with faces in photos already in the case. It asks for the lawful basis the first time. A score is similarity, never identification: treat it as a reason to look closer.
 
 ### 4.6 Video
 
@@ -673,7 +674,7 @@ The tasking needs to know whether the pictured man is "Daniel", and where the ph
 - The `@example.photo.pt` account has six years of posts, friends tagging him, consistent locations, the original high-resolution photos, and a bio giving the name **Rui Exemplo** (fictional), a photographer.
 - The "Daniel" profile was created three weeks before contacting the victim, and every one of its photos appears earlier on `@example.photo.pt`, cropped to remove a watermark. **Find the same photo across this case** groups each "Daniel" photo with its earlier original.
 
-Don't run face-search engines that scan the internet for a face: northstar doesn't include any, and running a private person's face through one raises serious legal problems in many places (biometric data under the GDPR, for example). **Face comparison** isn't needed here either: identical photos already prove where they came from, so comparing faces would be processing biometric data for nothing. Further searches on the man (other platforms, his business, his home) are outside the scope.
+Don't run this photo through the online face search engines (Image analysis → **Face search engines**) either. The man is an unconnected private person whose identity the tasking doesn't need, and sending his face to a commercial service raises serious legal problems in many places (biometric data under the GDPR, for example). **Face comparison** isn't needed here either: identical photos already prove where they came from, so comparing faces would be processing biometric data for nothing. Further searches on the man (other platforms, his business, his home) are outside the scope.
 
 ### B6. Findings and conclusion
 

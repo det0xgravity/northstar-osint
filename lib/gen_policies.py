@@ -14,6 +14,7 @@ import argparse
 import html
 import json
 import os
+import pathlib
 import sys
 import urllib.request
 
@@ -36,6 +37,20 @@ def resolve(slug):
                                  headers={"User-Agent": "northstar-osint"})
     with urllib.request.urlopen(req, timeout=20) as resp:
         return json.load(resp)["guid"]
+
+
+def local_links(nodes, data):
+    """Bookmarks to {NS_DATA}/path (local pages such as the face-search warning) as file:// URLs."""
+    out = []
+    for n in nodes:
+        if "children" in n:
+            out.append(dict(n, children=local_links(n["children"], data)))
+        elif str(n.get("url", "")).startswith("{NS_DATA}/"):
+            if data:
+                out.append(dict(n, url=pathlib.Path(os.path.abspath(data), n["url"][len("{NS_DATA}/"):]).as_uri()))
+        else:
+            out.append(n)
+    return out
 
 
 def to_html(tree, depth=2):
@@ -62,10 +77,12 @@ def main():
                     help="add-on slug list; repeat to add files (missing files are skipped)")
     ap.add_argument("--out", required=True)
     ap.add_argument("--folder", default="OSINT", help="top-level bookmark folder name")
+    ap.add_argument("--data", help="northstar's data folder: bookmarks to {NS_DATA}/… become file:// links "
+                                   "there (they're left out without it)")
     args = ap.parse_args()
 
     with open(args.bookmarks, encoding="utf-8") as fh:
-        tree = json.load(fh)
+        tree = local_links(json.load(fh), args.data)
     if args.local and os.path.isfile(args.local):
         with open(args.local, encoding="utf-8") as fh:
             tree += json.load(fh)

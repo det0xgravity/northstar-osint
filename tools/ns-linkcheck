@@ -26,7 +26,7 @@ for J in "$@"; do
       *)               echo "  DEAD? ($code): $url"; bad=$((bad+1)) ;;
     esac
   done <<LINKS
-$(jq -r '(.. | .url? // empty), (.searches[]?.links[]? | select(startswith("http")))' "$J" \
+$(jq -r '(.. | .url? // empty | select(startswith("http"))), (.searches[]?.links[]? | select(startswith("http")))' "$J" \
     | sed 's/{[a-z0-9]*}/test/g' | sort -u)
 LINKS
 done

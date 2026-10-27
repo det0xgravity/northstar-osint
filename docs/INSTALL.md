@@ -93,7 +93,7 @@ The installer records the modules you chose **not** to install in `~/.config/nor
 | `~/.local/pipx`, `~/.local/bin` | pipx-managed tools |
 | `~/.config/northstar` | Active case, skipped-module list, install log, API keys (`keys.env`, readable only by you) |
 | `~/Northstar/Cases` | Your investigation output and audit logs |
-| `~/.local/share/northstar/guides` | The guides as offline web pages, linked on the desktop as **Northstar guides** |
+| `~/Northstar/Guides` | The guides as offline web pages, linked on the desktop as **Northstar guides**, and the face-search warning page. Rebuilt by every update: don't keep your own files there |
 | `~/Northstar/northstar-bookmarks.html` | Bookmarks export for importing into other browsers |
 | `/etc/firefox*/policies/policies.json` | Firefox policy (Linux) |
 | `/etc/brave/policies/managed/northstar.json` | Brave policy (Linux) |

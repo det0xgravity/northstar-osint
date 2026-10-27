@@ -93,6 +93,9 @@ def cmd_build(docs, out):
     os.makedirs(tmp_out)
     with open(os.path.join(tmp_out, "guides.css"), "w", encoding="utf-8") as fh:
         fh.write(CSS)
+    face = os.path.join(os.path.dirname(docs), "assets", "face-search.html")   # the face-search bookmark's warning page
+    if os.path.isfile(face):
+        shutil.copy(face, os.path.join(tmp_out, "face-search.html"))
     if os.path.isdir(os.path.join(docs, "images")):
         shutil.copytree(os.path.join(docs, "images"), os.path.join(tmp_out, "images"))
     titles, failed = {}, []

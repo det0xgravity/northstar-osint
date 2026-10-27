@@ -5,7 +5,7 @@
 # shellcheck source=../lib/ui.sh
 . "${NS_HOME:-$HOME/.local/share/northstar}/lib/ui.sh"
 
-dir="$NS_HOME/guides"
+dir="$NS_DATA/Guides"
 page="$dir/${1:-index}.html"
 if [ ! -f "$page" ]; then
   ui_error "The guides aren't built yet. Run: ./install.sh --only desktop (from your northstar-osint folder), or Update northstar."

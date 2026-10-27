@@ -4,6 +4,22 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project uses
 [Semantic Versioning](https://semver.org/).
 
+## [0.37.0] - 2026-10-27
+
+### Added
+- **Face search engines, behind a warning:** Image analysis → Face search
+  engines opens PimEyes, FaceCheck.ID, Search4faces and Lenso.ai only after
+  a warning (the photo leaves the computer; biometric data; look-alikes, not
+  identifications). It refuses when the person could be under 18 or the photo
+  is of a victim, and records the reason and lawful basis as a `DECISION:`
+  note and in the audit log. A bookmark of the same name opens the warning as
+  a local page before the engines.
+
+### Changed
+- The guides moved from `~/.local/share/northstar/guides` to
+  `~/Northstar/Guides`: Ubuntu's Firefox snap can't open files in hidden
+  folders. The desktop links follow.
+
 ## [0.36.0] - 2026-10-27
 
 ### Added

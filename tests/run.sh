@@ -102,6 +102,20 @@ check "when allowed, Sherlock, Maigret and Blackbird include adult sites" \
 menu ns-case "Adult-site" "yes" ""
 check "they can be stopped again" "[ \"\$(ns_casework nsfw '$TC')\" = off ] && grep -q 'searches STOPPED' '$TC/notes.md'"
 
+section "Face search engines (warning first)"
+menu ns-image "Face search" "yes" "yes"
+check "never for a possible child or a victim" "! grep -q pimeyes '$W/out.txt' && grep -q 'not used: possible minor or victim' '$TC/audit.log'"
+menu ns-image "Face search" "yes" "no" "Fraud case: identify the man in photos used by the scammer; legitimate interest, counsel approved"
+check "the reason is recorded before the engines open" \
+  "grep -q 'DECISION: online face search engines used. Reason and basis: Fraud case' '$TC/notes.md' && grep -q 'ui_open.*pimeyes.com' '$W/out.txt'"
+printf '' > "$W/noext.txt"
+python3 "$R/lib/gen_policies.py" --bookmarks "$R/config/bookmarks.json" --extensions "$W/noext.txt" --out "$W/pol" --data "$W/data" > /dev/null
+python3 "$R/lib/gen_policies.py" --bookmarks "$R/config/bookmarks.json" --extensions "$W/noext.txt" --out "$W/pol2" > /dev/null
+check "the face search bookmark opens the local warning page" \
+  "grep -q '\"url\": \"file://$W/data/Guides/face-search.html\"' '$W/pol/firefox-policies.json' && ! grep -q 'NS_DATA' '$W/pol/firefox-policies.json' '$W/pol2/firefox-policies.json'"
+check "the warning page loads nothing and hides the engines until it's read" \
+  "! grep -qE '<(script|img|link)' '$R/assets/face-search.html' && grep -q '<details>' '$R/assets/face-search.html'"
+
 section "Guides (offline web pages)"
 if command -v pandoc >/dev/null 2>&1; then
   python3 "$R/lib/ns_guides.py" build "$R/docs" "$W/guides" > /dev/null
@@ -115,6 +129,7 @@ ids = set(re.findall(r'id=\"([^\"]+)\"', t))
 bad = [h for h in re.findall(r'href=\"#([^\"]+)\"', t) if h not in ids]
 print(bad); sys.exit(1 if bad else 0)
 PY"
+  check "the face-search warning page is installed with the guides" "[ -f '$W/guides/face-search.html' ]"
   check "the pages load nothing from the internet" "! grep -qE '<(script|link|img)[^>]+(src|href)=\"https?:' '$W'/guides/*.html"
 else
   printf '  skip  guides (pandoc not installed)\n'

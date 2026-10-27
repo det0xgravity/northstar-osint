@@ -7,7 +7,8 @@ choice=$(ui_list "Image analysis" \
   "Reverse search an image URL (Google Lens, Yandex, Bing, TinEye)" \
   "Analyze a local image (EXIF, GPS, then reverse search)" \
   "Read the text in images (OCR)" \
-  "Find the same photo across this case (perceptual hash)") || exit 0
+  "Find the same photo across this case (perceptual hash)" \
+  "Face search engines (online; read the warning)") || exit 0
 
 case "$choice" in
 "Reverse search an image URL"*)
@@ -103,4 +104,34 @@ The EXIF report and a SHA-256 hash of the original are saved in the case folder.
   ui_reveal "$out"     # opened even from the main menu: you drag the image from here
   ui_notify "Drag $base from the case folder into the search pages"
   ns_finish "$out" ;;
+
+"Face search engines"*)
+  # Online face search sends a face to a third party: warn, rule out children and
+  # victims, and record the reason in the case's notes and audit log first
+  case_dir=$(ns_case_dir)
+  if [ "$(ns_casework status "$case_dir" 2>/dev/null)" = closed ]; then
+    ui_error "Case $(ns_case) is closed. Reopen it first (Case → Reopen this case)."; exit 1
+  fi
+  ui_question "Face search engines: read this first
+
+- The photo LEAVES this computer. PimEyes, FaceCheck.ID, Search4faces and Lenso.ai are commercial services that may keep, index or analyse what you upload.
+- A face is biometric data. Many laws give it special protection (the GDPR, Illinois' BIPA). You need a lawful basis, and your organisation's permission. Some services only allow searching for your own face: check their terms.
+- Results are look-alikes, not identifications. False matches are common, especially with poor photos, and accuracy differs between groups. A match is a lead to corroborate, never proof.
+- Results can include adult sites, mugshots and offender registries.
+
+Continue?" || exit 0
+  if ui_question "Could the person be under 18, or is the photo of a victim (or from a victim or their family)?"; then
+    ui_error "Don't use online face search for this photo. Use Face comparison (within this case), which runs on this computer, or leave it to law enforcement."
+    ns_audit ns-image "face-search" "not used: possible minor or victim"
+    exit 0
+  fi
+  why=$(ui_entry "Why is an online face search needed, and on what lawful basis? (recorded in the case notes)") || exit 0
+  [ -n "$why" ] || exit 0
+  ns_casework note "$case_dir" "DECISION: online face search engines used. Reason and basis: $why" >/dev/null \
+    || { ui_error "The reason couldn't be recorded in the case notes, so the engines weren't opened."; exit 1; }
+  ns_audit ns-image "face-search" "opened PimEyes, FaceCheck.ID, Search4faces, Lenso.ai"
+  ui_info "Click OK to open the face search engines. Upload or drag in the photo yourself.
+
+Capture any result you'll rely on with Capture web pages, and treat every match as a lead."
+  ui_open "https://pimeyes.com/en" "https://facecheck.id/" "https://search4faces.com/" "https://lenso.ai/en" ;;
 esac

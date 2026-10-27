@@ -59,7 +59,11 @@ ns_tor_browser_tarball() {
 ns_install_policies() {
   local tmp rc d app
   tmp=$(mktemp -d)
+  # The face-search warning page that its bookmark opens (outside hidden folders,
+  # so the Firefox snap on Ubuntu can open it too)
+  mkdir -p "$NS_DATA/Guides" && install -m 644 "$NS_REPO/assets/face-search.html" "$NS_DATA/Guides/face-search.html"
   python3 "$NS_REPO/lib/gen_policies.py" \
+    --data       "$NS_DATA" \
     --bookmarks  "$NS_REPO/config/bookmarks.json" \
     --local      "$NS_CONF/bookmarks.local.json" \
     --countries  "$NS_REPO/config/countries" \

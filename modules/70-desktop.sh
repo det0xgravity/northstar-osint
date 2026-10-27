@@ -161,7 +161,7 @@ ns_macos_app() {
   ns_info "Northstar.app created in ~/Applications (find it with Spotlight)"
 }
 
-# The guides (docs/*.md) as offline web pages in $NS_HOME/guides, rebuilt on
+# The guides (docs/*.md) as offline web pages in $NS_DATA/Guides, rebuilt on
 # every update, with links on the desktop: "Northstar guides" (the folder) and
 # the investigation guide itself. GNOME shows desktop icons only with the
 # Desktop Icons NG extension, which is enabled here.
@@ -173,7 +173,9 @@ ns_desktop_dir() {
 }
 
 ns_guides() {
-  local out="$NS_HOME/guides" desk
+  # Not under a hidden folder: the Firefox snap (Ubuntu) can't open files there
+  local out="$NS_DATA/Guides" desk
+  rm -rf "$NS_HOME/guides"                      # where they were before v0.37
   python3 "$NS_REPO/lib/ns_guides.py" build "$NS_REPO/docs" "$out" || { ns_warn "The guides couldn't be rendered (is pandoc installed?)"; return 1; }
   desk=$(ns_desktop_dir)
   mkdir -p "$desk"

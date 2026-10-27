@@ -47,7 +47,7 @@ fi
 check "health check runs and writes a report" "ns_doctor '$W/doctor.txt' >/dev/null; grep -q '== Tools' '$W/doctor.txt'"
 check "every menu tool is installed" "for t in northstar ns-missing ns-username ns-telegram ns-domain ns-media ns-archive ns-metadata ns-image ns-video ns-geo ns-face ns-watch ns-map ns-translate ns-notes ns-country ns-breach ns-darkweb ns-evidence ns-case ns-keys ns-guides; do [ -x '$NS_HOME/bin/'\$t ] || { echo missing \$t; exit 1; }; done"
 
-check "the guides are built and linked on the desktop" "[ -f '$NS_HOME/guides/INVESTIGATION-GUIDE.html' ] && ls -d \"\$HOME/Desktop/Northstar guides\" \"\$(xdg-user-dir DESKTOP 2>/dev/null)/Northstar guides\" 2>/dev/null | grep -q ."
+check "the guides are built and linked on the desktop" "[ -f '$NS_DATA/Guides/INVESTIGATION-GUIDE.html' ] && ls -d \"\$HOME/Desktop/Northstar guides\" \"\$(xdg-user-dir DESKTOP 2>/dev/null)/Northstar guides\" 2>/dev/null | grep -q ."
 
 section "Case, notes and evidence"
 answers "e2e-case" "yes" "REF-1" "CI" "End-to-end test" "Test data only" "2030-01-01"
