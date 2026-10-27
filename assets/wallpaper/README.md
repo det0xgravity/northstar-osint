@@ -3,7 +3,7 @@
 `northstar.png` (3840×2160) is the desktop background that the `desktop` module
 sets on GNOME and XFCE, but only if you're still using the distribution's default
 background. It's original artwork made for this project and covered by the
-repository's license (PolyForm Noncommercial 1.0.0):
+repository's license (GPL-3.0-or-later):
 
 - a night sky over map contours and a coordinate grid
 - a north star inside a compass ring, with a dipper whose pointer stars lead to it

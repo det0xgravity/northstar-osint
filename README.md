@@ -5,7 +5,7 @@
 northstar-osint turns a fresh Debian, Ubuntu, Kali, Parrot or macOS install into a ready-to-work investigation machine: current open-source tools, simple point-and-click menus, browser hardening and bookmarks applied by policy, per-case output folders with an audit trail, and optional support for running as a Proxmox/Kasm Workspaces template.
 
 [![Lint](https://github.com/det0xgravity/northstar-osint/actions/workflows/lint.yml/badge.svg)](https://github.com/det0xgravity/northstar-osint/actions/workflows/lint.yml)
-![License: PolyForm Noncommercial 1.0.0](https://img.shields.io/badge/license-PolyForm%20Noncommercial%201.0.0-blue)
+![License: GPL v3](https://img.shields.io/badge/license-GPLv3-blue)
 ![Platforms](https://img.shields.io/badge/platforms-Debian%2013%20%7C%20Ubuntu%2024.04%20%7C%20Kali%20%7C%20Parrot%20%7C%20macOS%20(arm64)-informational)
 
 ---
@@ -168,12 +168,12 @@ The tools installed are third-party open-source projects, each under its own lic
 
 ## License
 
-northstar-osint is source-available under the [PolyForm Noncommercial License 1.0.0](LICENSE). In plain terms (the license text is what counts):
+Copyright (C) 2026 det0xgravity
 
-- **Free to use, change and share for any noncommercial purpose.** That covers individuals, volunteers and search parties, students and researchers, charities, schools, and police and other government agencies.
-- **Not for sale or commercial use.** You may not sell it, bundle it into a paid product or service, or use it in a business, including a private-investigation or consultancy firm, without a separate commercial license. To ask about one, open an issue on GitHub.
-- **Keep the notice.** Anyone you give a copy to must get the license and its `Required Notice:` line.
+northstar-osint is free software: you can redistribute it and/or modify it under the terms of the [GNU General Public License](LICENSE) as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version. It is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the license for details.
 
-Versions up to 0.30.0 were released under the MIT License, and copies obtained under it keep those terms.
+In plain terms: use it, study it, change it and share it freely. If you distribute it, changed or not, you must make the full source available under the same license and keep this notice.
 
-Contributions are welcome. By opening a pull request, you agree that your contribution is licensed under these terms and that the maintainer may also license it to others under different terms (for example, a commercial license).
+Versions up to 0.30.0 were released under the MIT License, and 0.31.0 under the PolyForm Noncommercial License 1.0.0; copies obtained under those keep their terms.
+
+Contributions are welcome. By opening a pull request, you agree that your contribution is licensed under the GPL (version 3 or later) and that the maintainer may also license it under other terms.
