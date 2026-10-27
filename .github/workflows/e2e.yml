@@ -1,0 +1,47 @@
+name: End-to-end
+
+# A full install (every module except vm) in clean containers on x86_64 and
+# arm64, then tests/e2e.sh drives the installed menus and engines with real
+# tools. Weekly and on demand: it downloads several GB and takes a while.
+on:
+  schedule:
+    - cron: "41 7 * * 1"
+  workflow_dispatch:
+
+jobs:
+  e2e:
+    strategy:
+      fail-fast: false
+      matrix:
+        runner: [ubuntu-24.04, ubuntu-24.04-arm]
+        image: ["debian:trixie", "ubuntu:24.04"]
+    runs-on: ${{ matrix.runner }}
+    container:
+      image: ${{ matrix.image }}
+      options: --privileged        # Flatpak installs need user namespaces
+    timeout-minutes: 150
+    steps:
+      - name: Base packages and a normal user with sudo
+        run: |
+          apt-get update -q
+          DEBIAN_FRONTEND=noninteractive apt-get install -y -q sudo git ca-certificates curl python3
+          useradd -m -s /bin/bash ns
+          echo 'ns ALL=(ALL) NOPASSWD:ALL' > /etc/sudoers.d/ns
+      - uses: actions/checkout@v4
+      - name: Full install (everything except vm)
+        run: |
+          chown -R ns: "$GITHUB_WORKSPACE"
+          su ns -c "cd '$GITHUB_WORKSPACE' && ./install.sh --yes --skip vm" || true
+      - name: End-to-end checks
+        run: su ns -c "cd '$GITHUB_WORKSPACE' && bash tests/e2e.sh"
+      - name: Keep the install log and health report
+        if: always()
+        run: |
+          mkdir -p logs
+          cp /home/ns/.config/northstar/install.log logs/ 2>/dev/null || true
+          su ns -c 'PATH="$HOME/.local/share/northstar/bin:$PATH" ns_doctor' > logs/doctor.txt 2>&1 || true
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: e2e-${{ matrix.runner }}-${{ strategy.job-index }}
+          path: logs/

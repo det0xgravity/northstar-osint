@@ -23,7 +23,8 @@ NS_DATA = os.environ.get("NS_DATA") or os.path.join(HOME, "Northstar")
 TOOLS = {
     "core": ["git", "jq", "python3", "pipx", "go", "pandoc", "ots"],
     "username": ["sherlock", "maigret", "socialscan", "holehe", "ghunt", "toutatis", "blackbird"],
-    "social": ["uv", "tgtracker"],
+    "social": ["uv", "tgtracker", "ns_telegram"],
+    "messaging": ["element-desktop", "signal-desktop"],
     "domain": ["subfinder", "dnsx", "httpx", "katana", "gowitness", "amass", "theHarvester",
                "waymore", "dnstwist", "shodan", "censys", "whois", "dig"],
     "media": ["yt-dlp", "gallery-dl", "instaloader", "streamlink", "ffmpeg", "exiftool", "mediainfo",
@@ -38,7 +39,7 @@ TOOLS = {
     "shell": ["zsh", "fzf", "eza", "ranger", "pay-respects"],
     "northstar": ["northstar", "ns-country", "ns-breach", "ns-darkweb", "ns-evidence", "ns-case",
                   "ns-archive", "ns-video", "ns-telegram", "ns_breach", "ns_darkweb", "ns_evidence",
-                  "ns_casework", "ns-watch", "ns_watch", "ns-map", "ns_casemap", "ns_missing"],
+                  "ns_casework", "ns-watch", "ns_watch", "ns-map", "ns_casemap", "ns-notes", "ns_vault", "ns_telegram", "ns_missing"],
 }
 NO_VERSION = {"northstar"}            # GUI menus: presence only
 

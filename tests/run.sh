@@ -19,7 +19,7 @@ H="$W/home"; mkdir -p "$H/lib" "$H/bin" "$H/config" "$W/data" "$W/conf"
 cp "$R/lib/ui.sh" "$R/lib/ns_country.py" "$H/lib/"
 cp "$R/config/ctf-categories.txt" "$H/config/"
 cp -R "$R/config/countries" "$H/config/"
-for e in breach darkweb evidence doctor missing watch casemap; do ln -s "$R/lib/ns_$e.py" "$H/bin/ns_$e"; done
+for e in breach darkweb evidence doctor missing watch casemap vault; do ln -s "$R/lib/ns_$e.py" "$H/bin/ns_$e"; done
 ln -s "$R/lib/ns_case.py" "$H/bin/ns_casework"
 export NS_HOME="$H" NS_DATA="$W/data" XDG_CONFIG_HOME="$W/xdg" NS_UI=script NS_UI_ANSWERS="$W/answers"
 export PATH="$H/bin:$PATH"
@@ -213,6 +213,33 @@ check "seven packs have a Missing persons search" "[ \"\$(grep -l '\"Missing per
 printf '#!/bin/sh\nexec bash "%s/tools/ns-country" "$@"\n' "$R" > "$G/ns-country"; chmod +x "$G/ns-country"
 PATH="$G:$PATH" menu ns-missing "Missing-persons" "United States" "<default>" "yes"
 check "subject's name pre-filled into the US missing-persons search" "grep -q 'charleyproject.org/?s=Jane+Doe' '$W/out.txt'"
+
+section "Notes (Obsidian vault)"
+python3 "$R/lib/ns_vault.py" setup "$W/data" > /dev/null
+check "vault settings and templates created" "[ -f '$W/data/Cases/.obsidian/templates.json' ] && [ -f '$W/data/Cases/_templates/Person.md' ]"
+check "every case gets Case.md and appears in Home.md" "[ -f '$CASE/Case.md' ] && grep -q 'general/Case' '$W/data/Cases/Home.md'"
+check "finished results are listed in Results.md" "grep -q '\*\*map\*\*' '$CASE/Results.md'"
+menu ns-notes "New note: person" "Jane Doe"
+check "person note made from the template" "grep -q '^type: person' '$CASE/People/Jane Doe.md' && grep -q '^# Jane Doe' '$CASE/People/Jane Doe.md'"
+check "note opened in Obsidian by URI" "grep -q 'obsidian://open?path=.*People%2FJane%20Doe.md' '$W/out.txt'"
+printf 'my edits\n' > "$W/data/Cases/_templates/Lead.md"
+python3 "$R/lib/ns_vault.py" setup "$W/data" > /dev/null
+check "edited templates are left alone" "grep -qx 'my edits' '$W/data/Cases/_templates/Lead.md'"
+python3 "$R/lib/ns_vault.py" register "$W/data" "$W/obs/obsidian.json" > /dev/null
+python3 "$R/lib/ns_vault.py" register "$W/data" "$W/obs/obsidian.json" > /dev/null
+check "vault registered once with Obsidian" "python3 -c 'import json,sys; assert len(json.load(open(sys.argv[1]))[\"vaults\"]) == 1' '$W/obs/obsidian.json'"
+
+section "Telegram (stubbed engine)"
+printf '#!/bin/sh\necho "ns_telegram $*" > called.txt\necho "ns_telegram $*"\n' > "$G/ns_telegram"; chmod +x "$G/ns_telegram"
+PATH="$G:$PATH" menu ns-telegram "Look up" "https://t.me/s/durov/123"
+check "lookup cleans the t.me link" "grep -q 'ns_telegram lookup durov' '$W/out.txt'"
+PATH="$G:$PATH" menu ns-telegram "Search a public channel" "@telegram" "update"
+check "preview search passes channel and words" "grep -q 'ns_telegram preview-search telegram update' '$W/out.txt'"
+PATH="$G:$PATH" menu ns-telegram "Search messages" "@somechan" "" "abc"
+check "message search defaults a bad limit to 500" "grep -q 'ns_telegram messages @somechan  500' '$W/out.txt'"
+PATH="$G:$PATH" menu ns-telegram "Log in for searches"
+check "login refused until API keys are set" "grep -q 'API ID and API hash' '$W/out.txt' && ! grep -q 'ns_telegram login' '$W/out.txt'"
+check "Telegram results in the case" "ls -d '$CASE'/telegram/lookup-durov_* >/dev/null"
 
 section "Installer module selection"
 I="$W/inst"; mkdir -p "$I/modules" "$I/bin" "$I/home"

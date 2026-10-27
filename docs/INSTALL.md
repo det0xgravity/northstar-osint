@@ -68,7 +68,7 @@ In UTM, choose the **QEMU** backend ("Virtualize", not "Apple Virtualization") i
 
 **Tor Browser on arm64:** Flathub only builds Tor Browser for x86_64, so in an arm64 guest northstar installs it directly from the Tor Project and verifies its signature. There's no *stable* arm64 Linux build yet, so for now that's the **alpha**, which the installer flags clearly. It switches to stable automatically once a stable arm64 build exists. The Tor Project advises people at high risk to use stable, so for the most sensitive work, use Tor Browser on the Mac host (`./install.sh --only browsers` installs it there from Homebrew). Details in [BREACH-DARKWEB.md](BREACH-DARKWEB.md#tor-browser-on-arm64-vms-on-apple-silicon).
 
-**Mullvad Browser** has no arm64 Linux build yet, so it's skipped in arm64 guests. Firefox, Brave and every other module work normally on arm64.
+**Mullvad Browser** and **Signal** have no official arm64 Linux builds yet, so they're skipped in arm64 guests (use Signal on a phone). Firefox, Brave, Telegram Desktop, Element, Obsidian and every other module work normally on arm64.
 
 ## Options
 

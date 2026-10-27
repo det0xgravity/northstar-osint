@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
-# ns-telegram — Telegram channel research: collect a public channel's posts,
-# metadata and forward sources (telegram-tracker) into the case, and search
-# for channels on the web. Needs a Telegram account (use a research account).
+# ns-telegram — Telegram research. Without a login: look up a channel, group,
+# bot or user and search a public channel's web preview. With a research
+# account: search Telegram for public chats and users, search messages, list a
+# group's visible members, read a user's profile, and collect channels (posts,
+# metadata, forward networks) with telegram-tracker. Results land in the case.
 # shellcheck source=../lib/ui.sh
 . "${NS_HOME:-$HOME/.local/share/northstar}/lib/ui.sh"
 
@@ -16,6 +18,20 @@ channel_name() {
   printf '%s' "$1" | sed -E 's#^https?://##; s#^(t\.me|telegram\.me)/(s/)?##; s#^@##; s#[/?].*$##' | tr -cd 'A-Za-z0-9_'
 }
 
+need_engine() {
+  ns_cmd ns_telegram && return 0
+  ui_error "The Telegram engine isn't installed. Run: ./install.sh --only social"
+  exit 1
+}
+
+# api <kind> <slug> <ns_telegram args...>: run an engine command into a result folder
+api() {
+  local kind="$1" slug="$2" out; shift 2
+  out=$(ns_outdir telegram "$kind-$slug")
+  ns_run "$out" ns_telegram "$@"
+  ns_finish "$out"
+}
+
 # collect <outdir> <tgtracker collect args...>
 collect() {
   local out="$1"; shift
@@ -25,12 +41,73 @@ collect() {
 }
 
 choice=$(ui_list "Telegram" \
+  "Look up a channel, group, bot or user (no login)" \
+  "Search a public channel's posts (no login)" \
+  "Search for channels (TGStat and web search)" \
+  "Search Telegram for public chats and users (login)" \
+  "Search messages in a channel or group (login)" \
+  "Members of a group (login)" \
+  "User profile (login)" \
   "Collect a public channel" \
   "Collect a list of channels (text file, one per line)" \
-  "Search for channels (TGStat and web search)" \
-  "Log in to Telegram (needed once)") || exit 0
+  "Log in for searches (needed once)" \
+  "Log in for channel collection (needed once)") || exit 0
 
 case "$choice" in
+  "Look up"*)
+    need_engine
+    c=$(channel_name "$(ui_entry "Username or t.me link:")") || exit 0
+    [ -n "$c" ] || { ui_error "That isn't a Telegram username."; exit 1; }
+    api lookup "$c" lookup "$c" ;;
+
+  "Search a public channel"*)
+    need_engine
+    c=$(channel_name "$(ui_entry "Channel username or t.me link:")") || exit 0
+    [ -n "$c" ] || { ui_error "That isn't a Telegram channel name."; exit 1; }
+    q=$(ui_entry "Search words (empty for the latest posts):") || q=""
+    api preview "$c" preview-search "$c" "$q" ;;
+
+  "Search Telegram"*)
+    need_engine
+    q=$(ui_entry "Search words or a name:") || exit 0
+    [ -n "$q" ] || exit 0
+    api search "$q" search "$q" ;;
+
+  "Search messages"*)
+    need_engine
+    c=$(ui_entry "Channel or group username, t.me link, or numeric ID:") || exit 0
+    q=$(ui_entry "Search words (empty for the latest messages):") || q=""
+    n=$(ui_entry "How many messages at most:" "500") || exit 0
+    case "$n" in ''|*[!0-9]*) n=500 ;; esac
+    api messages "$(channel_name "$c")" messages "$c" "$q" "$n" ;;
+
+  "Members of a group"*)
+    need_engine
+    c=$(channel_name "$(ui_entry "Group username or t.me link:")") || exit 0
+    [ -n "$c" ] || exit 0
+    api members "$c" members "$c" ;;
+
+  "User profile"*)
+    need_engine
+    c=$(channel_name "$(ui_entry "Username or t.me link:")") || exit 0
+    [ -n "$c" ] || exit 0
+    api user "$c" user "$c" ;;
+
+  "Log in for searches"*)
+    need_engine
+    if [ -z "$(ns_key_get TELEGRAM_API_ID)" ] || [ -z "$(ns_key_get TELEGRAM_API_HASH)" ]; then
+      ui_info "First add the research account's API ID and API hash: main menu → API keys.
+
+Get them at https://my.telegram.org/apps: log in with the research account's phone number and create an app."
+      ui_open "https://my.telegram.org/apps"
+      exit 0
+    fi
+    # Interactive and outside ns_run: the phone number, code and password are
+    # typed into Telethon directly and never reach audit.log
+    ns_audit ns_telegram "login" "Telegram login for searches (credentials not recorded)"
+    ns_telegram login
+    ns_pause ;;
+
   "Collect a public channel")
     need_tracker
     c=$(channel_name "$(ui_entry "Channel username or t.me link:")") || exit 0
@@ -65,7 +142,7 @@ case "$choice" in
             "$(ns_google "\"$q\" site:tgstat.com")"
     ui_notify "\"$q\" is on your clipboard: paste it into TGStat's search" ;;
 
-  "Log in"*)
+  "Log in for channel"*)
     need_tracker
     ui_info "Telegram login runs in this terminal window.
 

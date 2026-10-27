@@ -75,7 +75,7 @@ ns-update                                # pull the latest version and upgrade e
 |---|---|
 | `core` | Base packages, pipx, Go, the northstar runtime and menus *(always installed)* |
 | `username` | sherlock, maigret, socialscan, holehe, GHunt, toutatis, blackbird |
-| `social` | telegram-tracker for Telegram channel collection (installed with its own Python 3.14 through uv) |
+| `social` | Telegram research engine (Telethon, private venv) and telegram-tracker for channel collection (its own Python 3.14 through uv) |
 | `geo` | GeoCLIP (local AI photo geolocation) and ShadowFinder |
 | `face` | Local face comparison within a case (OpenCV YuNet + SFace, checksum-verified models) |
 | `translate` | Offline text translation (Argos Translate) for `ns-translate` |
@@ -88,6 +88,8 @@ ns-update                                # pull the latest version and upgrade e
 | `desktop` | App-menu launchers, GNOME dock favourites, macOS `Northstar.app` |
 | `shell` | zsh with Oh My Zsh, the Powerlevel10k prompt, autosuggestions, syntax highlighting and the MesloLGS NF font *(Linux)* |
 | `extras` | KeePassXC, Flameshot (bound to Print Screen on GNOME), OBS Studio |
+| `messaging` | Telegram Desktop, Signal (x86_64), Element (Matrix) for research accounts |
+| `notes` | Obsidian, with the Cases folder set up as a vault (templates, Case.md, Results.md) |
 | `vm` | QEMU guest agent, xrdp, clone-safe identity, `ns-seal` *(Linux only)* |
 
 Full details: [docs/MODULES.md](docs/MODULES.md).
@@ -115,6 +117,7 @@ northstar                # main menu
 ├── Dark web             # ns-darkweb
 ├── Evidence & exhibits  # ns-evidence
 ├── API keys             # ns-keys
+├── Notes (Obsidian)     # ns-notes
 ├── Case: notes, details, report, close   # ns-case
 ├── Switch / create case
 ├── Open latest results

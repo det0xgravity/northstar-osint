@@ -34,6 +34,7 @@ print(json.dumps(dict(zip(keys, sys.argv[1:]))))
 PY
 )
   printf '%s' "$js" | ns_casework init "$dir" >/dev/null
+  ns_cmd ns_vault && ns_vault case "$dir" >/dev/null      # Case.md overview for Obsidian
   ns_audit northstar "$name" "case opened with intake record"
   ui_info "Case $name opened.
 

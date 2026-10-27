@@ -58,6 +58,7 @@ grep -nE 'declare -A|local -A|mapfile|readarray|\$\{[A-Za-z_]+(,,|\^\^)|&>>' ins
 python3 -m py_compile lib/*.py && python3 -m json.tool config/bookmarks.json >/dev/null
 python3 lib/ns_country.py validate
 bash tests/run.sh                      # offline functional tests (also run in CI)
+# after a real install: bash tests/e2e.sh   (CI: .github/workflows/e2e.yml, weekly/on demand)
 ./install.sh --list
 ```
 

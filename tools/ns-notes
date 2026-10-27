@@ -1,0 +1,45 @@
+#!/usr/bin/env bash
+# ns-notes — working notes in Obsidian. ~/Northstar/Cases is one vault: each
+# case has a Case.md overview and a Results.md log of its result folders, and
+# notes about people, accounts, organisations, places, events and leads are
+# made from templates. The tamper-evident record stays in notes.md and audit.log.
+# shellcheck source=../lib/ui.sh
+. "${NS_HOME:-$HOME/.local/share/northstar}/lib/ui.sh"
+
+case_dir=$(ns_case_dir)
+ns_vault case "$case_dir" >/dev/null
+
+open_note() {
+  ns_audit ns-notes "$(basename "$1")" "opened in Obsidian"
+  ui_reveal "$(ns_vault uri "$1")"
+}
+
+choice=$(ui_list "Notes (Obsidian): case $(ns_case)" \
+  "Open this case's notes" \
+  "New note: person" \
+  "New note: account" \
+  "New note: organisation" \
+  "New note: place" \
+  "New note: event" \
+  "New note: lead" \
+  "Open the Cases vault (all cases)" \
+  "Add a contemporaneous note (tamper-evident)") || exit 0
+
+case "$choice" in
+  "Open this case"*)
+    open_note "$case_dir/Case.md" ;;
+  "New note: "*)
+    kind=${choice#New note: }
+    title=$(ui_entry "Title for the $kind note (for example a name or username):") || exit 0
+    [ -n "$title" ] || exit 0
+    p=$(ns_vault new "$case_dir" "$kind" "$title") || { ui_error "Couldn't create the note."; exit 1; }
+    ns_audit ns-notes "$kind" "note created: $(basename "$p")"
+    open_note "$p" ;;
+  "Open the Cases vault"*)
+    ns_vault setup "$NS_DATA" >/dev/null
+    open_note "$NS_DATA/Cases/Home.md" ;;
+  "Add a contemporaneous"*)
+    t=$(ui_entry "Note (saved with the UTC time; it can't be edited later without it showing):") || exit 0
+    ns_casework note "$case_dir" "$t" >/dev/null && ns_audit ns-case "note" "note added"
+    ui_notify "Note saved to case $(ns_case)" ;;
+esac

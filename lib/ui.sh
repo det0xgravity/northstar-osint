@@ -275,6 +275,7 @@ ns_hash_file() {
 ns_finish() {
   printf '\n\033[1mResults saved to:\033[0m %s\n' "$1"
   ns_seal_result "$1"
+  ns_cmd ns_vault && ns_vault result "$(ns_case_dir)" "$1" >/dev/null 2>&1   # listed in the case's Results.md
   mkdir -p "$NS_CONF" && printf '%s\n' "$1" > "$NS_CONF/last_result"
   if [ "${NS_FROM_MAIN:-0}" = 1 ]; then
     printf 'Back to the Northstar menu: choose "Open latest results" to see them.\n'

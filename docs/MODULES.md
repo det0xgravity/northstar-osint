@@ -18,6 +18,13 @@ System packages (git, curl, jq, Python, pipx, Go, whois, dig, zenity, clipboard 
 | [Toutatis](https://github.com/megadose/toutatis) | `toutatis` | Instagram account details (needs a session ID) |
 | [Blackbird](https://github.com/antoniaci/blackbird) | `blackbird` | Username/email search using WhatsMyName data |
 
+## social
+
+| Tool | Command | Purpose |
+|---|---|---|
+| northstar's Telegram engine ([Telethon](https://github.com/LonamiWebs/Telethon), private venv) | `ns_telegram` | Lookups and channel-preview search without a login; with a research account, Telegram search, message search, group members and user profiles |
+| [telegram-tracker](https://github.com/estebanpdl/telegram-tracker) | `tgtracker` | Channel collection: posts, metadata, forward networks (its own Python 3.14 through uv) |
+
 ## domain
 
 | Tool | Command | Purpose |
@@ -139,6 +146,20 @@ All of it is cloned from the official repositories and updated by `ns-update`. Y
 | [KeePassXC](https://keepassxc.org) | Store sock-puppet credentials inside the workstation |
 | [Flameshot](https://flameshot.org) | Annotated screenshots. Starts at login as a tray icon (click it to capture); Print Screen captures directly on GNOME |
 | [OBS Studio](https://obsproject.com) | Screen recording (Flatpak; Debian's package on arm64 Linux) |
+
+## messaging
+
+| App | Source | Notes |
+|---|---|---|
+| [Telegram Desktop](https://desktop.telegram.org) | Flathub (verified), Homebrew on macOS | x86_64 and arm64 |
+| [Signal](https://signal.org) | Signal's apt repository, Homebrew on macOS | x86_64 only on Linux: Signal has no official arm64 Linux build yet |
+| [Element](https://element.io) | Element's apt repository, Homebrew on macOS | Matrix client, x86_64 and arm64 |
+
+For research accounts only. `ns-seal` removes their logins from template clones.
+
+## notes
+
+[Obsidian](https://obsidian.md) from Flathub (verified; x86_64 and arm64) or Homebrew, with `~/Northstar/Cases` set up as a vault: settings (dark theme, core Templates plugin, attachments beside notes), templates for people, accounts, organisations, places, events and leads, `Home.md`, and a `Case.md` per case. The vault is added to Obsidian's vault list while Obsidian is closed. Used by `ns-notes`.
 
 ## vm *(Linux only)*
 

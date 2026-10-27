@@ -4,6 +4,29 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project uses
 [Semantic Versioning](https://semver.org/).
 
+## [0.25.0] - 2026-10-27
+
+### Added
+- Telegram: look up any channel, group, bot or user and search a public
+  channel's posts without a login; with a research account (Telethon), search
+  Telegram for public chats and users, search messages, list a group's visible
+  members and read user profiles. Telegram API ID and hash under API keys.
+- `messaging` module: Telegram Desktop (Flathub, verified), Signal (official
+  apt repository, x86_64) and Element (official apt repository).
+- `notes` module and `ns-notes` (main menu: Notes (Obsidian)): Obsidian with
+  `~/Northstar/Cases` as one vault, templates for people, accounts,
+  organisations, places, events and leads, a `Case.md` overview per case, and
+  `Results.md`, which every finished search now adds a line to.
+- `tests/e2e.sh` and the End-to-end workflow: a full install in clean Debian 13
+  and Ubuntu 24.04 containers (x86_64 and arm64), then the installed menus and
+  engines run with real tools: case and notes, missing persons, same-photo
+  finder, EXIF GPS on the case map, OCR, face comparison, page monitoring,
+  Telegram previews, translation, and evidence verification.
+
+### Changed
+- `ns-seal` also removes Telegram Desktop, Signal and Element logins and the
+  Telegram search session.
+
 ## [0.24.0] - 2026-10-26
 
 ### Added

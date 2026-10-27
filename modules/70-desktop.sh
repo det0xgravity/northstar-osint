@@ -23,6 +23,7 @@ ns-image|Image Analysis|image-x-generic|Reverse image search and EXIF/GPS
 ns-country|Country Search|applications-internet|Public-records searches for Canada, the US, UK, Europe, Asia-Pacific and more
 ns-breach|Breach Data|dialog-password|Breach and infostealer exposure for emails, usernames, domains and phones
 ns-darkweb|Dark Web|network-vpn|Tor connection check, onion search, text-only page capture, ransomware leak-site claims
+ns-notes|Notes|accessories-text-editor|Case notes in Obsidian: people, accounts, organisations, places, events, leads
 ns-case|Case|x-office-document|Open a case with intake details, take notes, build the report, close the case
 ns-evidence|Evidence & Exhibits|security-high|Record exhibits, verify folders and the audit log, export the case"
 

@@ -31,16 +31,23 @@ The search term is copied to your clipboard for the web services that open.
 
 ## ns-telegram
 
-Telegram research with [telegram-tracker](https://github.com/estebanpdl/telegram-tracker), using a Telegram **research** account:
+Telegram research. The first options need no account: they read Telegram's public web pages (text only). The rest use a Telegram **research** account, never a personal one.
 
 | Option | What it does | Output |
 |---|---|---|
-| Log in to Telegram | One-time login in the terminal: an API ID and hash from my.telegram.org/apps, the phone number and Telegram's code. Saved by telegram-tracker in `~/.telegram_tracker`, never in the audit log | |
-| Collect a public channel | Posts, channel metadata and forward sources, optionally since a date; then builds a dataset and a forward network. Opens the channel's web preview and TGStat page | `data/` (JSON, CSV, network files) |
-| Collect a list of channels | The same for every channel in a text file (`name`, `@name` or t.me links) | `channels.txt`, `data/` |
+| Look up a channel, group, bot or user | What `t.me/<name>` shows: type, title, bio or description, subscriber or member count | `lookup.json` |
+| Search a public channel's posts | Searches the channel's web preview (`t.me/s/<name>?q=`): the most recent matches, with date, link, views and text | `posts.csv` |
 | Search for channels | Opens TGStat and Google searches of t.me with your words on the clipboard | |
+| Search Telegram for public chats and users | Telegram's own search for public channels, groups, bots and users matching a word or name, with member counts and scam/fake flags | `search.csv` |
+| Search messages in a channel or group | Every matching message (or the latest, up to a limit) with sender ID, views, forwards, forward source, replies and media type | `messages.csv`, `chat.json` |
+| Members of a group | The members a non-admin can see: ID, username, names, phone (only when the member shares it), bot, premium, last seen. Groups that hide their member list are reported as such | `members.csv` |
+| User profile | ID, names, all usernames, bio, premium, birthday and personal channel when public, chats in common with the research account, and the current profile photo | `user.json`, `profile_photo.jpg` |
+| Collect a public channel | [telegram-tracker](https://github.com/estebanpdl/telegram-tracker): posts, channel metadata and forward sources, optionally since a date, then a dataset and forward network | `data/` |
+| Collect a list of channels | The same for every channel in a text file (`name`, `@name` or t.me links) | `channels.txt`, `data/` |
+| Log in for searches | One-time login in the terminal for the searches above. Add the API ID and hash from [my.telegram.org/apps](https://my.telegram.org/apps) under **API keys** first, then type the phone number, Telegram's code and the 2FA password. The session is kept in `~/.config/northstar/telegram/` (readable only by you) | |
+| Log in for channel collection | telegram-tracker's own login, saved in `~/.telegram_tracker` | |
 
-Collecting is read-only, but it uses your account: Telegram rate-limits heavy collection. `ns-seal` removes the Telegram session from template clones.
+Searches are read-only, but they use the account: Telegram rate-limits heavy use and the menu says how long to wait. Viewing doesn't notify anyone, but joining a group or messaging someone would: don't. Neither the API hash nor the login code ever reaches `audit.log`, and `ns-seal` removes both sessions from template clones.
 
 ## ns-domain
 
@@ -164,6 +171,21 @@ Offline text translation with [Argos Translate](https://github.com/argosopentech
 | Translate text files | Posts, transcripts (`ns-video`), subtitles (`.srt`, `.vtt`), captured page text: each file is copied into the result folder beside `<name>.<language>.<ext>` |
 
 Results are saved under `translation/` in the case and sealed. Machine translation is a lead: slang, names and dialect are often wrong, so have anything that matters checked by a qualified translator. For speech, use Video verification, which transcribes and translates the audio.
+
+## ns-notes
+
+**Notes (Obsidian)**: `~/Northstar/Cases` is one [Obsidian](https://obsidian.md) vault, so notes can link people, accounts and results across cases.
+
+| Option | What it does |
+|---|---|
+| Open this case's notes | Opens the case's `Case.md`: intake details, summary, subjects, open leads, and links to `Results.md`, the contemporaneous notes, the subject profile, timeline and findings |
+| New note: person / account / organisation / place / event / lead | Creates a note in the case's `People/`, `Accounts/`, `Organisations/`, `Places/`, `Events/` or `Leads/` folder from the vault's templates, and opens it |
+| Open the Cases vault | `Home.md`: every case with its status and reference |
+| Add a contemporaneous note | The same tamper-evident note as Case → Add a note |
+
+Every finished search adds a line to the case's `Results.md` (UTC time, tool, link to the main output), so results show up in Obsidian's search, graph and backlinks. Templates are in `Cases/_templates/`: edit them freely, and northstar stops updating any template you've changed. Use Obsidian's own Templates command for notes you create there.
+
+Obsidian notes are working notes and can be edited. The record that has to stand up later is still `notes.md` (hash-chained, Case → Add a note), `audit.log` and the sealed result folders. Obsidian's community plugins stay off (restricted mode) unless you turn them on: plugins can read the whole vault, case data included.
 
 ## ns-metadata
 

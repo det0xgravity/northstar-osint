@@ -9,7 +9,9 @@
 KEYS="HIBP_API_KEY|Have I Been Pwned|https://haveibeenpwned.com/API/Key
 INTELX_API_KEY|Intelligence X|https://intelx.io/account?tab=developer
 DEHASHED_API_KEY|DeHashed|https://app.dehashed.com/
-LEAKCHECK_API_KEY|LeakCheck|https://leakcheck.io/"
+LEAKCHECK_API_KEY|LeakCheck|https://leakcheck.io/
+TELEGRAM_API_ID|Telegram API ID|https://my.telegram.org/apps
+TELEGRAM_API_HASH|Telegram API hash|https://my.telegram.org/apps"
 
 while true; do
   items=()

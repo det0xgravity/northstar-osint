@@ -15,7 +15,7 @@ H=$(getent passwd "$U" | cut -d: -f6)
 cat <<EOF
 This will seal $(hostname) for templating:
   - clear browser history, cookies, sessions and SAVED LOGINS for $U (settings and extensions are kept)
-  - remove API keys (ns-keys) and logged-in tool sessions (GHunt, instaloader, Censys, Shodan, Telegram)
+  - remove API keys (ns-keys) and logged-in tool sessions (GHunt, instaloader, Censys, Shodan, Telegram) and messaging-app logins (Telegram Desktop, Signal, Element)
   - clear shell history, recent files and thumbnails
   - reset machine-id, SSH host keys, xrdp keys and DHCP leases (regenerated on first boot)
   - shut the VM down
@@ -44,7 +44,9 @@ done
 # Credentials: API keys and logged-in tool sessions must never reach every clone
 rm -f "$H/.config/northstar/keys.env" "$H/.config/northstar/last_result" "$H/.config/northstar/last_country"
 rm -rf "$H/.malfrats" "$H/.config/instaloader" "$H/.config/cencli" "$H/.shodan" "$H/.config/shodan" \
-       "$H/.telegram_tracker" 2>/dev/null
+       "$H/.telegram_tracker" "$H/.config/northstar/telegram" 2>/dev/null
+# Messaging apps: logged-in research accounts (Telegram Desktop, Signal, Element)
+rm -rf "$H/.var/app/org.telegram.desktop" "$H/.config/Signal" "$H/.config/Element" 2>/dev/null
 
 # Per-user traces
 rm -rf "$H/.bash_history" "$H/.zsh_history" "$H/.python_history" \

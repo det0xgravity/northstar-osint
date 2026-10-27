@@ -27,6 +27,7 @@ while true; do
     "Dark web" \
     "Evidence & exhibits" \
     "API keys" \
+    "Notes (Obsidian)" \
     "Case: notes, details, report, close" \
     "Switch / create case  (current: $case_name)" \
     "Open latest results" \
@@ -54,6 +55,7 @@ while true; do
     "Dark web")                ns-darkweb ;;
     "Evidence & exhibits")     ns-evidence ;;
     "API keys")                ns-keys ;;
+    "Notes (Obsidian)")        ns-notes ;;
     "Case:"*)                  ns-case ;;
     "Switch / create case"*)   ns-case open ;;
     "Open latest results")
