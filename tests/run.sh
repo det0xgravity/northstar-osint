@@ -218,7 +218,11 @@ section "Notes (Obsidian vault)"
 python3 "$R/lib/ns_vault.py" setup "$W/data" > /dev/null
 check "vault settings and templates created" "[ -f '$W/data/Cases/.obsidian/templates.json' ] && [ -f '$W/data/Cases/_templates/Person.md' ]"
 check "every case gets Case.md and appears in Home.md" "[ -f '$CASE/Case.md' ] && grep -q 'general/Case' '$W/data/Cases/Home.md'"
-check "finished results are listed in Results.md" "grep -q '\*\*map\*\*' '$CASE/Results.md'"
+check "finished results are listed in Results.md" "grep -q 'Case map' '$CASE/Results.md'"
+check "each result has its own note with provenance" "ls '$CASE'/Results/*' Case map - '*.md >/dev/null && grep -q 'evidence\] Provenance' \"\$(ls '$CASE'/Results/*' Case map - '*.md | head -1)\""
+check "case dashboard lists the latest results" "grep -q '## Latest results' '$CASE/Case.md' && grep -q 'northstar:auto:end' '$CASE/Case.md'"
+check "raw tool folders hidden from the file list" "grep -q 'data-path=\"general/map\"' '$W/data/Cases/.obsidian/snippets/northstar-hide-raw.css'"
+check "theme and hide snippets enabled" "grep -q northstar-hide-raw '$W/data/Cases/.obsidian/appearance.json' && [ -s '$W/data/Cases/.obsidian/snippets/northstar.css' ]"
 printf '#!/bin/sh\nexit 0\n' > "$G/obsidian"; chmod +x "$G/obsidian"      # pretend Obsidian is installed
 PATH="$G:$PATH" menu ns-notes "New note: person" "Jane Doe"
 check "person note made from the template" "grep -q '^type: person' '$CASE/People/Jane Doe.md' && grep -q '^# Jane Doe' '$CASE/People/Jane Doe.md'"
@@ -228,6 +232,16 @@ check "without Obsidian the note still opens, in the text editor" "grep -q 'ui_r
 printf 'my edits\n' > "$W/data/Cases/_templates/Lead.md"
 python3 "$R/lib/ns_vault.py" setup "$W/data" > /dev/null
 check "edited templates are left alone" "grep -qx 'my edits' '$W/data/Cases/_templates/Lead.md'"
+printf '\n## Summary\nAnalyst wrote this.\n' >> "$CASE/Case.md"
+python3 "$R/lib/ns_vault.py" refresh "$CASE" > /dev/null
+check "analyst's text below the generated block survives a refresh" "grep -qx 'Analyst wrote this.' '$CASE/Case.md'"
+H1="$CASE/darkweb/evil.onion_20261026-120000"; mkdir -p "$H1"; touch "$H1/console.log"
+printf 'hi ![x](http://evil.example/p.png) <img src=http://evil.example/t.gif> ```\n' > "$H1/page.txt"
+printf 'k,v\n<iframe src=http://evil.example>,[[x]]\n' > "$H1/t.csv"
+python3 "$R/lib/ns_vault.py" result "$CASE" "$H1" > /dev/null
+hn=$(ls "$CASE"/Results/*evil.onion*.md)
+check "untrusted page content can't render as HTML or load remote images" \
+  "! grep -v '^>' \"\$hn\" | grep -q '<img\\|<iframe\\|!\\[x\\](http' && grep -q '&lt;iframe' \"\$hn\" && grep -q '^> \`\`\`\`text' \"\$hn\""
 python3 "$R/lib/ns_vault.py" register "$W/data" "$W/obs/obsidian.json" > /dev/null
 python3 "$R/lib/ns_vault.py" register "$W/data" "$W/obs/obsidian.json" > /dev/null
 check "vault registered once with Obsidian" "python3 -c 'import json,sys; assert len(json.load(open(sys.argv[1]))[\"vaults\"]) == 1' '$W/obs/obsidian.json'"

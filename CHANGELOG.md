@@ -4,6 +4,24 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project uses
 [Semantic Versioning](https://semver.org/).
 
+## [0.27.0] - 2026-10-27
+
+### Added
+- Obsidian case hub: every finished search writes a result note in the case's
+  `Results/` folder (provenance, integrity, findings as tables, accounts
+  found, key text, embedded images, console output, links to every raw file).
+  `Case.md` is now a dashboard (details, counts, latest results, working notes,
+  key records, page-monitoring changes) that keeps the analyst's own text
+  below its generated part. `Home.md` lists every case with its activity.
+- A northstar theme snippet, and a snippet that hides raw tool folders from
+  Obsidian's file list (links and embeds still work).
+- Notes → Refresh this case's notes. Updating writes notes for existing results.
+- Redesigned templates (person, account, organisation, place, event, lead).
+
+### Security
+- Web content in result notes is escaped or fenced: it can't render as HTML or
+  load remote images in Obsidian.
+
 ## [0.26.2] - 2026-10-27
 
 ### Fixed

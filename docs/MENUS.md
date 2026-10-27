@@ -174,18 +174,26 @@ Results are saved under `translation/` in the case and sealed. Machine translati
 
 ## ns-notes
 
-**Notes (Obsidian)**: `~/Northstar/Cases` is one [Obsidian](https://obsidian.md) vault, so notes can link people, accounts and results across cases.
+**Notes (Obsidian)**: `~/Northstar/Cases` is one [Obsidian](https://obsidian.md) vault that works as the case hub.
+
+| In each case | What it is |
+|---|---|
+| `Case.md` | The dashboard: case details, counts (results, people, accounts, organisations, places, open leads), the latest results, links to every working note, key records (contemporaneous notes, subject profile, findings, timeline, latest case map, exhibits, reports) and the latest page-monitoring changes. northstar regenerates the top part; write your summary, analysis and next steps below the end marker and they're kept |
+| `Results/` | One note per result folder, written when a search finishes: provenance (time, operator, tool versions, query) and integrity (sealed, manifest SHA-256), the tool's findings as tables (CSV and JSON files), accounts found, key text files, embedded screenshots and photos, the console output, and links to every raw file |
+| `Results.md` | Every result, newest first |
+| `People/`, `Accounts/`, `Organisations/`, `Places/`, `Events/`, `Leads/` | Working notes from the templates in `Cases/_templates/` |
 
 | Option | What it does |
 |---|---|
-| Open this case's notes | Opens the case's `Case.md`: intake details, summary, subjects, open leads, and links to `Results.md`, the contemporaneous notes, the subject profile, timeline and findings |
-| New note: person / account / organisation / place / event / lead | Creates a note in the case's `People/`, `Accounts/`, `Organisations/`, `Places/`, `Events/` or `Leads/` folder from the vault's templates, and opens it |
-| Open the Cases vault | `Home.md`: every case with its status and reference |
-| Add a contemporaneous note | The same tamper-evident note as Case → Add a note |
+| Open this case's notes | Opens `Case.md` |
+| New note: person / account / organisation / place / event / lead | Creates the note from its template and opens it |
+| Open the Cases vault | `Home.md`: every case with status, reference, results and last activity |
+| Refresh this case's notes | Rebuilds every result note (for results from before this version, or after a tool's output changed) |
+| Add a contemporaneous note | The tamper-evident note, as in Case → Add a note |
 
-Every finished search adds a line to the case's `Results.md` (UTC time, tool, link to the main output), so results show up in Obsidian's search, graph and backlinks. Templates are in `Cases/_templates/`: edit them freely, and northstar stops updating any template you've changed. Use Obsidian's own Templates command for notes you create there.
+**Look:** a northstar theme snippet (headings, tables, callouts for evidence, findings and cautions) and a second snippet that hides the raw tool folders and case files from the file list, so the vault shows notes, not output. Links and embeds into the raw folders still work; to browse them, turn off **northstar-hide-raw** in Settings → Appearance → CSS snippets. Templates are yours to edit: northstar stops updating any template you've changed.
 
-Obsidian notes are working notes and can be edited. The record that has to stand up later is still `notes.md` (hash-chained, Case → Add a note), `audit.log` and the sealed result folders. Obsidian's community plugins stay off (restricted mode) unless you turn them on: plugins can read the whole vault, case data included.
+**Safety:** result notes are views of the sealed folders, rebuilt on refresh, so nothing in them is evidence on its own. Content collected from the web (pages, profiles, dark-web text) is shown escaped or in code blocks: it can't render as HTML or load remote images in Obsidian. Obsidian's community plugins stay off (restricted mode) unless you turn them on: plugins can read the whole vault, case data included.
 
 ## ns-metadata
 

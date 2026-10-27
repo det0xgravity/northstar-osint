@@ -48,6 +48,7 @@ choice=$(ui_list "Notes (Obsidian): case $(ns_case)" \
   "New note: event" \
   "New note: lead" \
   "Open the Cases vault (all cases)" \
+  "Refresh this case's notes (rebuild result notes)" \
   "Add a contemporaneous note (tamper-evident)") || exit 0
 
 case "$choice" in
@@ -60,6 +61,10 @@ case "$choice" in
     p=$(ns_vault new "$case_dir" "$kind" "$title") || { ui_error "Couldn't create the note."; exit 1; }
     ns_audit ns-notes "$kind" "note created: $(basename "$p")"
     open_note "$p" ;;
+  "Refresh"*)
+    r=$(ns_vault refresh "$case_dir"); ns_audit ns-notes "refresh" "$r"
+    ui_notify "$r"
+    open_note "$case_dir/Case.md" ;;
   "Open the Cases vault"*)
     ns_vault setup "$NS_DATA" >/dev/null
     open_note "$NS_DATA/Cases/Home.md" ;;
