@@ -4,6 +4,14 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project uses
 [Semantic Versioning](https://semver.org/).
 
+## [0.26.2] - 2026-10-27
+
+### Fixed
+- geo and translate failed on arm64 Linux: PyPI's PyTorch now pulls in NVIDIA
+  CUDA libraries (over 1 GB, unusable in a VM), and the download kept breaking.
+  Both now install PyTorch's CPU-only build on every Linux machine and pin it so
+  GeoCLIP and Argos Translate can't swap in the CUDA build.
+
 ## [0.26.1] - 2026-10-27
 
 ### Fixed

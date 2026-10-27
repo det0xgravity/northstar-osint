@@ -5,7 +5,7 @@
 #  Sourced by install.sh and every module. Bash 3.2 compatible (macOS).
 # =============================================================================
 
-NS_VERSION="0.26.1"
+NS_VERSION="0.26.2"
 
 NS_HOME="${NS_HOME:-$HOME/.local/share/northstar}"   # tools, venvs, sources
 NS_BIN="$NS_HOME/bin"                                # all northstar binaries
@@ -129,6 +129,27 @@ ns_pip() {
   else
     ns_bg "$log" "$label" "$pip" "$@"
   fi
+}
+
+# ns_torch_cpu <log> <venv> <package...>   PyTorch's CPU-only build on Linux
+# (x86_64 and arm64). PyPI's Linux builds pull in NVIDIA CUDA libraries, over
+# 1 GB that a VM can't use. Sets NS_TORCH_PIN to a pip constraints file that
+# keeps later installs (GeoCLIP, Argos Translate) on these builds. macOS: PyPI's
+# builds are already CPU/Apple GPU only, so nothing to do.
+NS_TORCH_PIN=""
+ns_torch_cpu() {
+  local log="$1" venv="$2" p v
+  shift 2
+  NS_TORCH_PIN=""
+  ns_is_linux || return 0
+  ns_pip "$log" "PyTorch (CPU build)" "$venv/bin/pip" install --upgrade "$@" \
+    --index-url https://download.pytorch.org/whl/cpu || return 1
+  NS_TORCH_PIN="$venv/torch-cpu-constraints.txt"
+  : > "$NS_TORCH_PIN"
+  for p in "$@"; do
+    v=$("$venv/bin/pip" show "$p" 2>/dev/null | sed -n 's/^Version: //p')
+    [ -n "$v" ] && printf '%s==%s\n' "$p" "$v" >> "$NS_TORCH_PIN"
+  done
 }
 
 # ns_download <url> <file> [label]   curl with a progress bar in a terminal

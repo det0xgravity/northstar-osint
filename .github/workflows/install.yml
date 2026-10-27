@@ -42,9 +42,15 @@ jobs:
             test -x "$HOME/.local/share/northstar/bin/ns-country"
             ./install.sh --version'
         working-directory: ${{ github.workspace }}
-      - name: Offline translation installs and translates
+      - name: PyTorch modules (translate, geo) install the CPU build and work
         run: |
-          su ns -c "cd '$GITHUB_WORKSPACE' && ./install.sh --yes --only translate"
+          su ns -c "cd '$GITHUB_WORKSPACE' && ./install.sh --yes --only translate,geo"
+          for v in translate geo; do
+            if su ns -c "~/.local/share/northstar/venvs/$v/bin/pip list" | grep -i nvidia; then
+              echo "NVIDIA CUDA packages in the $v venv: the CPU build wasn't used"; exit 1
+            fi
+          done
+          su ns -c '~/.local/share/northstar/venvs/geo/bin/python -c "import geoclip, torch; print(\"geoclip ok, torch\", torch.__version__)"'
           su ns -c 'export PATH="$HOME/.local/share/northstar/bin:$PATH"
             set -e
             ns_translate get es en
