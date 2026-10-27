@@ -25,6 +25,51 @@
     ]
   },
   {
+    "name": "Search Engines",
+    "children": [
+      {
+        "name": "Bing",
+        "url": "https://www.bing.com/"
+      },
+      {
+        "name": "Yandex Search",
+        "url": "https://yandex.com/"
+      },
+      {
+        "name": "DuckDuckGo",
+        "url": "https://duckduckgo.com/"
+      },
+      {
+        "name": "Startpage",
+        "url": "https://www.startpage.com/"
+      },
+      {
+        "name": "Brave Search",
+        "url": "https://search.brave.com/"
+      },
+      {
+        "name": "Mojeek (independent index)",
+        "url": "https://www.mojeek.com/"
+      },
+      {
+        "name": "Baidu",
+        "url": "https://www.baidu.com/"
+      },
+      {
+        "name": "DorkSearch (Google dork builder)",
+        "url": "https://dorksearch.com/"
+      },
+      {
+        "name": "Boardreader (forums)",
+        "url": "https://boardreader.com/"
+      },
+      {
+        "name": "Google Fact Check Explorer",
+        "url": "https://toolbox.google.com/factcheck/explorer"
+      }
+    ]
+  },
+  {
     "name": "Domains & Infrastructure",
     "children": [
       {
@@ -62,6 +107,58 @@
       {
         "name": "archive.today",
         "url": "https://archive.ph/"
+      },
+      {
+        "name": "VirusTotal",
+        "url": "https://www.virustotal.com/"
+      },
+      {
+        "name": "AbuseIPDB",
+        "url": "https://www.abuseipdb.com/"
+      },
+      {
+        "name": "IPinfo",
+        "url": "https://ipinfo.io/"
+      },
+      {
+        "name": "Hurricane Electric BGP Toolkit",
+        "url": "https://bgp.he.net/"
+      },
+      {
+        "name": "GreyNoise Visualizer",
+        "url": "https://viz.greynoise.io/"
+      },
+      {
+        "name": "AlienVault OTX",
+        "url": "https://otx.alienvault.com/"
+      },
+      {
+        "name": "Netlas",
+        "url": "https://app.netlas.io/"
+      },
+      {
+        "name": "URLhaus (malicious URLs)",
+        "url": "https://urlhaus.abuse.ch/"
+      },
+      {
+        "name": "BuiltWith (site technology)",
+        "url": "https://builtwith.com/"
+      },
+      {
+        "name": "PublicWWW (search page source code)",
+        "url": "https://publicwww.com/"
+      },
+      {
+        "name": "grep.app (search public code)",
+        "url": "https://grep.app/"
+      },
+      {
+        "name": "DNSViz",
+        "url": "https://dnsviz.net/"
+      },
+      {
+        "name": "Ghostarchive",
+        "url": "https://ghostarchive.org/"
       }
     ]
   },
@@ -83,6 +180,26 @@
       {
         "name": "FotoForensics",
         "url": "https://fotoforensics.com/"
+      },
+      {
+        "name": "Bing Visual Search",
+        "url": "https://www.bing.com/visualsearch"
+      },
+      {
+        "name": "Baidu Images",
+        "url": "https://image.baidu.com/"
+      },
+      {
+        "name": "Forensically (photo forensics in the browser)",
+        "url": "https://29a.ch/photo-forensics/"
+      },
+      {
+        "name": "YouTube Metadata (mattw)",
+        "url": "https://mattw.io/youtube-metadata/"
+      },
+      {
+        "name": "YouTube Geofind (videos by location)",
+        "url": "https://mattw.io/youtube-geofind/"
       }
     ]
   },
@@ -104,6 +221,22 @@
       {
         "name": "Epieos",
         "url": "https://epieos.com/"
+      },
+      {
+        "name": "Hunter (email patterns for a domain)",
+        "url": "https://hunter.io/"
+      },
+      {
+        "name": "FamilySearch (genealogy records)",
+        "url": "https://www.familysearch.org/search/"
+      },
+      {
+        "name": "Find a Grave",
+        "url": "https://www.findagrave.com/"
+      },
+      {
+        "name": "LittleSis (power networks)",
+        "url": "https://littlesis.org/"
       }
     ]
   },
@@ -137,6 +270,18 @@
       {
         "name": "Social Blade (account statistics)",
         "url": "https://socialblade.com/"
+      },
+      {
+        "name": "Social Searcher",
+        "url": "https://www.social-searcher.com/"
+      },
+      {
+        "name": "4plebs (4chan archive)",
+        "url": "https://archive.4plebs.org/"
+      },
+      {
+        "name": "Lyzem (Telegram search)",
+        "url": "https://lyzem.com/"
       }
     ]
   },
@@ -158,6 +303,134 @@
       {
         "name": "Google Earth Web",
         "url": "https://earth.google.com/web/"
+      },
+      {
+        "name": "Mapillary (street-level imagery)",
+        "url": "https://www.mapillary.com/app/"
+      },
+      {
+        "name": "KartaView (street-level imagery)",
+        "url": "https://kartaview.org/map/"
+      },
+      {
+        "name": "Esri World Imagery Wayback",
+        "url": "https://livingatlas.arcgis.com/wayback/"
+      },
+      {
+        "name": "Zoom Earth (near-real-time satellite)",
+        "url": "https://zoom.earth/"
+      },
+      {
+        "name": "USGS EarthExplorer",
+        "url": "https://earthexplorer.usgs.gov/"
+      },
+      {
+        "name": "Sentinel Hub EO Browser",
+        "url": "https://apps.sentinel-hub.com/eo-browser/"
+      },
+      {
+        "name": "Wikimapia",
+        "url": "https://wikimapia.org/"
+      },
+      {
+        "name": "GeoNames",
+        "url": "https://www.geonames.org/"
+      },
+      {
+        "name": "Bellingcat OpenStreetMap Search",
+        "url": "https://osm-search.bellingcat.com/"
+      },
+      {
+        "name": "PeakVisor (mountain identification)",
+        "url": "https://peakvisor.com/"
+      },
+      {
+        "name": "OpenRailwayMap",
+        "url": "https://www.openrailwaymap.org/"
+      },
+      {
+        "name": "Old Maps Online",
+        "url": "https://www.oldmapsonline.org/"
+      },
+      {
+        "name": "timeanddate (time zones, sun and moon)",
+        "url": "https://www.timeanddate.com/"
+      },
+      {
+        "name": "Liveuamap (conflict maps)",
+        "url": "https://liveuamap.com/"
+      }
+    ]
+  },
+  {
+    "name": "Wireless & Telecom",
+    "children": [
+      {
+        "name": "WiGLE (Wi-Fi and cell networks)",
+        "url": "https://wigle.net/"
+      },
+      {
+        "name": "OpenCelliD",
+        "url": "https://opencellid.org/"
+      },
+      {
+        "name": "CellMapper",
+        "url": "https://www.cellmapper.net/map"
+      }
+    ]
+  },
+  {
+    "name": "Crypto",
+    "children": [
+      {
+        "name": "Blockchair",
+        "url": "https://blockchair.com/"
+      },
+      {
+        "name": "WalletExplorer (Bitcoin clusters)",
+        "url": "https://www.walletexplorer.com/"
+      },
+      {
+        "name": "Etherscan",
+        "url": "https://etherscan.io/"
+      },
+      {
+        "name": "Breadcrumbs (transaction graphs)",
+        "url": "https://www.breadcrumbs.app/"
+      }
+    ]
+  },
+  {
+    "name": "Dark Web",
+    "children": [
+      {
+        "name": "Ahmia (onion search)",
+        "url": "https://ahmia.fi/"
+      },
+      {
+        "name": "ransomware.live (leak-site tracker)",
+        "url": "https://www.ransomware.live/"
+      }
+    ]
+  },
+  {
+    "name": "Verification & Method",
+    "children": [
+      {
+        "name": "Verification Handbook",
+        "url": "https://verificationhandbook.com/"
+      },
+      {
+        "name": "Bellingcat guides",
+        "url": "https://www.bellingcat.com/category/resources/how-tos/"
+      },
+      {
+        "name": "Snopes",
+        "url": "https://www.snopes.com/"
+      },
+      {
+        "name": "Berkeley Protocol on Digital Open Source Investigations",
+        "url": "https://www.ohchr.org/en/publications/policy-and-methodological-publications/berkeley-protocol-digital-open-source"
       }
     ]
   }

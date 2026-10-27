@@ -92,7 +92,7 @@ Evidence-grade web page capture. Each page gets its own folder:
 | `headers.txt`, `capture.txt` | Response headers; UTC capture time, HTTP status, final URL after redirects, server IP, Wayback result |
 | `rdap.json` | Who held the domain at capture time |
 
-Options: capture one page, capture a list of URLs from a text file, or look up existing archived copies (Wayback, archive.today, Memento TimeTravel). The folder is sealed, you can record it as an exhibit straight away, and archive.today opens so you can add an independent public copy (it needs a CAPTCHA). Pages are fetched over your own connection: use a VPN if your work needs it.
+Options: capture one page, capture a list of URLs from a text file, or look up existing archived copies (Wayback, archive.today, Ghostarchive). The folder is sealed, you can record it as an exhibit straight away, and archive.today opens so you can add an independent public copy (it needs a CAPTCHA). Pages are fetched over your own connection: use a VPN if your work needs it.
 
 ## ns-video
 

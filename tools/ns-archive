@@ -92,9 +92,10 @@ Click OK to capture it." || true
   "Look up"*)
     url=$(ui_entry "URL:") || exit 0
     valid_url "$url" || { ui_error "Enter a full web address starting with https://"; exit 1; }
-    ns_audit archive-lookup "$url" "Wayback, archive.today, Memento"
+    # Memento TimeTravel, which searched every archive at once, closed in September 2025
+    ns_audit archive-lookup "$url" "Wayback, archive.today, Ghostarchive"
     ui_open "https://web.archive.org/web/*/$url" "https://archive.ph/$url" \
-            "https://timetravel.mementoweb.org/list/0/$url"
+            "https://ghostarchive.org/search?term=$(ns_enc "$url")"
     exit 0 ;;
 esac
 

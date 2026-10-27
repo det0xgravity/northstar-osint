@@ -4,6 +4,23 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project uses
 [Semantic Versioning](https://semver.org/).
 
+## [0.36.0] - 2026-10-27
+
+### Added
+- **62 more bookmarks** (95 in the base set, plus the country packs), chosen
+  from tools that several of the large public OSINT lists agree on (jivoi's
+  Awesome OSINT, Cipher387, Astrosp, the OSINT Framework, edoardottt) and
+  that fill gaps: new folders for alternative search engines, wireless and
+  telecom, crypto, the dark web, and verification method; more geolocation
+  and imagery (Mapillary, KartaView, Esri Wayback, EO Browser, Bellingcat OSM
+  Search), network and threat intelligence (VirusTotal, AbuseIPDB, IPinfo,
+  BGP, GreyNoise, OTX, URLhaus), and video and image verification. Face
+  search engines are deliberately left out.
+
+### Fixed
+- Capture web pages → Look up existing archived copies opened Memento
+  TimeTravel, which closed in September 2025; it now searches Ghostarchive.
+
 ## [0.35.0] - 2026-10-27
 
 ### Added
