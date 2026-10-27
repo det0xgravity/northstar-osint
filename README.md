@@ -144,6 +144,7 @@ Secrets you type into a menu, such as session cookies, are redacted from `audit.
 
 ## Documentation
 
+- [Investigation guide](docs/INVESTIGATION-GUIDE.md): a whole case step by step, from a new VM to a report ready for submission
 - [Installation](docs/INSTALL.md): per-platform notes, options, uninstalling
 - [Modules](docs/MODULES.md): every tool installed, with upstream links
 - [Menus](docs/MENUS.md): what each menu option runs and produces

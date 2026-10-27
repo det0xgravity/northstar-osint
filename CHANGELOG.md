@@ -4,6 +4,16 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project uses
 [Semantic Versioning](https://semver.org/).
 
+## [Unreleased]
+
+### Added
+- **docs/INVESTIGATION-GUIDE.md:** a whole investigation step by step, from a
+  new VM to a report ready for submission, with a worked example, grading,
+  verification traps, a pre-submission checklist and common mistakes.
+
+### Fixed
+- docs/MENUS.md: the ns-case table described the old report location.
+
 ## [0.32.0] - 2026-10-27
 
 ### Changed

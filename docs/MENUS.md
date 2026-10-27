@@ -209,14 +209,16 @@ Results are saved under `translation/` in the case and sealed. Machine translati
    |---|---|
    | `report.docx` | The report |
    | `report.md` | Its source |
+   | `findings-section.md` | The generated findings part of the report |
    | `findings-frozen.md` | A verbatim copy of the findings it used |
-   | `hashes.sha256` | SHA-256 of each of the files above |
+   | `hashes.sha256` | SHA-256 of report.md, report.docx and findings-frozen.md |
 
    The report's hash and the findings fingerprint are written to the contemporaneous notes.
 
 **What the report contains:**
 - your Summary and Analysis;
 - each reportable finding with its grading, what was observed, your assessment, and its evidence. Every exhibit's fingerprint and files are re-checked;
+- the chronology: Event notes marked reportable, reported findings with a time, and the last-seen time;
 - searches with no result: notes you marked `nil_return: true`, plus searches that saved no output and haven't been checked yet;
 - unused material;
 - the latest review;
@@ -281,7 +283,8 @@ Case records (main menu: **Case: notes, details, report, close**; **Switch / cre
 | Open or switch case | A new case asks for its intake details: client or matter reference, who authorised it, purpose and lawful basis, scope and subjects, review or retention date. An existing case is switched to, never overwritten | `case.json`, `scope.md` |
 | Add a note | A contemporaneous note, saved with the UTC time and operator, and hash-chained so later edits show | `notes.md` |
 | Case details | Shows the intake record and status | |
-| Build a report | A Word document (pandoc): case details, a Summary for your findings, methodology (the tools and sources actually used, from the audit log), the exhibit list with fingerprints, notes, and the audit log as an appendix | `reports/report_<UTC>.docx` (and its `.md` source) |
+| Build a report | A Word document (pandoc) from the case details, your Summary and Analysis in Case.md, the reportable findings and their checked exhibits, nil returns, unused material, the latest review, methodology (the tools and sources actually used, from the audit log), exhibits, notes and the audit log. Warnings are listed first. See [From findings to the report](#from-findings-to-the-report) | `reports/v<n>_<UTC>/`: `report.docx`, `report.md`, `findings-frozen.md`, `hashes.sha256` |
+| Record a supervisor review | Reviewer, role, decision and comments, written to the notes with the fingerprint of the findings reviewed | `notes.md` |
 | Verify notes and audit log | Checks both hash chains | |
 | Close this case | Verifies the audit log, exports the case with a SHA-256 to `~/Northstar/Exports`, and marks it closed. Nothing is deleted | `case.json` status |
 
