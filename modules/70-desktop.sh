@@ -1,8 +1,9 @@
 # shellcheck shell=bash
 # desktop — application-menu launchers for every northstar menu (Linux), GNOME
-# dock favourites, and a Northstar.app launcher on macOS.
+# dock favourites, a Northstar.app launcher on macOS, and the user guides as
+# offline web pages, linked on the desktop.
 
-ns_register desktop "Menu launchers (app menu, GNOME dock, macOS app)" "linux macos" mod_desktop
+ns_register desktop "Menu launchers (app menu, GNOME dock, macOS app) and the guides on the desktop" "linux macos" mod_desktop
 
 # id | name | icon | description
 NS_LAUNCHERS="northstar|Northstar|system-search|All northstar OSINT menus
@@ -25,7 +26,8 @@ ns-breach|Breach Data|dialog-password|Breach and infostealer exposure for emails
 ns-darkweb|Dark Web|network-vpn|Tor connection check, onion search, text-only page capture, ransomware leak-site claims
 ns-notes|Notes|accessories-text-editor|Case notes in Obsidian: people, accounts, organisations, places, events, leads
 ns-case|Case|x-office-document|Open a case with intake details, take notes, build the report, close the case
-ns-evidence|Evidence & Exhibits|security-high|Record exhibits, verify folders and the audit log, export the case"
+ns-evidence|Evidence & Exhibits|security-high|Record exhibits, verify folders and the audit log, export the case
+ns-guides|Guides|help-browser|The investigation guide and manuals, offline in your browser"
 
 ns_linux_launchers() {
   local apps="$HOME/.local/share/applications" id name icon desc
@@ -159,7 +161,35 @@ ns_macos_app() {
   ns_info "Northstar.app created in ~/Applications (find it with Spotlight)"
 }
 
+# The guides (docs/*.md) as offline web pages in $NS_HOME/guides, rebuilt on
+# every update, with links on the desktop: "Northstar guides" (the folder) and
+# the investigation guide itself. GNOME shows desktop icons only with the
+# Desktop Icons NG extension, which is enabled here.
+ns_desktop_dir() {
+  local d=""
+  ns_has xdg-user-dir && d=$(xdg-user-dir DESKTOP 2>/dev/null)
+  [ -n "$d" ] && [ "$d" != "$HOME" ] || d="$HOME/Desktop"
+  printf '%s\n' "$d"
+}
+
+ns_guides() {
+  local out="$NS_HOME/guides" desk
+  python3 "$NS_REPO/lib/ns_guides.py" build "$NS_REPO/docs" "$out" || { ns_warn "The guides couldn't be rendered (is pandoc installed?)"; return 1; }
+  desk=$(ns_desktop_dir)
+  mkdir -p "$desk"
+  # links only: never replace a file or folder of yours with the same name
+  [ -e "$desk/Northstar guides" ] && [ ! -L "$desk/Northstar guides" ] || ln -sfn "$out" "$desk/Northstar guides"
+  [ -e "$desk/Northstar investigation guide.html" ] && [ ! -L "$desk/Northstar investigation guide.html" ] \
+    || ln -sfn "$out/INVESTIGATION-GUIDE.html" "$desk/Northstar investigation guide.html"
+  if ns_in_gnome_session; then
+    ns_gnome_extension ding@rastersoft.com gnome-shell-extension-desktop-icons-ng \
+      "Desktop icons enabled, for the guides (from your next login)"
+  fi
+  ns_info "Guides on the desktop ($desk), and under Guides in the main menu"
+}
+
 mod_desktop() {
+  local rc=0
   if ns_is_macos; then
     ns_macos_app
   else
@@ -168,4 +198,6 @@ mod_desktop() {
     ns_gnome_tweaks
     ns_wallpaper
   fi
+  ns_guides || rc=1
+  return $rc
 }

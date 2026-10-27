@@ -4,6 +4,16 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project uses
 [Semantic Versioning](https://semver.org/).
 
+## [0.34.0] - 2026-10-27
+
+### Added
+- **Guides on the desktop:** the desktop module renders every guide in `docs/`
+  as an offline web page (pandoc) in `~/.local/share/northstar/guides`,
+  rebuilt on each update, and links **Northstar guides** and the
+  investigation guide on the desktop (GNOME gets the Desktop Icons NG
+  extension so they show). **Guides** in the main menu and `ns-guides` open
+  them in the browser.
+
 ## [0.33.0] - 2026-10-27
 
 ### Added

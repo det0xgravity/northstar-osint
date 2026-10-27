@@ -32,6 +32,7 @@ while true; do
     "Switch / create case  (current: $case_name)" \
     "Open latest results" \
     "Open case folder" \
+    "Guides (how to investigate, manuals)" \
     "Health check" \
     "Update northstar") || break
 
@@ -62,6 +63,7 @@ while true; do
       last=$(cat "$NS_CONF/last_result" 2>/dev/null)
       if [ -n "$last" ] && [ -d "$last" ]; then ui_reveal "$last"; else ui_reveal "$(ns_case_dir)"; fi ;;
     "Open case folder")        ui_reveal "$(ns_case_dir)" ;;
+    "Guides"*)                 ns-guides ;;
     "Health check")            ns-doctor ;;
     "Update northstar")        ns-update ;;
   esac

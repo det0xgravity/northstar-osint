@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+# ns-guides — open the user guides (offline web pages built from docs/ by the
+# desktop module) in the browser.
+# Usage: ns-guides [NAME]   e.g. ns-guides INVESTIGATION-GUIDE; no name opens the index
+# shellcheck source=../lib/ui.sh
+. "${NS_HOME:-$HOME/.local/share/northstar}/lib/ui.sh"
+
+dir="$NS_HOME/guides"
+page="$dir/${1:-index}.html"
+if [ ! -f "$page" ]; then
+  ui_error "The guides aren't built yet. Run: ./install.sh --only desktop (from your northstar-osint folder), or Update northstar."
+  exit 1
+fi
+ui_open "$page"

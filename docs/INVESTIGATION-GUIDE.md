@@ -6,6 +6,8 @@ Two more worked examples follow the main guide: [a dark-web vendor traced from t
 
 It draws on reviews by an experienced case manager (evidence, supervision, handover) and a senior OSINT specialist (collection, verification, OPSEC).
 
+**Where to find this guide:** on the VM's desktop (**Northstar investigation guide**, and the **Northstar guides** folder for the other manuals), under **Guides** in the northstar main menu, or on GitHub. The copies on the VM work offline and are refreshed by every update.
+
 You don't need to know the command line. Everything here is in the **northstar** menu (the compass icon in the dock, or type `northstar` in a terminal). Menu names in **bold** are exactly what you'll see.
 
 > **📷 Screenshots.** Places marked 📷 show what you should see at that step. To capture your own, press **Print Screen** in the VM (Flameshot).
