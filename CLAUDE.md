@@ -21,6 +21,10 @@ references to them.
 - `lib/gen_policies.py`: builds Firefox/Brave policy JSON and a bookmarks export.
 - `lib/ns_breach.py`, `lib/ns_darkweb.py`: engines for `ns-breach` and
   `ns-darkweb` (stdlib + curl; API keys read from `~/.config/northstar/keys.env`).
+- `lib/ns_vault.py`: the Obsidian case hub behind `ns-notes` (dashboards, result notes,
+  findings, selectors, accounts, link chart, chronology, handover, the report's
+  vault sections). Everything it renders from collected data goes through
+  `cell()`/`code()`/`fence()`/`flink()`; never put raw web-sourced text in a link.
 - `lib/ns_country.py`: engine for `ns-country` (reads the country packs, builds
   search links, phone analysis, `validate`).
 - `modules/NN-name.sh`: one module each; it registers with

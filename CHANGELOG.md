@@ -4,6 +4,26 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project uses
 [Semantic Versioning](https://semver.org/).
 
+## [0.30.0] - 2026-10-27
+
+Phase 4 of the case-hub review.
+
+### Added
+- `Chronology.md`: Event notes, findings, the missing-person timeline and
+  timed map places in one timeline, with the kind of time and the source;
+  reportable entries go into the report's new Chronology section.
+- `Handover.md`: intake, integrity, findings and report status, the last
+  review, open leads with owners, next steps, decisions (`DECISION:` notes)
+  and the latest notes.
+- Highlights at the top of each result note, chosen by tool.
+- Ready-made searches on Home.md, and a northstar bookmarks group per case.
+- Lead notes have assigned_to, outcome_finding and closed_utc; Event notes
+  have time_kind and reportable.
+
+### Changed
+- Notes for deleted result folders are removed, or flagged folder_missing if
+  the analyst wrote in them.
+
 ## [0.29.0] - 2026-10-27
 
 Phase 3 of the case-hub review: selectors, accounts and the link chart.

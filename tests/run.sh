@@ -330,6 +330,26 @@ echo '{"nodes":[],"edges":[]}' > "$SC/Link chart.canvas"; python3 "$R/lib/ns_vau
 check "an edited link chart is kept; a generated copy is written beside it" "grep -qx '{\"nodes\":\[\],\"edges\":\[\]}' '$SC/Link chart.canvas' && [ -s '$SC/Link chart (generated).canvas' ]"
 check "hostile selectors stay inert" "! grep -q '<img' '$SC/Selectors.md' '$SC/Accounts.md' && ! grep -q '\[\[x' '$SC/Selectors.md'"
 
+section "Chronology, handover and upkeep"
+CC="$W/data/Cases/chron-case"; mkdir -p "$CC/domain/example.com_20261027-130000" "$CC/Events" "$CC/Leads" "$CC/subject" "$CC/username/gone_20261027-090000"
+echo '{"status":"open","reference":"CH-1"}' > "$CC/case.json"; echo x > "$CC/audit.log"
+printf '▶ subfinder -d example.com\n' > "$CC/domain/example.com_20261027-130000/console.log"; printf 'a.example.com\nb.example.com\n' > "$CC/domain/example.com_20261027-130000/subdomains.txt"
+touch "$CC/username/gone_20261027-090000/console.log"
+printf -- '---\ntype: event\nwhen_utc: 2026-10-02T09:15:00Z\ntime_kind: platform\nreportable: true\n---\n# Posted from Kingston\n' > "$CC/Events/Posted from Kingston.md"
+printf -- '---\ntype: lead\nstatus: open\npriority: high\nassigned_to: DC Lee\n---\n# Check bus CCTV\n' > "$CC/Leads/Check bus CCTV.md"
+printf 'when_utc,relative_to_last_seen,event,source,kind\n2026-10-01T18:30:00Z,last seen,Last seen at the bus station,profile,last seen\n' > "$CC/subject/timeline.csv"
+python3 "$R/lib/ns_case.py" note "$CC" "DECISION: prioritise Kingston leads" > /dev/null
+python3 "$R/lib/ns_vault.py" refresh "$CC" > /dev/null
+check "the chronology merges events, the last-seen time and their kinds of time" \
+  "grep -q '| 2026-10-01 18:30 | Last seen at the bus station | witness/report' '$CC/Chronology.md' && grep -q '| 2026-10-02 09:15 | Posted from Kingston | platform' '$CC/Chronology.md'"
+check "the handover lists open leads with owners and decisions" "grep -q 'DC Lee' '$CC/Handover.md' && grep -q '(.*): DECISION: prioritise Kingston leads' '$CC/Handover.md'"
+check "result notes start with highlights" "grep -A2 'Highlights' '$CC'/Results/*Domain*.md | grep -q '2 subdomains'"
+rm -rf "$CC/username/gone_20261027-090000"; python3 "$R/lib/ns_vault.py" refresh "$CC" > /dev/null
+check "notes for deleted result folders are tidied away" "! ls '$CC'/Results/*gone* >/dev/null 2>&1"
+check "bookmarks and saved searches for every case" \
+  "grep -q '\"title\": \"chron-case\"' '$W/data/Cases/.obsidian/bookmarks.json' && grep -q 'reportable:true' '$W/data/Cases/Home.md'"
+check "reportable chronology entries go into the report" "python3 '$R/lib/ns_vault.py' report-sections '$CC' '$W/rs2' > /dev/null && grep -q '| 2026-10-02 09:15 | Posted from Kingston | platform |' '$W/rs2/findings-section.md'"
+
 section "Telegram (stubbed engine)"
 printf '#!/bin/sh\necho "ns_telegram $*" > called.txt\necho "ns_telegram $*"\n' > "$G/ns_telegram"; chmod +x "$G/ns_telegram"
 PATH="$G:$PATH" menu ns-telegram "Look up" "https://t.me/s/durov/123"

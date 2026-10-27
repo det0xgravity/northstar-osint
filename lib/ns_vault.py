@@ -219,7 +219,9 @@ created: {{date:YYYY-MM-DD}}
     "Event": """---
 type: event
 when_utc:
+time_kind: analyst
 where: "[[ ]]"
+reportable: false
 tags: [event]
 created: {{date:YYYY-MM-DD}}
 ---
@@ -241,6 +243,9 @@ created: {{date:YYYY-MM-DD}}
 type: lead
 status: open
 priority: medium
+assigned_to:
+outcome_finding:
+closed_utc:
 tags: [lead]
 created: {{date:YYYY-MM-DD}}
 ---
@@ -593,6 +598,10 @@ def result_note(case_dir, result_dir):
 > | Integrity | {'sealed · manifest SHA-256 ' + code(fp) if sealed else 'not sealed'} |
 > | Exhibit | {cell(exhibit.get('exhibit_id') or 'not recorded as an exhibit (Evidence & exhibits → Record an exhibit)')} |
 > | Folder | {code(info['rel'])} |"""]
+    hl = highlights(info, result_dir, files, found_accounts(read_text(os.path.join(result_dir, "console.log"), 512 * 1024, tail=True)
+                                                                if "console.log" in files else "", info["label"]))
+    if hl:
+        out.append("> [!finding] Highlights\n" + "\n".join(f"> - {cell(x, 240)}" for x in hl))
     if not payload:
         out.append("> [!caution] No output saved\n> The tool saved no output files. If the search genuinely found nothing, "
                    "set **nil_return: true** in this note's properties so the report lists it under searches with no "
@@ -839,7 +848,7 @@ def auto_block(case_dir, agg=None):
 |---|---|---|---|---|---|---|---|
 | {len(rows)} | {len([1 for k in agg if k[0] != 'url'])} | {len(people)} | {len(accounts)} | {len(orgs)} | {len(places)} | {len(open_leads)} | {cell(last)} |
 
-{wlink(vpath(case_dir, 'Selectors'), 'Selectors')} · {wlink(vpath(case_dir, 'Accounts'), 'Accounts (tool hits)')} · {wlink(vpath(case_dir, 'Link chart.canvas'), 'Link chart')} · {wlink(vpath(case_dir, 'Results'), 'All results')}"""]
+{wlink(vpath(case_dir, 'Chronology'), 'Chronology')} · {wlink(vpath(case_dir, 'Selectors'), 'Selectors')} · {wlink(vpath(case_dir, 'Accounts'), 'Accounts (tool hits)')} · {wlink(vpath(case_dir, 'Link chart.canvas'), 'Link chart')} · {wlink(vpath(case_dir, 'Results'), 'All results')} · {wlink(vpath(case_dir, 'Handover'), 'Handover')}"""]
     if rows:
         b.append("## Latest results\n\n| When (UTC) | Tool | Target |\n|---|---|---|\n" + "\n".join(
             f"| {cell(w)} | {cell(t)} | {wlink(vpath(case_dir, 'Results', n[:-3]), tg or n[:-3], True)} |" for w, t, tg, n in rows[:12])
@@ -976,10 +985,13 @@ def update_case(case_dir):
     if not any(k == "tags" for k, _ in [(l[0].split(":")[0], l) for l in keep_fm]):
         keep_fm.append(["tags: [case]"])
     fm = "\n".join([f"{k}: {v}" for k, v in managed] + ["\n".join(l) for l in keep_fm])
+    prune_results(case_dir)
     agg = update_hub_pages(case_dir)
+    write(os.path.join(case_dir, "Chronology.md"), chronology_page(case_dir, chronology(case_dir)))
     text = (f"---\n{fm}\n---\n{title}\n\n" + (above + "\n\n" if above else "")
             + auto_block(case_dir, agg) + "\n" + ("\n" + below.lstrip("\n") if below.strip() else "\n"))
     write(path, text)
+    write(os.path.join(case_dir, "Handover.md"), handover_page(case_dir))
     rows = results_index(case_dir)
     write(os.path.join(case_dir, "Results.md"),
           f"---\ntype: index\ntags: [results]\n---\n# Results: {cell(name)}\n\n{MARK}\n\n"
@@ -1007,7 +1019,12 @@ def home(root):
                     f"{cell((meta.get('opened_utc') or '')[:10])} | {len(res)} | {cell(res[0][0] if res else '—')} |")
     write(path, f"---\ntype: index\ntags: [home]\n---\n# Northstar cases\n\n{MARK}\n\n"
                 "| Case | Status | Reference | Opened | Results | Last activity |\n|---|---|---|---|---|---|\n"
-          + "\n".join(rows) + "\n\n> [!tip] Working in a case\n> Open its **Case** note. New notes about people, accounts, "
+          + "\n".join(rows) + "\n\n## Useful searches\n\nPaste one into Obsidian's search (the magnifier, or Ctrl/Cmd+Shift+F); add "
+          "`path:<case>` to keep it to one case.\n\n| To find | Search |\n|---|---|\n"
+          "| Findings for the report | `[type:finding] [reportable:true]` |\n| Findings still leads | `[type:finding] [status:lead]` |\n"
+          "| Unverified accounts | `[type:account] [verified:false]` |\n| Open leads | `[type:lead] [status:open]` |\n"
+          "| Results not yet reviewed | `[type:result] [reviewed:false]` |\n| Searches that saved nothing | `[type:result] [no_output:true]` |\n"
+          "| Results whose folder is missing | `[folder_missing:true]` |\n\n> [!tip] Working in a case\n> Open its **Case** note. New notes about people, accounts, "
           "organisations, places, events and leads: northstar → Notes (Obsidian), or the *Templates* command. "
           "Raw tool output is hidden from the file list: Settings → Appearance → CSS snippets → northstar-hide-raw shows it.\n")
 
@@ -1046,6 +1063,7 @@ def merge_json(path, defaults, managed):
 def refresh_shared(root):
     home(root)
     hide_raw_css(root)
+    bookmarks(root)
 
 
 def cmd_setup(data_dir):
@@ -1506,6 +1524,212 @@ def update_hub_pages(case_dir):
     return agg
 
 
+# --- chronology, handover, highlights ------------------------------------------------------------
+TIME_KINDS = {"photo EXIF": "camera clock", "media metadata": "platform", "last seen": "witness/report",
+              "your event": "analyst", "finding": "analyst", "map": "analyst"}
+
+
+def iso(v):
+    v = str(v or "").strip().replace(" ", "T")
+    m = re.match(r"^(\d{4}-\d{2}-\d{2})(?:T(\d{2}:\d{2})(?::\d{2})?)?", v)
+    return f"{m.group(1)} {m.group(2) or ''}".strip() if m else ""
+
+
+def chronology(case_dir):
+    """[(when, what, kind of time, source link, reportable)] from Event notes, findings, the
+    missing-person timeline and timed places on the case map."""
+    rows = []
+    for n in notes_in(case_dir, "Events"):
+        m = props(os.path.join(case_dir, "Events", n + ".md"))
+        if iso(m.get("when_utc")):
+            rows.append((iso(m["when_utc"]), n, str(m.get("time_kind") or "analyst"),
+                         wlink(vpath(case_dir, "Events", n), n, True), m.get("reportable") is True))
+    for f in findings(case_dir):
+        if iso(f["when"]) and f["status"] != "discounted":
+            rows.append((iso(f["when"]), f"Finding: {f['name']}", "analyst", wlink(vpath(case_dir, "Findings", f["name"]), f["name"], True),
+                         f["included"]))
+    tl = os.path.join(case_dir, "subject", "timeline.csv")
+    if os.path.exists(tl):
+        try:
+            with open(tl, newline="", encoding="utf-8") as fh:
+                for r in itertools.islice(csv.DictReader(fh), 2000):
+                    if iso(r.get("when_utc")):
+                        kind = r.get("kind", "")
+                        rows.append((iso(r["when_utc"]), r.get("event", ""), TIME_KINDS.get(kind, kind or "—"),
+                                     cell(r.get("source", ""), 80), kind == "last seen"))
+        except (OSError, csv.Error):
+            pass
+    pl = os.path.join(case_dir, "map", "places.csv")
+    if os.path.exists(pl):
+        try:
+            with open(pl, newline="", encoding="utf-8") as fh:
+                for r in itertools.islice(csv.DictReader(fh), 2000):
+                    if iso(r.get("when_utc")):
+                        rows.append((iso(r["when_utc"]), f"{r.get('kind', '')}: {r.get('label', '')}", "analyst",
+                                     f"{r.get('lat')}, {r.get('lon')}", r.get("kind") == "last seen"))
+        except (OSError, csv.Error):
+            pass
+    return sorted(rows, key=lambda r: r[0])
+
+
+def chronology_page(case_dir, rows):
+    name = os.path.basename(os.path.abspath(case_dir))
+    out = [f"---\ntype: index\ntags: [chronology]\n---\n# Chronology: {cell(name)}\n\n{MARK}\n",
+           "> [!info] Where these times come from\n> Event notes (set **when_utc**, **time_kind** and **reportable**), "
+           "findings with a **when_utc**, the missing-person timeline (Missing person → Build the timeline) and timed places "
+           "on the case map. **Kind of time** matters: a camera clock can be wrong or in local time; platform times are "
+           "usually UTC. Entries marked reportable go into the report."]
+    if rows:
+        out.append("| When (UTC) | What | Kind of time | Source | Report |\n|---|---|---|---|---|\n" + "\n".join(
+            f"| {cell(w)} | {cell(what, 160)} | {cell(k)} | {src} | {'yes' if rep else ''} |" for w, what, k, src, rep in rows))
+    else:
+        out.append("Nothing dated yet.")
+    return "\n\n".join(out) + "\n"
+
+
+def tasks_open(text):
+    return [re.sub(r"^\s*- \[ \]\s*", "", l).strip() for l in text.splitlines()
+            if re.match(r"^\s*- \[ \]\s*\S", l)]
+
+
+def handover_page(case_dir):
+    name = os.path.basename(os.path.abspath(case_dir))
+    meta = read_json(os.path.join(case_dir, "case.json"), {}) or {}
+    notes = [l for l in read_text(os.path.join(case_dir, "notes.md"), 16 * 1024 * 1024).splitlines() if l.startswith("- **")]
+    def clean(l):
+        """'- **time** (op): text `h:…`' → 'time (op): text'."""
+        l = re.sub(r" `h:[0-9a-f]{64}`$", "", l)
+        return re.sub(r"^- \*\*([^*]+)\*\* \(([^)]*)\): ", r"\1 (\2): ", l)
+    decisions = [clean(l) for l in notes if "DECISION:" in l]
+    case_md = read_text(os.path.join(case_dir, "Case.md"), 8 * 1024 * 1024)
+    todo = tasks_open(case_md.split(AUTO_END, 1)[1] if AUTO_END in case_md else "")
+    leads = []
+    for n in notes_in(case_dir, "Leads"):
+        m = props(os.path.join(case_dir, "Leads", n + ".md"))
+        if str(m.get("status") or "open") in ("open", ""):
+            leads.append((n, str(m.get("assigned_to") or "unassigned"), str(m.get("priority") or "")))
+    fs = findings(case_dir)
+    review, rhash = last_review(case_dir)
+    rd = os.path.join(case_dir, "reports")
+    vers = sorted((n for n in os.listdir(rd) if re.match(r"^v\d+_", n)), key=lambda n: int(n[1:].split("_")[0])) if os.path.isdir(rd) else []
+    out = [f"---\ntype: index\ntags: [handover]\n---\n# Handover: {cell(name)}\n\n{MARK}\n",
+           f"> [!abstract] Case {cell(name)} · {cell(meta.get('status', 'open'))} · generated {utc()}\n> | | |\n> |---|---|\n"
+           f"> | Reference | {cell(meta.get('reference') or '—')} |\n> | Authorised by | {cell(meta.get('authorised_by') or '—')} |\n"
+           f"> | Purpose and lawful basis | {cell(meta.get('purpose') or '—', 300)} |\n> | Scope | {cell(meta.get('scope') or '—', 300)} |\n"
+           f"> | Review date | {cell(meta.get('review_date') or '—')} |"]
+    integ = integrity(case_dir)
+    if integ:
+        out.append("## Integrity\n\n" + "\n".join(f"- {'✓' if ok else '✗'} **{n}:** {cell(s, 200)}" for n, s, ok in integ))
+    out.append(f"## Where things stand\n\n- Findings: {len(fs)} ({sum(1 for f in fs if f['included'])} for the report, "
+               f"{sum(1 for f in fs if f['status'] == 'lead')} leads, {sum(1 for f in fs if f['status'] == 'discounted')} discounted)\n"
+               f"- Report: {('version ' + vers[-1].split('_')[0][1:] + ' (' + vers[-1] + ')') if vers else 'none built yet'}\n"
+               f"- Last review: {cell(review, 240) if review else 'none'}"
+               + (" **(findings changed since)**" if review and rhash != findings_hash(fs) else ""))
+    out.append("## Open leads\n\n" + ("| Lead | Assigned to | Priority |\n|---|---|---|\n" + "\n".join(
+        f"| {wlink(vpath(case_dir, 'Leads', n), n, True)} | {cell(a)} | {cell(p)} |" for n, a, p in leads) if leads else "None."))
+    out.append("## Next steps (unticked in Case.md)\n\n" + ("\n".join(f"- {cell(t, 200)}" for t in todo) if todo else "None listed."))
+    out.append("## Decisions\n\nContemporaneous notes that start with **DECISION:** (write them with Case → Add a note).\n\n"
+               + ("\n".join(f"- {cell(d, 300)}" for d in decisions[-20:]) if decisions else "None recorded."))
+    out.append("## Latest contemporaneous notes\n\n" + ("\n".join(f"- {cell(clean(l), 300)}" for l in notes[-10:]) if notes else "None."))
+    return "\n\n".join(out) + "\n"
+
+
+def highlights(info, result_dir, files, accts):
+    """A few lines at the top of a result note, by tool."""
+    base = {os.path.basename(f): f for f in files}
+    rp = lambda n: os.path.join(result_dir, base[n])
+    h = []
+    if accts:
+        tools = sorted({t for _, _, t in accts if t})
+        h.append(f"{len(accts)} tool hits" + (f" from {', '.join(tools)}" if tools else "") + " (unverified)")
+    k = info["kind"]
+    if k == "domain":
+        for n, label in (("subdomains.txt", "subdomains"), ("live.txt", "live web hosts"), ("resolved.txt", "resolving names")):
+            if n in base:
+                h.append(f"{sum(1 for l in read_text(rp(n), 4 * 1024 * 1024).splitlines() if l.strip())} {label}")
+        if "rdap.txt" in base:
+            h += [l.strip() for l in read_text(rp("rdap.txt"), 4096).splitlines() if l.strip()][:4]
+    if k == "breach" and "summary.txt" in base:
+        h += [l.strip() for l in read_text(rp("summary.txt"), 8192).splitlines() if l.strip()][:5]
+    for n in ("lookup.json", "user.json"):
+        d = read_json(rp(n), {}) if n in base else {}
+        if isinstance(d, dict) and d:
+            h.append(" · ".join(f"{x}: {d[x]}" for x in ("type", "id", "title", "counts", "username") if d.get(x)))
+    for n, label in (("members.csv", "members"), ("messages.csv", "messages"), ("posts.csv", "posts"), ("search.csv", "matches")):
+        if n in base:
+            h.append(f"{max(0, sum(1 for _ in read_text(rp(n), 32 * 1024 * 1024).splitlines()) - 1)} {label}")
+    if k == "face" and "results.csv" in base:
+        try:
+            with open(rp("results.csv"), newline="", encoding="utf-8") as fh:
+                top = list(itertools.islice(csv.DictReader(fh), 3))
+            h += [f"{r.get('score')} {r.get('band')}: {r.get('image')}" for r in top]
+            h.append("Similarity for human review, never an identification")
+        except (OSError, csv.Error):
+            pass
+    if "geoclip.csv" in base:
+        try:
+            with open(rp("geoclip.csv"), newline="", encoding="utf-8") as fh:
+                top = list(itertools.islice(csv.DictReader(fh), 3))
+            h += [f"GeoCLIP #{r.get('rank')}: {r.get('lat')}, {r.get('lon')} (p={r.get('probability')})" for r in top]
+            h.append("AI estimates are leads to verify, not locations")
+        except (OSError, csv.Error):
+            pass
+    if "same_photos.csv" in base:
+        last = [l for l in read_text(os.path.join(result_dir, "console.log"), 4096, tail=True).splitlines()
+                if l.strip() and not l.startswith("▶")] if "console.log" in base else []
+        h.append(last[-1] if last else "same-photo results")
+    if k == "darkweb":
+        d = read_json(rp("metadata.json"), {}) if "metadata.json" in base else {}
+        if isinstance(d, dict) and d:
+            h.append(" · ".join(f"{x}: {d[x]}" for x in ("title", "status", "url") if d.get(x)))
+        if "onion_addresses.txt" in base:
+            h.append(f"{sum(1 for l in read_text(rp('onion_addresses.txt'), 1024 * 1024).splitlines() if l.strip())} onion addresses linked")
+    infos = [f for f in files if f.endswith(".info.json")][:3]
+    for f in infos:
+        d = read_json(os.path.join(result_dir, f), {}) or {}
+        if isinstance(d, dict):
+            h.append(" · ".join(str(d[x]) for x in ("title", "uploader", "upload_date") if d.get(x)))
+    return [x for x in h if x][:10]
+
+
+def bookmarks(root):
+    """A 'northstar' group in Obsidian's bookmarks: each case's dashboard and hub pages (other bookmarks kept)."""
+    path = os.path.join(root, ".obsidian", "bookmarks.json")
+    conf = read_json(path, {}) or {}
+    items = [i for i in conf.get("items", []) if not (i.get("type") == "group" and i.get("title") == "northstar")]
+    group = []
+    for case in sorted(os.listdir(root)):
+        cp = os.path.join(root, case)
+        if not is_case(cp):
+            continue
+        sub = [{"type": "file", "path": f"{case}/{n}", "title": t} for n, t in
+               (("Case.md", "Dashboard"), ("Chronology.md", "Chronology"), ("Selectors.md", "Selectors"),
+                ("Accounts.md", "Accounts"), ("Handover.md", "Handover"), ("Results.md", "Results"))
+               if os.path.exists(os.path.join(cp, n))]
+        group.append({"type": "group", "title": case, "items": sub})
+    items.insert(0, {"type": "group", "title": "northstar", "items": [{"type": "file", "path": "Home.md", "title": "All cases"}] + group})
+    conf["items"] = items
+    write(path, json.dumps(conf, indent=2))
+
+
+def prune_results(case_dir):
+    """Notes for result folders that no longer exist: removed if you hadn't written in them,
+    otherwise kept and flagged."""
+    rdir = os.path.join(case_dir, "Results")
+    for n in os.listdir(rdir) if os.path.isdir(rdir) else []:
+        p = os.path.join(rdir, n)
+        m = props(p)
+        if m.get("type") != "result" or not m.get("folder") or os.path.isdir(os.path.join(case_dir, str(m["folder"]))):
+            continue
+        body = read_text(p, 8 * 1024 * 1024)
+        mine = body.split(AUTO_END, 1)[1].strip() if AUTO_END in body else ""
+        if not mine or mine == RESULT_USER_PART.strip():
+            with contextlib.suppress(OSError):
+                os.unlink(p)
+        elif m.get("folder_missing") is not True:
+            set_props(p, {"folder_missing": "true"})
+
+
 # --- findings and the report --------------------------------------------------------------
 REPORTABLE = ("corroborated", "confirmed")
 SRC_GRADES = {"A": "always reliable", "B": "usually reliable", "C": "fairly reliable", "D": "not usually reliable",
@@ -1711,6 +1935,10 @@ def report_sections(case_dir):
             r += [f"| {cell(e['ref'])} | {cell(e['folder'])} | `{e['sha'] or '—'}` | {'matches' if e['ok'] else 'PROBLEM'} |"
                   for e in f["evidence"]]
             r.append("")
+    chron = [r for r in chronology(case_dir) if r[4]]
+    r += ["## Chronology", "", "Dated events marked reportable (and the last-seen time), oldest first.", ""]
+    r += (["| When (UTC) | What | Kind of time |", "|---|---|---|"]
+          + [f"| {cell(w)} | {cell(what, 200)} | {cell(k)} |" for w, what, k, _, _ in chron] if chron else ["None marked reportable."]) + [""]
     nil = []
     for w, t, tg, n in results_index(case_dir):
         rp = props(os.path.join(case_dir, "Results", n))
