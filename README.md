@@ -5,7 +5,7 @@
 northstar-osint turns a fresh Debian, Ubuntu, Kali, Parrot or macOS install into a ready-to-work investigation machine: current open-source tools, simple point-and-click menus, browser hardening and bookmarks applied by policy, per-case output folders with an audit trail, and optional support for running as a Proxmox/Kasm Workspaces template.
 
 [![Lint](https://github.com/det0xgravity/northstar-osint/actions/workflows/lint.yml/badge.svg)](https://github.com/det0xgravity/northstar-osint/actions/workflows/lint.yml)
-![License: MIT](https://img.shields.io/badge/license-MIT-blue)
+![License: PolyForm Noncommercial 1.0.0](https://img.shields.io/badge/license-PolyForm%20Noncommercial%201.0.0-blue)
 ![Platforms](https://img.shields.io/badge/platforms-Debian%2013%20%7C%20Ubuntu%2024.04%20%7C%20Kali%20%7C%20Parrot%20%7C%20macOS%20(arm64)-informational)
 
 ---
@@ -164,8 +164,16 @@ northstar-osint collects **publicly available** information. You are responsible
 - Use sock-puppet accounts and a separated environment (such as a VM) for investigative browsing. Never use your personal accounts.
 - Don't use this toolkit to stalk, harass or dox anyone.
 
-The tools installed are third-party open-source projects, each under its own license. northstar-osint installs them from their official sources and doesn't redistribute them.
+The tools installed are third-party open-source projects, each under its own license; this project's license covers only northstar-osint's own code and content. northstar-osint installs them from their official sources and doesn't redistribute them.
 
 ## License
 
-[MIT](LICENSE). Use it, fork it, improve it. Pull requests are welcome.
+northstar-osint is source-available under the [PolyForm Noncommercial License 1.0.0](LICENSE). In plain terms (the license text is what counts):
+
+- **Free to use, change and share for any noncommercial purpose.** That covers individuals, volunteers and search parties, students and researchers, charities, schools, and police and other government agencies.
+- **Not for sale or commercial use.** You may not sell it, bundle it into a paid product or service, or use it in a business, including a private-investigation or consultancy firm, without a separate commercial license. To ask about one, open an issue on GitHub.
+- **Keep the notice.** Anyone you give a copy to must get the license and its `Required Notice:` line.
+
+Versions up to 0.30.0 were released under the MIT License, and copies obtained under it keep those terms.
+
+Contributions are welcome. By opening a pull request, you agree that your contribution is licensed under these terms and that the maintainer may also license it to others under different terms (for example, a commercial license).

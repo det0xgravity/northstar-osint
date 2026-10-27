@@ -4,6 +4,16 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project uses
 [Semantic Versioning](https://semver.org/).
 
+## [0.31.0] - 2026-10-27
+
+### Changed
+- **License:** northstar-osint is now under the PolyForm Noncommercial License
+  1.0.0. It's free for any noncommercial use (individuals, volunteers,
+  researchers, charities, schools, government and public-safety agencies);
+  selling it or using it commercially needs a separate license. Versions up to
+  0.30.0 were released under the MIT License, and copies obtained under it keep
+  those terms.
+
 ## [0.30.0] - 2026-10-27
 
 Phase 4 of the case-hub review.

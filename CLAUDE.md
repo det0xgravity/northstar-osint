@@ -4,7 +4,7 @@ Context for Claude Code sessions working on this repository.
 
 ## What this is
 
-A modular, MIT-licensed OSINT workstation builder for Debian 13, Ubuntu 24.04,
+A modular, source-available (PolyForm Noncommercial 1.0.0) OSINT workstation builder for Debian 13, Ubuntu 24.04,
 Kali, Parrot and macOS on Apple Silicon. It's original work: never copy code,
 templates or assets from OSINT books, courses or paid products, and don't add
 references to them.
