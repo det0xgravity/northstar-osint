@@ -219,9 +219,12 @@ python3 "$R/lib/ns_vault.py" setup "$W/data" > /dev/null
 check "vault settings and templates created" "[ -f '$W/data/Cases/.obsidian/templates.json' ] && [ -f '$W/data/Cases/_templates/Person.md' ]"
 check "every case gets Case.md and appears in Home.md" "[ -f '$CASE/Case.md' ] && grep -q 'general/Case' '$W/data/Cases/Home.md'"
 check "finished results are listed in Results.md" "grep -q '\*\*map\*\*' '$CASE/Results.md'"
-menu ns-notes "New note: person" "Jane Doe"
+printf '#!/bin/sh\nexit 0\n' > "$G/obsidian"; chmod +x "$G/obsidian"      # pretend Obsidian is installed
+PATH="$G:$PATH" menu ns-notes "New note: person" "Jane Doe"
 check "person note made from the template" "grep -q '^type: person' '$CASE/People/Jane Doe.md' && grep -q '^# Jane Doe' '$CASE/People/Jane Doe.md'"
 check "note opened in Obsidian by URI" "grep -q 'obsidian://open?path=.*People%2FJane%20Doe.md' '$W/out.txt'"
+NS_OBSIDIAN_APP="$W/none" menu ns-notes "New note: lead" "Check the bus station CCTV" "no"
+check "without Obsidian the note still opens, in the text editor" "grep -q 'ui_reveal.*Leads/Check the bus station CCTV.md' '$W/out.txt' && grep -q \"Obsidian isn't available\" '$W/out.txt'"
 printf 'my edits\n' > "$W/data/Cases/_templates/Lead.md"
 python3 "$R/lib/ns_vault.py" setup "$W/data" > /dev/null
 check "edited templates are left alone" "grep -qx 'my edits' '$W/data/Cases/_templates/Lead.md'"

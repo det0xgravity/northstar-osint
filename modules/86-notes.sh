@@ -18,7 +18,15 @@ mod_notes() {
   if ns_is_macos; then
     ns_cask obsidian || rc=1
   else
-    ns_flatpak md.obsidian.Obsidian || rc=1        # verified on Flathub, x86_64 and arm64
+    if ns_flatpak md.obsidian.Obsidian; then      # verified on Flathub, x86_64 and arm64
+      # an `obsidian` command (the Flatpak itself only runs as "flatpak run …")
+      printf '#!/usr/bin/env bash\nexec flatpak run md.obsidian.Obsidian "$@"\n' > "$NS_BIN/obsidian"
+      chmod +x "$NS_BIN/obsidian"
+      ln -sf "$NS_BIN/obsidian" "$HOME/.local/bin/obsidian"
+      ns_info "Obsidian installed: in your applications menu, or run 'obsidian'"
+    else
+      ns_warn "Obsidian (Flatpak) failed to install"; rc=1
+    fi
   fi
   "$NS_BIN/ns_vault" setup "$NS_DATA" >/dev/null || rc=1
   # Obsidian rewrites its vault list on exit, so only add ours while it's closed

@@ -4,6 +4,15 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project uses
 [Semantic Versioning](https://semver.org/).
 
+## [0.26.1] - 2026-10-27
+
+### Fixed
+- Notes did nothing when Obsidian wasn't installed (for example when an update
+  stopped before the notes module). It now offers to install Obsidian, and
+  otherwise opens the note in the default text editor.
+- An `obsidian` command for the Flatpak version (it otherwise only runs as
+  `flatpak run md.obsidian.Obsidian`).
+
 ## [0.26.0] - 2026-10-27
 
 ### Added
