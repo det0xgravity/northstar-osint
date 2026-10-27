@@ -15,6 +15,9 @@ Commands:
                           is the findings part built from the Obsidian vault (ns_vault report-sections)
   close CASEDIR           mark the case closed in case.json
   reopen CASEDIR REASON   mark a closed case open again; the reason goes in the notes
+  nsfw CASEDIR            print "on" if adult-site searches are allowed in this case, else "off"
+  nsfw-set CASEDIR on|off REASON
+                          allow or stop adult-site (NSFW) searches; the decision and reason go in the notes
 
 Notes chain: every note line ends with `h:<sha256>`, the hash of the previous
 note's hash plus this note's time, operator and text, so an edited, inserted or
@@ -276,8 +279,34 @@ def cmd_reopen(case_dir, reason):
     return 0
 
 
+def cmd_nsfw(case_dir):
+    print("on" if (load(case_dir).get("nsfw") or {}).get("allowed") else "off")
+    return 0
+
+
+def cmd_nsfw_set(case_dir, state, reason):
+    d = load(case_dir)
+    if not d:
+        print("Record the case's intake details first (Case → Edit case details).", file=sys.stderr)
+        return 1
+    if d.get("status") == "closed":
+        print("This case is closed: reopen it first.", file=sys.stderr)
+        return 3
+    reason = " ".join(reason.split())
+    if state not in ("on", "off") or (state == "on" and not reason):
+        print("Give on or off, and a reason to allow them.", file=sys.stderr)
+        return 1
+    d["nsfw"] = {"allowed": state == "on", "reason": reason, "utc": utc_now(), "by": getpass.getuser()}
+    save(case_dir, d)
+    cmd_note(case_dir, f"DECISION: adult-site (NSFW) searches ALLOWED in this case. Reason: {reason}" if state == "on"
+             else f"DECISION: adult-site (NSFW) searches STOPPED in this case.{' Reason: ' + reason if reason else ''}")
+    print(f"Adult-site searches {'allowed' if state == 'on' else 'stopped'} in this case.")
+    return 0
+
+
 def main(argv):
     cmds = {"init": (cmd_init, 1), "amend": (cmd_amend, 1), "reopen": (cmd_reopen, 2),
+            "nsfw": (cmd_nsfw, 1), "nsfw-set": (cmd_nsfw_set, 3),
             "show": (cmd_show, 1), "status": (cmd_status, 1), "note": (cmd_note, 2),
             "notes-verify": (cmd_notes_verify, 1), "report": (cmd_report, 2), "close": (cmd_close, 1)}
     extra = 1 if len(argv) > 1 and argv[1] == "report" else 0          # report takes an optional SECTIONS file

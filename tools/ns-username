@@ -15,12 +15,34 @@ Username*)
   u=$(ui_entry "Username (without @):") || exit 0
   u="${u#@}"
   out=$(ns_outdir username "$u")
-  ns_run "$out" sherlock "$u" --print-found --txt --output "$out/sherlock.txt"
-  ns_run "$out" maigret "$u" --html --folderoutput "$out/maigret"
+  # Adult (NSFW) sites only when the case allows them (Case → Adult-site searches)
+  adult=off; ns_cmd ns_casework && adult=$(ns_casework nsfw "$(ns_case_dir)")
+  adult_tags="porn,erotic,webcam"
+  if [ "$adult" = on ]; then
+    echo "Adult (NSFW) sites: included (allowed for this case; see the case notes)" | tee "$out/search-settings.txt"
+    ns_audit ns-username "$u" "adult (NSFW) sites included"
+    ns_run "$out" sherlock "$u" --nsfw --print-found --txt --output "$out/sherlock.txt"
+  else
+    echo "Adult (NSFW) sites: not searched" > "$out/search-settings.txt"
+    ns_run "$out" sherlock "$u" --print-found --txt --output "$out/sherlock.txt"
+  fi
+  mg_x=""
+  maigret --help 2>/dev/null | grep -q -- '--exclude-tags' && mg_x=1
+  if [ "$adult" != on ] && [ -n "$mg_x" ]; then
+    ns_run "$out" maigret "$u" --exclude-tags "$adult_tags" --html --folderoutput "$out/maigret"
+  else
+    ns_run "$out" maigret "$u" --html --folderoutput "$out/maigret"
+  fi
+  # Maigret's default scan covers its most popular sites; check every adult-tagged site too
+  [ "$adult" = on ] && ns_run "$out" maigret "$u" --tags "$adult_tags" --all-sites --html --folderoutput "$out/maigret-adult"
   ns_run "$out" socialscan "$u"
   # Blackbird always saves into its own install folder; move this run's files
   bb="$NS_HOME/src/blackbird/results"; mark="$out/.blackbird-start"; touch "$mark"
-  ns_run "$out" blackbird --username "$u" --csv --json
+  if [ "$adult" = on ]; then
+    ns_run "$out" blackbird --username "$u" --csv --json
+  else
+    ns_run "$out" blackbird --username "$u" --csv --json --no-nsfw
+  fi
   if [ -d "$bb" ]; then
     mkdir -p "$out/blackbird"
     find "$bb" -mindepth 1 -maxdepth 1 -newer "$mark" -exec mv {} "$out/blackbird/" \;
@@ -29,6 +51,7 @@ Username*)
   ui_clip "$u"
   ui_open "https://whatsmyname.app/" "$(ns_google "\"$u\"")"
   echo "Username copied to clipboard for WhatsMyName."
+  [ "$adult" = on ] && echo "WhatsMyName can filter by category: include its NSFW category there too."
   ui_notify "\"$u\" is on your clipboard: paste it into WhatsMyName"
   ns_finish "$out" ;;
 

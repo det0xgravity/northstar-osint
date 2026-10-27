@@ -30,6 +30,8 @@ The hub. Besides opening each menu, it lets you:
 
 The search term is copied to your clipboard for the web services that open.
 
+**Adult (NSFW) sites** are left out of username searches unless the case allows them (Case → **Adult-site (NSFW) searches**). Then Sherlock adds its NSFW sites (`--nsfw`), Maigret also checks every site it tags porn, erotic or webcam (a second report in `maigret-adult/`), and Blackbird keeps its NSFW sites (otherwise `--no-nsfw`). Each result folder's `search-settings.txt` says which applied. Dating sites are searched either way. Username variants are never checked against adult sites: they're guesses.
+
 ## ns-telegram
 
 Telegram research. The first options need no account: they read Telegram's public web pages (text only). The rest use a Telegram **research** account, never a personal one.
@@ -287,6 +289,7 @@ Case records (main menu: **Case: notes, details, report, close**; **Switch / cre
 | Edit case details (intake) | Changes the reference, authority, lawful basis, scope or review date (empty a field to clear it; Cancel changes nothing). Each change goes into the notes with its old and new value; intake recorded after the case was opened is marked late | `case.json`, `scope.md`, `notes.md` |
 | Build a report | A Word document (pandoc) from the case details, your Summary and Analysis in Case.md, the reportable findings and their checked exhibits, nil returns, unused material, the latest review, methodology (the tools and sources actually used, from the audit log), exhibits, notes and the audit log. Warnings are listed first. See [From findings to the report](#from-findings-to-the-report) | `reports/v<n>_<UTC>/`: `report.docx`, `report.md`, `findings-section.md`, `findings-frozen.md`, `hashes.sha256` |
 | Record a supervisor review | Reviewer, role, decision and comments, written to the notes with the fingerprint of the findings reviewed | `notes.md` |
+| Adult-site (NSFW) searches | Allows or stops adult sites in username searches for this case. Allowing them asks whether anyone searched for could be under 18 (if so, they stay off) and for a reason, recorded as a `DECISION:` note | `case.json`, `notes.md` |
 | Verify notes and audit log | Checks both hash chains | |
 | Close this case | First lists anything unfinished: notes, audit log or exhibits that don't verify, no report or one older than the findings, no review covering the current findings and summary, an incomplete intake, open leads. Closing anyway writes those points to the notes. Then it verifies the audit log, exports the case with a SHA-256 to `~/Northstar/Exports`, and marks it closed. Nothing is deleted | `case.json` status |
 | Reopen this case | Shown instead of Close on a closed case. Asks for the reason, which goes into the notes | `case.json` status |

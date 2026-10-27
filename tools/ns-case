@@ -87,6 +87,7 @@ choice=$(ui_list "Case: $(ns_case)" \
   "Edit case details (intake)" \
   "Build a report (Word document)" \
   "Record a supervisor review" \
+  "Adult-site (NSFW) searches: $(ns_casework nsfw "$case_dir" | sed 's/on/allowed/; s/off/off/')" \
   "Verify notes and audit log" \
   "$last_item") || exit 0
 
@@ -100,6 +101,32 @@ case "$choice" in
   "Edit case details"*)
     need_open || exit 1
     edit_case ;;
+  "Adult-site"*)
+    need_open || exit 1
+    if [ "$(ns_casework nsfw "$case_dir")" = on ]; then
+      ui_question "Adult-site searches are allowed in this case. Stop them?" || exit 0
+      why=$(ui_entry "Reason (optional, recorded in the notes):") || why=""
+      r=$(ns_casework nsfw-set "$case_dir" off "$why" 2>&1)
+    else
+      ui_question "Allow adult-site (NSFW) searches in this case?
+
+Username searches will then also check pornography, webcam and erotic sites. Profiles there can be strong leads (reused usernames, photos, locations), but opening them shows explicit material.
+
+- Only if the case needs it, and your lawful basis and policy cover it.
+- Open hits only inside the VM, and don't download from them.
+- If you see anything that may show a child, stop: don't save, screenshot or share it, and report it to the police or your national hotline." || exit 0
+      if ui_question "Could anyone you'll search for in this case be under 18?"; then
+        ui_error "Adult-site searches stay off. Where a child may be involved, leave this to law enforcement or a body with the authority to do it."
+        ns_audit ns-case "nsfw" "not allowed: a subject may be under 18"
+        exit 0
+      fi
+      why=$(ui_entry "Why does this case need adult-site searches? (recorded in the notes)") || exit 0
+      [ -n "$why" ] || exit 0
+      r=$(ns_casework nsfw-set "$case_dir" on "$why" 2>&1)
+    fi
+    ns_audit ns-case "nsfw" "$(printf '%s' "$r" | tail -1)"
+    ns_cmd ns_vault && ns_vault case "$case_dir" >/dev/null
+    ui_info "$r" ;;
   "Reopen this case")
     why=$(ui_entry "Why is the case being reopened? (recorded in the notes)") || exit 0
     [ -n "$why" ] || exit 0

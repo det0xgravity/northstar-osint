@@ -81,6 +81,27 @@ check "intake recorded late keeps the real opening time and says it was late" \
 check "intake changes are saved and recorded in the notes with old and new values" \
   "grep -q '\"scope\": \"Acme and its directors\"' '$TC/case.json' && grep -q 'INTAKE AMENDED: Scope and subjects: \"Acme\" changed to \"Acme and its directors\"' '$TC/notes.md' && ! grep -q 'INTAKE AMENDED: Client' '$TC/notes.md'"
 
+section "Adult-site (NSFW) searches"
+mkdir -p "$W/ustub"
+for t in sherlock socialscan blackbird; do printf '#!/bin/sh\necho "%s $*"\n' "$t" > "$W/ustub/$t"; done
+printf '#!/bin/sh\n[ "$1" = --help ] && { echo "  --exclude-tags EXCLUDE_TAGS"; exit 0; }\necho "maigret $*"\n' > "$W/ustub/maigret"
+chmod +x "$W/ustub/"*
+PATH="$W/ustub:$PATH" menu ns-username "Username" "jdoe"
+ud=$(ls -td "$TC"/username/jdoe_* | head -1)
+check "by default adult sites are left out of every username tool" \
+  "grep -q 'Adult (NSFW) sites: not searched' '$ud/search-settings.txt' && grep -q 'blackbird --username jdoe --csv --json --no-nsfw' '$ud/console.log' && grep -q 'exclude-tags porn,erotic,webcam' '$ud/console.log' && ! grep -q 'sherlock jdoe --nsfw' '$ud/console.log'"
+menu ns-case "Adult-site" "yes" "yes"
+check "they can't be allowed when a subject may be under 18" "grep -q '\"status\": \"open\"' '$TC/case.json' && [ \"\$(ns_casework nsfw '$TC')\" = off ]"
+menu ns-case "Adult-site" "yes" "no" "Subject advertises under this username on adult sites"
+check "allowing them needs a reason, recorded as a decision" \
+  "[ \"\$(ns_casework nsfw '$TC')\" = on ] && grep -q 'DECISION: adult-site (NSFW) searches ALLOWED.*advertises under this username' '$TC/notes.md'"
+sleep 1; PATH="$W/ustub:$PATH" menu ns-username "Username" "jdoe"
+ud=$(ls -td "$TC"/username/jdoe_* | head -1)
+check "when allowed, Sherlock, Maigret and Blackbird include adult sites" \
+  "grep -q 'sherlock jdoe --nsfw' '$ud/console.log' && grep -q 'maigret jdoe --tags porn,erotic,webcam --all-sites' '$ud/console.log' && ! grep -q -- '--no-nsfw' '$ud/console.log' && grep -q 'adult (NSFW) sites included' '$TC/audit.log'"
+menu ns-case "Adult-site" "yes" ""
+check "they can be stopped again" "[ \"\$(ns_casework nsfw '$TC')\" = off ] && grep -q 'searches STOPPED' '$TC/notes.md'"
+
 section "Guides (offline web pages)"
 if command -v pandoc >/dev/null 2>&1; then
   python3 "$R/lib/ns_guides.py" build "$R/docs" "$W/guides" > /dev/null

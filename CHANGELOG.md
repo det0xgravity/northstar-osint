@@ -4,6 +4,21 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project uses
 [Semantic Versioning](https://semver.org/).
 
+## [0.35.0] - 2026-10-27
+
+### Added
+- **Adult-site (NSFW) searches, per case:** Case → Adult-site (NSFW) searches
+  allows them with a reason (a `DECISION:` note), refusing when anyone
+  searched for could be under 18. Username searches then run Sherlock with
+  `--nsfw`, a second Maigret pass over its porn, erotic and webcam sites, and
+  Blackbird with its NSFW sites.
+
+### Changed
+- Without that permission, username searches now leave adult sites out of
+  every tool: Blackbird runs with `--no-nsfw` and Maigret excludes its porn,
+  erotic and webcam tags (both used to include some). Each result folder
+  records the setting in `search-settings.txt`.
+
 ## [0.34.0] - 2026-10-27
 
 ### Added

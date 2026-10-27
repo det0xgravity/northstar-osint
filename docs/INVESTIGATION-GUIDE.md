@@ -212,6 +212,8 @@ Below is the order used for the Jane Doe example. Skip what doesn't apply to you
 3. **Generate username and email variants**: likely variants from the name and birth year, optionally checked. These are guesses: hits on them are especially likely to be someone else.
 4. **Google account** (with an email; needs `ghunt login`): the name, photo and sometimes public Maps reviews, which can be a location lead.
 
+**Adult sites** (pornography, webcam, erotic) are left out unless you allow them for the case: Case → **Adult-site (NSFW) searches**, with your reason. They can be strong leads when a case needs them (a reused username, photos, a location), but opening hits shows explicit material: open them only in the VM, download nothing, and if anything may show a child, stop and report it. They can't be allowed if anyone you're searching for could be under 18.
+
 What the results mean: a username "hit" only shows a profile with that name exists, and common handles collide. Sites that block scripts show "no result", which isn't proof of absence. Some sites answer "found" for any name. holehe shows an email is **registered** with a service, not that the subject is using it.
 
 In Obsidian, open `Accounts.md`: an account reported by **two or more tools** gets an Account note, still labelled **unverified**. Open each likely profile in the browser and check it's the subject (photos, bio, location, friends, writing style, links to known identifiers). Record what you checked in the Account note's **Attribution** section, and set **`verified: true`** and **`owner`** only once you're sure.
