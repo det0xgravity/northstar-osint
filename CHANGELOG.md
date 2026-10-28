@@ -4,6 +4,17 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project uses
 [Semantic Versioning](https://semver.org/).
 
+## [0.37.1] - 2026-10-28
+
+### Fixed
+- **GHunt on Ubuntu 26.04 (Python 3.14):** its last release caps Pillow below
+  11, which has no Python 3.14 wheels, so pip tried to compile Pillow and
+  failed ("headers or library files could not be found for jpeg"). On Python
+  3.14+ GHunt is now installed from its main branch, which uses Pillow 12.
+
+### Changed
+- The end-to-end tests also run a full install on Ubuntu 26.04.
+
 ## [0.37.0] - 2026-10-27
 
 ### Added

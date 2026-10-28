@@ -14,7 +14,7 @@ jobs:
       fail-fast: false
       matrix:
         runner: [ubuntu-24.04, ubuntu-24.04-arm]
-        image: ["debian:trixie", "ubuntu:24.04"]
+        image: ["debian:trixie", "ubuntu:24.04", "ubuntu:26.04"]
     runs-on: ${{ matrix.runner }}
     container:
       image: ${{ matrix.image }}

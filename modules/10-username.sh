@@ -9,7 +9,14 @@ mod_username() {
   ns_pipx maigret                      || rc=1
   ns_pipx socialscan                   || rc=1
   ns_pipx holehe                       || rc=1
-  ns_pipx ghunt                        || rc=1
+  # GHunt's last release (2.3.4) caps Pillow below 11, which has no wheels for
+  # Python 3.14 (Ubuntu 26.04), so pip tries to compile Pillow and fails. GHunt's
+  # main branch moved to Pillow 12: use it on 3.14+, the release elsewhere.
+  if python3 -c 'import sys; sys.exit(sys.version_info < (3, 14))'; then
+    ns_pipx ghunt "git+https://github.com/mxrch/GHunt.git" || rc=1
+  else
+    ns_pipx ghunt || rc=1
+  fi
   ns_pipx toutatis                     || rc=1
   ns_git_venv blackbird https://github.com/antoniaci/blackbird blackbird.py requirements.txt cd || rc=1
   # Retired: unmaintained since 2022 (ns-breach covers breach lookups now)
