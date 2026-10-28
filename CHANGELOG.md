@@ -4,6 +4,16 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project uses
 [Semantic Versioning](https://semver.org/).
 
+## [0.37.2] - 2026-10-28
+
+### Fixed
+- **ShadowFinder on Ubuntu 26.04 (Python 3.14):** it caps cartopy below 0.25
+  and timezonefinder below 7, neither of which has Python 3.14 wheels, so the
+  geo module failed while compiling them. On Python 3.14+ it's installed
+  without its pins, with current cartopy and timezonefinder (same APIs).
+- The end-to-end check for the guides looked in the test's own data folder
+  instead of the installed one. A new check loads ShadowFinder's libraries.
+
 ## [0.37.1] - 2026-10-28
 
 ### Fixed

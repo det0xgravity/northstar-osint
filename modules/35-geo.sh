@@ -27,6 +27,28 @@ mod_geo() {
   printf '#!/usr/bin/env bash\n# northstar wrapper: GeoCLIP helpers in their own venv\nexec "%s/bin/python" "%s/lib/ns_geo.py" "$@"\n' \
     "$venv" "$NS_HOME" > "$NS_BIN/ns_geo"
   chmod +x "$NS_BIN/ns_geo"
-  ns_pipx shadowfinder || rc=1
+  ns_shadowfinder || rc=1
   return $rc
+}
+
+# ShadowFinder 0.7.1 caps cartopy below 0.25 and timezonefinder below 7, which
+# have no Python 3.14 wheels (Ubuntu 26.04), so pip tries to compile them and
+# fails. On 3.14+ install it without its own pins, then current releases of
+# those two (same APIs) and its other dependencies as it declares them.
+ns_shadowfinder() {
+  python3 -c 'import sys; sys.exit(sys.version_info < (3, 14))' || { ns_pipx shadowfinder; return; }
+  if [ -x "$HOME/.local/bin/shadowfinder" ] || ns_has shadowfinder; then
+    ns_info "shadowfinder ✓"; return 0
+  fi
+  local log; log=$(mktemp)
+  if ns_bg "$log" "pipx: shadowfinder" pipx install --pip-args=--no-deps shadowfinder \
+     && ns_bg "$log" "pipx: shadowfinder libraries" pipx inject shadowfinder "cartopy>=0.26" "timezonefinder[pytz]>=6.5" \
+          "matplotlib>=3.8,<4" "fire>=0.5,<1" "pandas>=2.2,<3" "numpy>=1" "pytz>=2025" "suncalc>=0.1.3,<0.2"; then
+    ns_info "shadowfinder installed (current cartopy and timezonefinder, for Python 3.14)"
+    rm -f "$log"
+  else
+    ns_warn "pipx failed: shadowfinder"; ns_show_tail "$log"; rm -f "$log"
+    pipx uninstall shadowfinder >/dev/null 2>&1      # so the next update tries again
+    return 1
+  fi
 }

@@ -21,6 +21,7 @@ section() { printf '\n== %s\n' "$1"; }
 
 # Installed tools, a private data folder and config, scripted dialogs
 export PATH="$NS_HOME/bin:$HOME/.local/bin:$PATH"
+REAL_DATA="${NS_DATA:-$HOME/Northstar}"     # where the installer put the guides
 export NS_HOME NS_DATA="$W/data" XDG_CONFIG_HOME="$W/xdg" NS_UI=script NS_UI_ANSWERS="$W/answers"
 mkdir -p "$NS_DATA/Cases" "$XDG_CONFIG_HOME/northstar"
 answers() { printf '%s\n' "$@" > "$NS_UI_ANSWERS"; rm -f "$NS_UI_ANSWERS.pos"; }
@@ -47,7 +48,7 @@ fi
 check "health check runs and writes a report" "ns_doctor '$W/doctor.txt' >/dev/null; grep -q '== Tools' '$W/doctor.txt'"
 check "every menu tool is installed" "for t in northstar ns-missing ns-username ns-telegram ns-domain ns-media ns-archive ns-metadata ns-image ns-video ns-geo ns-face ns-watch ns-map ns-translate ns-notes ns-country ns-breach ns-darkweb ns-evidence ns-case ns-keys ns-guides; do [ -x '$NS_HOME/bin/'\$t ] || { echo missing \$t; exit 1; }; done"
 
-check "the guides are built and linked on the desktop" "[ -f '$NS_DATA/Guides/INVESTIGATION-GUIDE.html' ] && ls -d \"\$HOME/Desktop/Northstar guides\" \"\$(xdg-user-dir DESKTOP 2>/dev/null)/Northstar guides\" 2>/dev/null | grep -q ."
+check "the guides are built and linked on the desktop" "[ -f '$REAL_DATA/Guides/INVESTIGATION-GUIDE.html' ] && ls -d \"\$HOME/Desktop/Northstar guides\" \"\$(xdg-user-dir DESKTOP 2>/dev/null)/Northstar guides\" 2>/dev/null | grep -q ."
 
 section "Case, notes and evidence"
 answers "e2e-case" "yes" "REF-1" "CI" "End-to-end test" "Test data only" "2030-01-01"
@@ -118,6 +119,13 @@ menu ns-watch "Watch a page" "http://127.0.0.1:8765/" "test page" "yes"
 printf '<p>Last post: hello</p><p>New post: safe</p>' > "$W/site/index.html"
 check "a change on a watched page is detected" "ns_watch check '$CASE'; [ \$? -eq 10 ] && grep -q 'New post: safe' '$CASE/watch/changes.log'"
 kill "$srv" 2>/dev/null
+
+section "Shadow analysis"
+SFPY=$(ls "$HOME"/.local/share/pipx/venvs/shadowfinder/bin/python "$HOME"/.local/pipx/venvs/shadowfinder/bin/python 2>/dev/null | head -1)
+if [ -n "$SFPY" ]; then
+  check "ShadowFinder's libraries load and find the time zone" \
+    "'$SFPY' -c 'import shadowfinder, cartopy.crs, cartopy.feature; from timezonefinder import TimezoneFinder; print(TimezoneFinder(in_memory=True).timezone_at(lng=-9.14, lat=38.72))' | grep -q Europe/Lisbon"
+else skip "ShadowFinder" "not installed"; fi
 
 section "Telegram (public web preview, no login)"
 if have ns_telegram; then
