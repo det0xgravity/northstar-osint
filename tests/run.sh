@@ -150,6 +150,10 @@ menu ns-evidence "Check received" "$W/tri/form.pdf"
 check "the menu saves the triage report in the case and seals it" \
   "t=\$(ls -td '$TC'/triage/* | head -1) && grep -q 'CAUTION' \"\$t/triage.txt\" && [ -f \"\$t/manifest.sha256\" ]"
 
+section "QGIS"
+menu ns-map "Open the latest case map in QGIS"
+check "QGIS needs a built case map first" "grep -q 'No case map yet' '$W/out.txt'"
+
 section "LAN isolation (ns-lan)"
 mkdir -p "$W/lanetc"; printf '192.168.1.20  # NAS\nnot-an-ip\nfd00::5\n10.1.0.0/16\n' > "$W/lanetc/lan-allow"
 NS_LAN_ETC="$W/lanetc" bash "$R/tools/ns-lan" rules > "$W/lan.nft"

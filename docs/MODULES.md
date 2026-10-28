@@ -104,6 +104,10 @@ On arm64 Linux, such as a VM on Apple Silicon, Mullvad Browser isn't installed b
 
 The Tor client as a service (a SOCKS proxy on `127.0.0.1:9050`, never a relay) and `torsocks`, used by `ns-darkweb`, and [OnionShare](https://onionshare.org) for sending and receiving files over private .onion links: the app (Flathub, verified by the OnionShare project, x86_64 and arm64; Homebrew cask on macOS) and `onionshare-cli` (pipx). Tor Browser itself comes with `browsers`. See [BREACH-DARKWEB.md](BREACH-DARKWEB.md).
 
+## gis
+
+[QGIS](https://qgis.org), the desktop GIS, for the case map's GeoJSON and KML exports (Case map → Open the latest case map in QGIS): Flathub, verified by the QGIS project, x86_64 and arm64 (about 600 MB); Homebrew cask on macOS. Skip it with `--skip gis` if you don't need it.
+
 ## triage
 
 Tools for checking received or suspicious files without opening them: [ClamAV](https://www.clamav.net) with its signature updater (the `clamav-freshclam` service on Linux, about 200 MB of signatures the first time; Homebrew on macOS) and [oletools](https://github.com/decalage2/oletools) (pipx) for Office macros. Used by Evidence → Check received or suspicious files, and automatically when an OnionShare drop box closes. See [EVIDENCE.md](EVIDENCE.md).

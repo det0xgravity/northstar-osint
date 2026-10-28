@@ -256,7 +256,7 @@ Profiles change and posts get deleted. When you find something relevant, capture
 
 ### 4.7 Places and the case map
 
-**Case map** → **Add a place** for the last-seen location, sightings, home and work (by address or `lat, lon`). Then **Build the case map**: photo GPS and GeoCLIP estimates are added automatically, and you get `map.html` plus KML and GeoJSON for Google Earth or QGIS.
+**Case map** → **Add a place** for the last-seen location, sightings, home and work (by address or `lat, lon`). Then **Build the case map**: photo GPS and GeoCLIP estimates are added automatically, and you get `map.html` plus KML and GeoJSON for Google Earth or QGIS. **Open the latest case map in QGIS** opens it there, offline, for measuring distances, adding layers and making a map for the report.
 
 📷 *map.html with the last-seen place, a photo GPS point and AI estimates.*
 

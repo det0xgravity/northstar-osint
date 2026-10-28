@@ -7,6 +7,8 @@ All notable changes to this project are documented here. The format follows
 ## [0.39.0] - 2026-10-28
 
 ### Added
+- **QGIS** (`gis` module; Flathub, verified, or Homebrew): Case map → Open
+  the latest case map in QGIS opens the case's GeoJSON offline.
 - **File triage** (`triage` module, `ns_triage`): Evidence → Check received
   or suspicious files looks at files without opening them: real type against
   the name, SHA-256, ClamAV, Office macros (oletools), PDF active content,

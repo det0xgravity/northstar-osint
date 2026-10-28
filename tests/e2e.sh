@@ -127,6 +127,12 @@ if [ -n "$SFPY" ]; then
     "'$SFPY' -c 'import shadowfinder, cartopy.crs, cartopy.feature; from timezonefinder import TimezoneFinder; print(TimezoneFinder(in_memory=True).timezone_at(lng=-9.14, lat=38.72))' | grep -q Europe/Lisbon"
 else skip "ShadowFinder" "not installed"; fi
 
+section "QGIS"
+if command -v flatpak >/dev/null 2>&1 && flatpak info org.qgis.qgis >/dev/null 2>&1; then
+  ok "QGIS installed (Flathub)"
+elif [ -d /Applications/QGIS.app ]; then ok "QGIS installed"
+else bad "QGIS installed" "flatpak info org.qgis.qgis"; fi
+
 section "File triage"
 if have ns_triage; then
   printf 'hello' > "$W/plain.txt"

@@ -164,7 +164,7 @@ Every coordinate in the active case on one map.
 | GPS in photo and video metadata anywhere in the case (exiftool) | photo GPS, with the camera-clock time |
 | GeoCLIP's top three estimates from each Photo geolocation run, named from `places.json` | AI estimate |
 
-**Build the case map** writes `case.geojson` and `case.kml` (open them offline in QGIS or Google Earth Pro), `points.csv`, and `map.html`, an interactive map with a layer for each kind. Opening `map.html` loads Leaflet from unpkg (pinned and integrity-checked) and map tiles from CARTO or OpenStreetMap, so those services see which areas you view; the menu asks first. Address lookups use OpenStreetMap Nominatim and are logged in the audit log. Recorded places are kept in the case's `map/places.csv`.
+**Build the case map** writes `case.geojson` and `case.kml` (open them offline in QGIS or Google Earth Pro; **Open the latest case map in QGIS** does it for you, with no background map until you add one), `points.csv`, and `map.html`, an interactive map with a layer for each kind. Opening `map.html` loads Leaflet from unpkg (pinned and integrity-checked) and map tiles from CARTO or OpenStreetMap, so those services see which areas you view; the menu asks first. Address lookups use OpenStreetMap Nominatim and are logged in the audit log. Recorded places are kept in the case's `map/places.csv`.
 
 ## ns-translate
 

@@ -11,7 +11,8 @@ case_dir=$(ns_case_dir)
 choice=$(ui_list "Case map: case $(ns_case)" \
   "Build the case map" \
   "Add a place (address or coordinates)" \
-  "List recorded places") || exit 0
+  "List recorded places" \
+  "Open the latest case map in QGIS") || exit 0
 
 case "$choice" in
   "Build"*)
@@ -23,6 +24,18 @@ case "$choice" in
     fi
     ns_finish "$out" ;;
 
+  "Open the latest case map in QGIS")
+    g=$(ls -t "$case_dir"/map/*/case.geojson 2>/dev/null | head -1)
+    [ -n "$g" ] || { ui_error "No case map yet: use Build the case map first."; exit 1; }
+    ns_audit ns-map "qgis" "opened $(basename "$(dirname "$g")")/case.geojson in QGIS"
+    ui_info "QGIS opens the case map's points (case.geojson) with no background map, so nothing is fetched.
+
+To add one: Layer → Add Layer → Add XYZ Layer (OpenStreetMap). The tile server then sees the areas you view.
+
+Save any QGIS project outside the sealed map folder, for example in the case's own folder."
+    if ui_mac && [ -d /Applications/QGIS.app ]; then open -a QGIS "$g"
+    elif ns_cmd flatpak && flatpak info org.qgis.qgis >/dev/null 2>&1; then ( setsid flatpak run org.qgis.qgis "$g" >/dev/null 2>&1 & )
+    else ui_error "QGIS isn't installed: ./install.sh --only gis"; exit 1; fi ;;
   "Add a place"*)
     kind=$(ui_list "What kind of place?" "last seen" "sighting" "home" "work or school" "vehicle" "other") || exit 0
     pre=""
