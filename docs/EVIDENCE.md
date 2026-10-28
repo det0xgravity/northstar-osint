@@ -31,6 +31,7 @@ sha256sum -c manifest.sha256          # macOS: shasum -a 256 -c manifest.sha256
 | Verify the audit log's hash chain | Reports intact, broken and unchained lines, and where the chain breaks |
 | List exhibits | Shows `exhibits.csv` |
 | Export the case | Archives the whole case folder to `~/Northstar/Exports/<case>_<UTC time>.tar.gz` (readable only by you) with a `.sha256` beside it, ready to hand over |
+| Check received or suspicious files (triage) | Looks at files **without opening or running them**: the real file type against its name (a program called `invoice.pdf`), SHA-256, a ClamAV scan for known malware, macros in Office documents (oletools), active content in PDFs (JavaScript, open actions, launch actions, embedded files), archive contents (listed, never extracted, with password-protected entries and path tricks flagged) and GPS in image metadata. Each file gets **DANGER**, **CAUTION** or **no warning signs**, which is never a guarantee. The report (`triage.txt`, `triage.json`) is sealed in the case |
 | Export the case, encrypted (age) | The same archive, encrypted with [age](https://age-encryption.org) for a **passphrase** (typed in the terminal, never logged) or the **recipient's public key** (`age1…`, or their `ssh-ed25519`/`ssh-rsa` key). You get `….tar.gz.age` and its `.sha256`; the unencrypted archive is removed, and its own SHA-256 stays in `….tar.gz.sha256`, so after decrypting, the recipient can check they have exactly what was exported. The audit log records the method and the start of the key, never a passphrase. Use this for anything that leaves the VM |
 
 ### OpenTimestamps (optional)
@@ -42,7 +43,7 @@ Recording an exhibit can also create `manifest.sha256.ots`: a proof, anchored in
 
 ## Files from outside: OnionShare
 
-**Dark web → OnionShare: receive files from a source into this case** saves what a source uploads into a result folder under `received/`, lists each file's SHA-256 in `received.txt`, and seals the folder, so you can record it as an exhibit at once. The drop box's address and key are never written to the case. Received files are untrusted: open them only in the VM.
+**Dark web → OnionShare: receive files from a source into this case** saves what a source uploads into a result folder under `received/`, lists each file's SHA-256 in `received.txt`, checks every file (the triage above, in `triage.txt`) and seals the folder, so you can record it as an exhibit at once. The drop box's address and key are never written to the case. Received files are untrusted: open them only in the VM.
 
 **OnionShare: send files over a private .onion link** can deliver an export when no approved channel exists. The audit log records each file sent with its SHA-256; give the recipient the `.sha256` separately so they can check it.
 

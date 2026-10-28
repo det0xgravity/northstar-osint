@@ -127,6 +127,13 @@ if [ -n "$SFPY" ]; then
     "'$SFPY' -c 'import shadowfinder, cartopy.crs, cartopy.feature; from timezonefinder import TimezoneFinder; print(TimezoneFinder(in_memory=True).timezone_at(lng=-9.14, lat=38.72))' | grep -q Europe/Lisbon"
 else skip "ShadowFinder" "not installed"; fi
 
+section "File triage"
+if have ns_triage; then
+  printf 'hello' > "$W/plain.txt"
+  check "triage runs on a file and reports it" "ns_triage '$W/plain.txt' | grep -q 'no warning signs'"
+  check "oletools and ClamAV are installed for it" "command -v olevba && command -v clamscan"
+else skip "file triage" "core not installed"; fi
+
 section "Telegram (public web preview, no login)"
 if have ns_telegram; then
   check "channel lookup reads the public page" "mkdir -p '$W/tg' && cd '$W/tg' && ns_telegram lookup telegram | grep -q 'type: channel'"

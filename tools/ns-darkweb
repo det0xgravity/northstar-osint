@@ -132,6 +132,11 @@ Start the drop box?" || exit 0
         printf '%s  %s\n' "$(ns_hash_file "$f")" "${f#"$out/"}"; done
     } > "$out/received.txt"
     ns_audit ns-darkweb:onionshare "receive" "drop box closed: $n file(s) received"
+    if [ "$n" -gt 0 ] && ns_cmd ns_triage; then
+      # Check what arrived before anyone opens it; the report is sealed with the files
+      ns_triage --json "$out/triage.json" "$out/files" | tee "$out/triage.txt"
+      ns_audit ns-darkweb:onionshare "triage" "$(sed -n 's/^File triage: //p' "$out/triage.txt" | head -1)"
+    fi
     ns_finish "$out" ;;
 
   "OnionShare: send"*)

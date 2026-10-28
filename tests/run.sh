@@ -20,7 +20,7 @@ H="$W/home"; mkdir -p "$H/lib" "$H/bin" "$H/config" "$W/data" "$W/conf"
 cp "$R/lib/ui.sh" "$R/lib/ns_country.py" "$H/lib/"
 cp "$R/config/ctf-categories.txt" "$H/config/"
 cp -R "$R/config/countries" "$H/config/"
-for e in breach darkweb evidence doctor missing watch casemap vault; do ln -s "$R/lib/ns_$e.py" "$H/bin/ns_$e"; done
+for e in breach darkweb evidence doctor missing watch casemap vault triage; do ln -s "$R/lib/ns_$e.py" "$H/bin/ns_$e"; done
 ln -s "$R/lib/ns_case.py" "$H/bin/ns_casework"
 export NS_HOME="$H" NS_DATA="$W/data" XDG_CONFIG_HOME="$W/xdg" NS_UI=script NS_UI_ANSWERS="$W/answers"
 export PATH="$H/bin:$PATH"
@@ -131,6 +131,24 @@ if command -v age >/dev/null 2>&1 && command -v age-keygen >/dev/null 2>&1; then
 else
   printf '  skip  encrypted export (age not installed)\n'
 fi
+
+section "File triage"
+mkdir -p "$W/tri"
+printf '\177ELF\002\001\001\000\000\000\000\000\000\000\000\000\002\000\076\000' > "$W/tri/invoice.pdf"; head -c 400 /dev/zero >> "$W/tri/invoice.pdf"
+printf '%%PDF-1.7\n1 0 obj << /OpenAction 2 0 R /JS (x) >> endobj\n2 0 obj << /S /JavaScript >> endobj\n%%%%EOF\n' > "$W/tri/form.pdf"
+printf 'hello' > "$W/tri/notes.txt"
+python3 -c 'import zipfile,sys; z=zipfile.ZipFile(sys.argv[1],"w"); z.writestr("../../evil.sh","echo"); z.writestr("doc/readme.txt","hi"); z.close()' "$W/tri/bundle.zip"
+python3 "$R/lib/ns_triage.py" --json "$W/tri.json" "$W/tri" > "$W/tri.txt"
+verdict() { python3 -c 'import json,sys; print({r["file"].rsplit("/",1)[1]: r["verdict"] for r in json.load(open(sys.argv[1]))}[sys.argv[2]])' "$W/tri.json" "$1"; }
+if command -v file >/dev/null 2>&1; then
+  check "a program disguised as a PDF is flagged DANGER" "[ \"\$(verdict invoice.pdf)\" = DANGER ] && grep -q 'named .pdf but is really application/x-executable' '$W/tri.txt'"
+fi
+check "a PDF with JavaScript and an open action is flagged CAUTION" "[ \"\$(verdict form.pdf)\" = CAUTION ] && grep -q '/OpenAction' '$W/tri.txt'"
+check "archives are listed, never extracted, and path tricks flagged" "[ \"\$(verdict bundle.zip)\" = DANGER ] && grep -q 'escapes the folder' '$W/tri.txt' && [ ! -e '$W/evil.sh' ]"
+check "a plain text file shows no warning signs, with its hash" "[ \"\$(verdict notes.txt)\" = 'no warning signs' ] && grep -q 2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824 '$W/tri.txt'"
+menu ns-evidence "Check received" "$W/tri/form.pdf"
+check "the menu saves the triage report in the case and seals it" \
+  "t=\$(ls -td '$TC'/triage/* | head -1) && grep -q 'CAUTION' \"\$t/triage.txt\" && [ -f \"\$t/manifest.sha256\" ]"
 
 section "LAN isolation (ns-lan)"
 mkdir -p "$W/lanetc"; printf '192.168.1.20  # NAS\nnot-an-ip\nfd00::5\n10.1.0.0/16\n' > "$W/lanetc/lan-allow"

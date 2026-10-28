@@ -104,6 +104,10 @@ On arm64 Linux, such as a VM on Apple Silicon, Mullvad Browser isn't installed b
 
 The Tor client as a service (a SOCKS proxy on `127.0.0.1:9050`, never a relay) and `torsocks`, used by `ns-darkweb`, and [OnionShare](https://onionshare.org) for sending and receiving files over private .onion links: the app (Flathub, verified by the OnionShare project, x86_64 and arm64; Homebrew cask on macOS) and `onionshare-cli` (pipx). Tor Browser itself comes with `browsers`. See [BREACH-DARKWEB.md](BREACH-DARKWEB.md).
 
+## triage
+
+Tools for checking received or suspicious files without opening them: [ClamAV](https://www.clamav.net) with its signature updater (the `clamav-freshclam` service on Linux, about 200 MB of signatures the first time; Homebrew on macOS) and [oletools](https://github.com/decalage2/oletools) (pipx) for Office macros. Used by Evidence → Check received or suspicious files, and automatically when an OnionShare drop box closes. See [EVIDENCE.md](EVIDENCE.md).
+
 ## countries
 
 Creates a private Python environment with Google's [libphonenumber](https://github.com/daviddrysdale/python-phonenumbers) for the phone analysis in `ns-country`. The country packs themselves are installed by `core`, and their bookmark folders by `browsers`. See [COUNTRIES.md](COUNTRIES.md).

@@ -94,7 +94,10 @@ That was Ubuntu 26.04 (Python 3.14) before v0.37.2: their last releases asked fo
 The menu's OnionShare options use the system Tor (`ns-darkweb` → **Check Tor connection** starts it). If `onionshare-cli` is missing, run `./install.sh --only darkweb`. On macOS use **Open the OnionShare app** instead.
 
 **Received files (OnionShare)**
-They're in the case under `received/`, with their SHA-256 in `received.txt`. Treat them as hostile: open documents only in the VM, never run programs or enable macros, and record what you rely on as an exhibit.
+They're in the case under `received/`, with their SHA-256 in `received.txt` and a check of every file in `triage.txt`. Treat them as hostile even when triage finds nothing: open documents only in the VM, never run programs or enable macros, and record what you rely on as an exhibit.
+
+**Triage says "ClamAV couldn't scan it"**
+ClamAV's signatures haven't downloaded yet (about 200 MB, in the background after install). Check with `systemctl status clamav-freshclam`, or fetch them now: `sudo systemctl stop clamav-freshclam && sudo freshclam && sudo systemctl start clamav-freshclam`.
 
 ## VM / Kasm
 

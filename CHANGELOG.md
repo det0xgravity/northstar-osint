@@ -7,6 +7,12 @@ All notable changes to this project are documented here. The format follows
 ## [0.39.0] - 2026-10-28
 
 ### Added
+- **File triage** (`triage` module, `ns_triage`): Evidence → Check received
+  or suspicious files looks at files without opening them: real type against
+  the name, SHA-256, ClamAV, Office macros (oletools), PDF active content,
+  archive contents (listed, never extracted), image GPS. DANGER / CAUTION /
+  no warning signs, sealed in the case. Runs automatically on what an
+  OnionShare drop box receives.
 - **Encrypted case exports:** Evidence → Export the case, encrypted (age),
   for a passphrase or the recipient's public key (age or SSH). The plain
   archive is removed; its SHA-256 is kept so the recipient can check the
