@@ -4,6 +4,24 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project uses
 [Semantic Versioning](https://semver.org/).
 
+## [0.38.0] - 2026-10-28
+
+### Added
+- **OnionShare** (darkweb module): the app (Flathub, verified; Homebrew on
+  macOS) and `onionshare-cli`. Dark web → **receive files from a source into
+  this case** opens a private .onion drop box; what arrives is hashed in
+  `received.txt` and sealed. **Send files over a private .onion link** shares
+  files such as a case export until the first download. Addresses and keys
+  are shown in the terminal only, never saved; the audit log records what was
+  sent and its SHA-256. `ns-seal` removes OnionShare's saved keys.
+- **LAN isolation** (`lan` module, `ns-lan`, main menu → LAN isolation): an
+  nftables table that blocks connections from the machine to private
+  networks (RFC 1918, CGNAT, link-local, multicast and IPv6 equivalents)
+  while the internet, DNS, DHCP and replies to incoming RDP/SSH keep working.
+  On in VMs from the first install, with an allow list for a NAS or
+  Tailscale; off on physical machines until `ns-lan on`. Loaded at boot by
+  `northstar-lan-block.service`; shown in the health check.
+
 ## [0.37.2] - 2026-10-28
 
 ### Fixed

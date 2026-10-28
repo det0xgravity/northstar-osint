@@ -15,7 +15,7 @@ H=$(getent passwd "$U" | cut -d: -f6)
 cat <<EOF
 This will seal $(hostname) for templating:
   - clear browser history, cookies, sessions and SAVED LOGINS for $U (settings and extensions are kept)
-  - remove API keys (ns-keys) and logged-in tool sessions (GHunt, instaloader, Censys, Shodan, Telegram) and messaging-app logins (Telegram Desktop, Signal, Element)
+  - remove API keys (ns-keys) and logged-in tool sessions (GHunt, instaloader, Censys, Shodan, Telegram) and messaging-app logins (Telegram Desktop, Signal, Element) and OnionShare's saved onion keys
   - clear shell history, recent files and thumbnails
   - reset machine-id, SSH host keys, xrdp keys and DHCP leases (regenerated on first boot)
   - shut the VM down
@@ -47,6 +47,8 @@ rm -rf "$H/.malfrats" "$H/.config/instaloader" "$H/.config/cencli" "$H/.shodan" 
        "$H/.telegram_tracker" "$H/.config/northstar/telegram" 2>/dev/null
 # Messaging apps: logged-in research accounts (Telegram Desktop, Signal, Element)
 rm -rf "$H/.var/app/org.telegram.desktop" "$H/.config/Signal" "$H/.config/Element" 2>/dev/null
+# OnionShare: saved (persistent) onion addresses and their keys, and received files
+rm -rf "$H/.var/app/org.onionshare.OnionShare" "$H/.config/onionshare" "$H/OnionShare" 2>/dev/null
 
 # Per-user traces
 rm -rf "$H/.bash_history" "$H/.zsh_history" "$H/.python_history" \

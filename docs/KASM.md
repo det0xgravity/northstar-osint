@@ -49,6 +49,10 @@ master VM ──(full clone)──▶ clone ──(sudo ns-seal)──▶ shut d
 
 Keep the previous template until the new one is proven. Rolling back is then just pointing Kasm at the old name.
 
+### LAN isolation and shared storage
+
+The `lan` module turns on LAN isolation in VMs (`ns-lan`): the VM can't open connections to private networks, while Kasm's RDP connections to it still work. If your cases go to a NAS or another machine on your network (below), allow it on the master before you build the template: `ns-lan allow 192.168.10.5` (or the NAS's subnet).
+
 ### Saving data from disposable sessions
 
 Anything left inside a pool clone is destroyed when the session ends. Before closing, copy case folders out to shared storage (NFS, Nextcloud, a Git repo), or set `NS_DATA` to a mounted share in `~/.profile` on the master, so every clone writes its cases there.

@@ -102,7 +102,7 @@ On arm64 Linux, such as a VM on Apple Silicon, Mullvad Browser isn't installed b
 
 ## darkweb
 
-The Tor client as a service (a SOCKS proxy on `127.0.0.1:9050`, never a relay) and `torsocks`, used by `ns-darkweb`. Tor Browser itself comes with `browsers`. See [BREACH-DARKWEB.md](BREACH-DARKWEB.md).
+The Tor client as a service (a SOCKS proxy on `127.0.0.1:9050`, never a relay) and `torsocks`, used by `ns-darkweb`, and [OnionShare](https://onionshare.org) for sending and receiving files over private .onion links: the app (Flathub, verified by the OnionShare project, x86_64 and arm64; Homebrew cask on macOS) and `onionshare-cli` (pipx). Tor Browser itself comes with `browsers`. See [BREACH-DARKWEB.md](BREACH-DARKWEB.md).
 
 ## countries
 
@@ -161,6 +161,10 @@ For research accounts only. `ns-seal` removes their logins from template clones.
 ## notes
 
 [Obsidian](https://obsidian.md) from Flathub (verified; x86_64 and arm64) or Homebrew, with `~/Northstar/Cases` set up as a vault: settings (dark theme, core Templates plugin, attachments beside notes), templates for people, accounts, organisations, places, events and leads, `Home.md`, and a `Case.md` per case. The vault is added to Obsidian's vault list while Obsidian is closed. Used by `ns-notes`.
+
+## lan *(Linux only)*
+
+LAN isolation: installs `nftables` and, **in a VM only**, turns on `ns-lan`, a firewall table that blocks connections from the machine to private networks (your LAN, other VMs, the hypervisor host) while the internet, DNS, DHCP and replies to incoming RDP/SSH keep working. On a physical machine it's left off until you run `ns-lan on`. See [MENUS.md](MENUS.md#ns-lan-linux).
 
 ## vm *(Linux only)*
 

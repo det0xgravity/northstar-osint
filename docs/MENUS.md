@@ -272,7 +272,22 @@ Breach and infostealer lookups by email, username, domain or phone, a password e
 
 ## ns-darkweb
 
-Tor connection check, onion search (Ahmia), text-only capture of an onion page, ransomware leak-site claims, and Tor Browser. See [BREACH-DARKWEB.md](BREACH-DARKWEB.md).
+Tor connection check, onion search (Ahmia), text-only capture of an onion page, ransomware leak-site claims, Tor Browser, and OnionShare: a private drop box that receives files from a source into the case, and sending files (such as a case export) over a private .onion link. See [BREACH-DARKWEB.md](BREACH-DARKWEB.md).
+
+## ns-lan *(Linux)*
+
+**LAN isolation (firewall)** in the main menu. An nftables table (`inet northstar_lan`) that stops this machine from **opening** connections to private networks: `10.0.0.0/8`, `172.16.0.0/12`, `192.168.0.0/16`, carrier-grade NAT `100.64.0.0/10`, link-local, multicast, and their IPv6 equivalents. A hostile page, document or tool output opened during an investigation then can't reach your router's admin page, NAS, printers, other VMs or the hypervisor host.
+
+What still works: the internet, DNS and DHCP from the local router, IPv6 neighbour discovery, and replies to connections made **to** this machine, so RDP from Kasm and SSH keep working.
+
+| Option (or command) | What it does |
+|---|---|
+| Status (`ns-lan status`) | On or off, the allow list, and how many packets have been blocked |
+| Turn on / off (`ns-lan on`, `ns-lan off`) | Loads or removes the rules; a systemd service (`northstar-lan-block`) loads them at every boot |
+| Allow an address or network (`ns-lan allow 192.168.1.20`) | An exception, for example a NAS holding case data (`NS_DATA` on a share) or a Tailscale network (`100.64.0.0/10`) |
+| Remove an allowed address (`ns-lan remove …`) | |
+
+The `lan` module turns it on during the first install **in a VM**, and leaves it alone afterwards if you turn it off. On a physical machine it stays off (it would block your own printers and NAS) until you run `ns-lan on`. The rules are in `/etc/northstar/lan-block.nft` and the allow list in `/etc/northstar/lan-allow`. Changes are written to the active case's audit log.
 
 ## ns-keys
 

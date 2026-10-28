@@ -83,13 +83,14 @@ ns-update                                # pull the latest version and upgrade e
 | `media` | yt-dlp, gallery-dl, instaloader, streamlink, ffmpeg, exiftool, mediainfo, mat2, internetarchive |
 | `frameworks` | SpiderFoot, recon-ng, changedetection.io, search-that-hash, name-that-hash |
 | `browsers` | Firefox, Brave, Tor Browser, Mullvad Browser + extension and bookmark policies |
-| `darkweb` | Tor client service and torsocks for `ns-darkweb` |
+| `darkweb` | Tor client service and torsocks for `ns-darkweb`, and OnionShare (private .onion drop box and file sending) |
 | `countries` | Phone-number analysis for the country menus (the country bookmarks come with `browsers`) |
 | `desktop` | App-menu launchers, GNOME dock favourites, macOS `Northstar.app` |
 | `shell` | zsh with Oh My Zsh, the Powerlevel10k prompt, autosuggestions, syntax highlighting and the MesloLGS NF font *(Linux)* |
 | `extras` | KeePassXC, Flameshot (bound to Print Screen on GNOME), OBS Studio |
 | `messaging` | Telegram Desktop, Signal (x86_64), Element (Matrix) for research accounts |
 | `notes` | Obsidian, with the Cases folder set up as a vault (templates, Case.md, Results.md) |
+| `lan` | LAN isolation (`ns-lan`): blocks connections from the VM to private networks *(Linux; on in VMs)* |
 | `vm` | QEMU guest agent, xrdp, clone-safe identity, `ns-seal` *(Linux only)* |
 
 Full details: [docs/MODULES.md](docs/MODULES.md).

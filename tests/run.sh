@@ -116,6 +116,21 @@ check "the face search bookmark opens the local warning page" \
 check "the warning page loads nothing and hides the engines until it's read" \
   "! grep -qE '<(script|img|link)' '$R/assets/face-search.html' && grep -q '<details>' '$R/assets/face-search.html'"
 
+section "LAN isolation (ns-lan)"
+mkdir -p "$W/lanetc"; printf '192.168.1.20  # NAS\nnot-an-ip\nfd00::5\n10.1.0.0/16\n' > "$W/lanetc/lan-allow"
+NS_LAN_ETC="$W/lanetc" bash "$R/tools/ns-lan" rules > "$W/lan.nft"
+check "private networks are blocked, replies and DNS/DHCP still allowed" \
+  "grep -q '10.0.0.0/8, 100.64.0.0/10, 169.254.0.0/16, 172.16.0.0/12, 192.168.0.0/16' '$W/lan.nft' && grep -q 'fc00::/7, fe80::/10' '$W/lan.nft' && grep -q 'ct state established,related accept' '$W/lan.nft' && grep -q 'udp dport { 53, 67, 547 } accept' '$W/lan.nft'"
+check "the allow list is checked and split by family" \
+  "grep -q 'elements = { 192.168.1.20/32, 10.1.0.0/16 }' '$W/lan.nft' && grep -q 'elements = { fd00::5/128 }' '$W/lan.nft' && ! grep -q not-an-ip '$W/lan.nft'"
+if command -v nft >/dev/null 2>&1 && sudo -n true 2>/dev/null; then
+  check "nftables accepts the ruleset" "sudo -n nft -c -f '$W/lan.nft'"
+  NS_LAN_ETC="$W/lanetc2" bash "$R/tools/ns-lan" rules > "$W/lan2.nft"
+  check "...and the ruleset with an empty allow list" "sudo -n nft -c -f '$W/lan2.nft'"
+else
+  printf '  skip  nftables syntax check (needs nft and passwordless sudo)\n'
+fi
+
 section "Guides (offline web pages)"
 if command -v pandoc >/dev/null 2>&1; then
   python3 "$R/lib/ns_guides.py" build "$R/docs" "$W/guides" > /dev/null

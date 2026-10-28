@@ -120,15 +120,18 @@ This pulls the latest northstar-osint, upgrades pipx tools, reinstalls Go tools 
 # northstar's pipx tools (this leaves any pipx tools of your own alone)
 for p in sherlock-project maigret socialscan holehe ghunt toutatis theHarvester waymore dnstwist shodan \
          yt-dlp gallery-dl instaloader streamlink internetarchive changedetection.io search-that-hash \
-         name-that-hash; do pipx uninstall "$p"; done
+         name-that-hash onionshare-cli shadowfinder; do pipx uninstall "$p"; done
 rm -rf ~/.local/share/northstar ~/.config/northstar
 rm -f ~/.local/bin/northstar ~/.local/bin/ns-*
 rm -f ~/.local/share/applications/northstar.desktop ~/.local/share/applications/ns-*.desktop
 sudo rm -f /etc/firefox/policies/policies.json /etc/firefox-esr/policies/policies.json \
            /etc/brave/policies/managed/northstar.json /usr/local/sbin/ns-seal \
            /etc/polkit-1/rules.d/45-northstar-xrdp-colord.rules
-sudo systemctl disable --now northstar-ssh-hostkeys northstar-xrdp-keys 2>/dev/null
-sudo rm -f /etc/systemd/system/northstar-ssh-hostkeys.service /etc/systemd/system/northstar-xrdp-keys.service
+sudo systemctl disable --now northstar-ssh-hostkeys northstar-xrdp-keys northstar-lan-block 2>/dev/null
+sudo nft delete table inet northstar_lan 2>/dev/null
+sudo rm -f /etc/systemd/system/northstar-ssh-hostkeys.service /etc/systemd/system/northstar-xrdp-keys.service \
+           /etc/systemd/system/northstar-lan-block.service
+sudo rm -rf /etc/northstar
 rm -f ~/.config/autostart/org.flameshot.Flameshot.desktop ~/.xsession
 rm -rf ~/.local/share/fonts/MesloLGS-NF
 # Remove the line tagged "northstar-osint" from ~/.bashrc / ~/.zshrc / ~/.profile

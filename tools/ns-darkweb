@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # ns-darkweb — dark web lookups through Tor: check the Tor connection, search
 # the Ahmia onion index, save an onion page as text only, check ransomware
-# leak-site claims, and open Tor Browser.
+# leak-site claims, open Tor Browser, and send or receive files over private
+# OnionShare links.
 # shellcheck source=../lib/ui.sh
 . "${NS_HOME:-$HOME/.local/share/northstar}/lib/ui.sh"
 
@@ -52,12 +53,24 @@ open_tor_browser() {
   fi
 }
 
+# OnionShare's command-line version, using the system tor (Linux)
+onionshare_ready() {
+  if ui_mac; then
+    ui_error "On macOS, use the OnionShare app (Open the OnionShare app)."; return 1
+  fi
+  ns_cmd onionshare-cli || { ui_error "OnionShare isn't installed. Run: ./install.sh --only darkweb"; return 1; }
+  ns_cmd tor || { ui_error "Tor isn't installed. Run: ./install.sh --only darkweb"; return 1; }
+}
+
 choice=$(ui_list "Dark web" \
   "Check Tor connection" \
   "Search onion services (Ahmia)" \
   "Fetch an onion page as text (safe)" \
   "Ransomware leak-site check (organisation)" \
-  "Open Tor Browser") || exit 0
+  "Open Tor Browser" \
+  "OnionShare: receive files from a source into this case" \
+  "OnionShare: send files over a private .onion link" \
+  "Open the OnionShare app") || exit 0
 
 case "$choice" in
   Check*)
@@ -91,6 +104,58 @@ Ahmia removes abuse material from its index. Open results in Tor Browser, or sav
     ns_run "$out" ns_darkweb ransomware "$q"
     ns_finish "$out" ;;
 
-  Open*)
+  "Open Tor Browser")
     open_tor_browser ;;
+
+  # OnionShare runs in this terminal: its address and private key are shown here
+  # only, never written to the case or the audit log
+  "OnionShare: receive"*)
+    onionshare_ready || exit 1
+    ui_question "Receive files into case $(ns_case)
+
+OnionShare starts a private .onion drop box. Give its address and private key to your source over a channel you trust; they open it in Tor Browser and upload files (or send text).
+
+- Received files are UNTRUSTED: don't run programs or enable macros, and open documents only here in the VM.
+- The address and key are shown in this terminal only, never saved to the case.
+- Press Ctrl+C here to close the drop box. What arrived is then hashed and sealed in the case.
+
+Start the drop box?" || exit 0
+    title=$(ui_entry "Title the sender sees (optional, e.g. your organisation):") || title=""
+    out=$(ns_outdir received onionshare)
+    ns_audit ns-darkweb:onionshare "receive" "drop box opened (address and key not logged)"
+    printf '\nOnionShare drop box: send the source the address AND the private key shown below.\nPress Ctrl+C to close it.\n\n'
+    ( cd "$out" && onionshare-cli --receive --data-dir "$out/files" ${title:+--title "$title"} ) || true
+    n=$(find "$out/files" -type f 2>/dev/null | wc -l | tr -d ' ')
+    { echo "Received over OnionShare (receive mode) into case $(ns_case), closed $(date -u '+%Y-%m-%dT%H:%M:%SZ')"
+      echo "Files: $n (untrusted: received from an outside source)"
+      find "$out/files" -type f 2>/dev/null | sort | while IFS= read -r f; do
+        printf '%s  %s\n' "$(ns_hash_file "$f")" "${f#"$out/"}"; done
+    } > "$out/received.txt"
+    ns_audit ns-darkweb:onionshare "receive" "drop box closed: $n file(s) received"
+    ns_finish "$out" ;;
+
+  "OnionShare: send"*)
+    onionshare_ready || exit 1
+    files=$(ui_files "Choose what to send (for example a case export from $NS_DATA/Exports)") || exit 0
+    set --
+    while IFS= read -r f; do [ -f "$f" ] && set -- "$@" "$f"; done <<FILES
+$files
+FILES
+    [ $# -gt 0 ] || exit 0
+    ui_question "Send $# file(s) over OnionShare
+
+- The recipient needs Tor Browser, the .onion address and the private key. Send the address and the key by two different channels you trust.
+- Sharing stops after the first complete download, or when you press Ctrl+C here.
+- The address and key are shown in this terminal only. The audit log records what was sent and its SHA-256, not how to reach it.
+
+Start sharing?" || exit 0
+    for f in "$@"; do ns_audit ns-darkweb:onionshare "$(basename "$f")" "sent over OnionShare: sha256 $(ns_hash_file "$f")"; done
+    printf '\nOnionShare: give the recipient the address AND the private key shown below.\n\n'
+    onionshare-cli "$@" || true ;;
+
+  "Open the OnionShare app")
+    if ui_mac && [ -d /Applications/OnionShare.app ]; then open -a OnionShare
+    elif ns_cmd flatpak && flatpak info org.onionshare.OnionShare >/dev/null 2>&1; then
+      ( setsid flatpak run org.onionshare.OnionShare >/dev/null 2>&1 & )
+    else ui_error "OnionShare isn't installed. Run: ./install.sh --only darkweb"; fi ;;
 esac

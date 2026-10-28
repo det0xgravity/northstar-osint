@@ -104,6 +104,9 @@ def main(argv):
         m = mode(d)
         if m is not None and m & 0o077:
             problems.append(f"{d} is readable by other accounts: run chmod 700 {d}")
+    if sys.platform.startswith("linux"):
+        on = os.path.exists("/etc/northstar/lan-block.nft")
+        say("LAN isolation (ns-lan): " + ("on" if on else "off: this machine can connect to your local network"))
     ports = {3389: "xrdp (remote desktop)", 4000: "amass engine", 9050: "Tor SOCKS proxy"}
     for p, what in ports.items():
         say(f"Port {p} ({what}): {'listening' if listening(p) else 'not listening'}")

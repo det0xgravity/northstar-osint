@@ -63,7 +63,7 @@ LABELS = {"username": "Username search", "variants": "Username variants", "email
           "capture": "Page capture", "metadata": "Metadata", "image": "Image analysis", "ocr": "Text in images (OCR)",
           "same-photo": "Same-photo finder", "video": "Video verification", "geo": "Photo geolocation",
           "shadow": "Shadow analysis", "face": "Face comparison", "map": "Case map", "translation": "Translation",
-          "breach": "Breach data", "darkweb": "Dark web", "ransomware": "Ransomware claims", "subject": "Subject"}
+          "breach": "Breach data", "darkweb": "Dark web", "received": "Received files (OnionShare)", "ransomware": "Ransomware claims", "subject": "Subject"}
 IMAGE_EXT = (".png", ".jpg", ".jpeg", ".webp", ".gif")
 TEXT_SKIP = {"console.log", "page.html.txt", "manifest.sha256", ".ns-tools"}
 PRIORITY_TEXT = ["summary.txt", "sherlock.txt", "rdap.txt", "dns.txt", "live.txt", "subdomains.txt", "links.txt",

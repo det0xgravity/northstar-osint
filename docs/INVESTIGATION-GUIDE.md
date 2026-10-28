@@ -98,6 +98,8 @@ In UTM, with the VM shut down, take a snapshot called *clean baseline*. Go back 
 
 Every search leaves from the VM's internet connection. If your organisation requires a VPN or a dedicated research line, connect it **before** you open the browser or run any menu. Check your public IP in the browser before you start.
 
+**LAN isolation.** In a VM, northstar blocks connections from the VM to your own network (router, NAS, printers, other machines), so nothing you open during an investigation can reach them. Check it's on with main menu → **LAN isolation (firewall)** → **Status**. If your cases are saved to a NAS, allow it there.
+
 ### 1.4 Research accounts and API keys
 
 - **Research accounts** ("sock puppets") only, never your personal accounts: for Telegram, Instagram and anything else that needs a login. Create them under your organisation's policy.
@@ -444,7 +446,7 @@ The report's hash is written to the contemporaneous notes. **Read the whole .doc
 
 1. Case → **Verify notes and audit log**: both chains should report 0 broken.
 2. **Evidence & exhibits** → **Export the case (archive + SHA-256)**: a `.tar.gz` of the whole case in `~/Northstar/Exports/`, readable only by you, with a `.sha256` beside it.
-3. Submit `report.docx` with `hashes.sha256` (and the export, if the recipient needs the evidence) through your organisation's approved channel, and send the SHA-256 values separately so they can check what they received.
+3. Submit `report.docx` with `hashes.sha256` (and the export, if the recipient needs the evidence) through your organisation's approved channel, and send the SHA-256 values separately so they can check what they received. If no approved channel exists and the recipient has Tor Browser, **Dark web** → **OnionShare: send files over a private .onion link** sends them end to end encrypted; give the address and the private key by two different channels.
 4. If someone else takes over, give them **Handover.md**: intake and lawful basis, integrity, findings and report status, the last review, open leads and owners, next steps and decisions.
 5. Case → **Close this case (verify, export, mark closed)**. Before closing, northstar checks that the notes, audit log and exhibits verify, a report has been built since the last change to findings, a review covers the current findings and summary, the intake is complete and no leads are open. Anything not done is listed; if you close anyway, the open points are written to the notes. Nothing is deleted, and scheduled page checks skip closed cases.
 
