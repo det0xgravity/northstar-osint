@@ -121,7 +121,7 @@ check "a change on a watched page is detected" "ns_watch check '$CASE'; [ \$? -e
 kill "$srv" 2>/dev/null
 
 section "Shadow analysis"
-SFPY=$(ls "$HOME"/.local/share/pipx/venvs/shadowfinder/bin/python "$HOME"/.local/pipx/venvs/shadowfinder/bin/python 2>/dev/null | head -1)
+SFPY=$(ls "$NS_HOME"/venvs/shadowfinder/bin/python "$HOME"/.local/share/pipx/venvs/shadowfinder/bin/python "$HOME"/.local/pipx/venvs/shadowfinder/bin/python 2>/dev/null | head -1)
 if [ -n "$SFPY" ]; then
   check "ShadowFinder's libraries load and find the time zone" \
     "'$SFPY' -c 'import shadowfinder, cartopy.crs, cartopy.feature; from timezonefinder import TimezoneFinder; print(TimezoneFinder(in_memory=True).timezone_at(lng=-9.14, lat=38.72))' | grep -q Europe/Lisbon"

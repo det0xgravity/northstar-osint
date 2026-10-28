@@ -33,22 +33,26 @@ mod_geo() {
 
 # ShadowFinder 0.7.1 caps cartopy below 0.25 and timezonefinder below 7, which
 # have no Python 3.14 wheels (Ubuntu 26.04), so pip tries to compile them and
-# fails. On 3.14+ install it without its own pins, then current releases of
-# those two (same APIs) and its other dependencies as it declares them.
+# fails. On 3.14+ it goes in a private venv without its own pins (pipx won't
+# install a package whose declared dependencies it can't find), with current
+# releases of those two (same APIs) and its other dependencies as declared.
 ns_shadowfinder() {
   python3 -c 'import sys; sys.exit(sys.version_info < (3, 14))' || { ns_pipx shadowfinder; return; }
-  if [ -x "$HOME/.local/bin/shadowfinder" ] || ns_has shadowfinder; then
+  local venv="$NS_VENVS/shadowfinder" log
+  if [ -x "$venv/bin/shadowfinder" ] && [ "$NS_UPDATE" != 1 ]; then
     ns_info "shadowfinder ✓"; return 0
   fi
-  local log; log=$(mktemp)
-  if ns_bg "$log" "pipx: shadowfinder" pipx install --pip-args=--no-deps shadowfinder \
-     && ns_bg "$log" "pipx: shadowfinder libraries" pipx inject shadowfinder "cartopy>=0.26" "timezonefinder[pytz]>=6.5" \
+  log=$(mktemp)
+  mkdir -p "$NS_VENVS" "$NS_BIN"
+  if { [ -x "$venv/bin/pip" ] || python3 -m venv "$venv" >>"$log" 2>&1; } \
+     && ns_pip "$log" "pip: shadowfinder" "$venv/bin/pip" install -q -U --no-deps shadowfinder \
+     && ns_pip "$log" "pip: shadowfinder libraries" "$venv/bin/pip" install -q -U "cartopy>=0.26" "timezonefinder[pytz]>=6.5" \
           "matplotlib>=3.8,<4" "fire>=0.5,<1" "pandas>=2.2,<3" "numpy>=1" "pytz>=2025" "suncalc>=0.1.3,<0.2"; then
+    ln -sf "$venv/bin/shadowfinder" "$NS_BIN/shadowfinder"
     ns_info "shadowfinder installed (current cartopy and timezonefinder, for Python 3.14)"
     rm -f "$log"
   else
-    ns_warn "pipx failed: shadowfinder"; ns_show_tail "$log"; rm -f "$log"
-    pipx uninstall shadowfinder >/dev/null 2>&1      # so the next update tries again
+    ns_warn "shadowfinder install failed"; ns_show_tail "$log"; rm -f "$log"
     return 1
   fi
 }
