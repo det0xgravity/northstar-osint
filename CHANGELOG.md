@@ -7,6 +7,10 @@ All notable changes to this project are documented here. The format follows
 ## [0.39.0] - 2026-10-28
 
 ### Added
+- **Crypto addresses in Selectors:** Bitcoin (legacy, P2SH, bech32 and
+  bech32m, checksum-verified) and Ethereum-style addresses, read from tool
+  results and also from captured onion pages and Telegram posts and messages,
+  with pivots to the Crypto bookmarks.
 - **QGIS** (`gis` module; Flathub, verified, or Homebrew): Case map → Open
   the latest case map in QGIS opens the case's GeoJSON offline.
 - **File triage** (`triage` module, `ns_triage`): Evidence → Check received

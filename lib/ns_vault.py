@@ -1208,12 +1208,14 @@ def cmd_new(case_dir, kind, title):
 # --- selectors, accounts and the link chart ---------------------------------------------------
 SEL_TYPES = [("username", "Usernames"), ("email", "Emails"), ("phone", "Phone numbers"), ("domain", "Domains"),
              ("ip", "IP addresses"), ("onion", "Onion addresses"), ("telegram", "Telegram IDs"),
-             ("coordinates", "Coordinates"), ("url", "Profile URLs")]
+             ("coordinates", "Coordinates"), ("crypto", "Crypto addresses"), ("url", "Profile URLs")]
 RX = {"email": re.compile(r"\b[A-Za-z0-9._%+-]{1,64}@[A-Za-z0-9.-]{1,190}\.[A-Za-z]{2,24}\b"),
       "onion": re.compile(r"\b[a-z2-7]{56}\.onion\b"),
       "ip": re.compile(r"\b(?:(?:25[0-5]|2[0-4]\d|1?\d?\d)\.){3}(?:25[0-5]|2[0-4]\d|1?\d?\d)\b"),
       "phone": re.compile(r"(?<![\w+])\+\d[\d ().-]{6,18}\d"),
-      "domain": re.compile(r"^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,24}$")}
+      "domain": re.compile(r"^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,24}$"),
+      # Bitcoin (legacy, P2SH, bech32/bech32m) and Ethereum-style addresses; checked in crypto_ok()
+      "crypto": re.compile(r"(?<![A-Za-z0-9])(?:[13][1-9A-HJ-NP-Za-km-z]{25,34}|bc1[02-9ac-hj-np-z]{11,71}|0x[0-9a-fA-F]{40})(?![A-Za-z0-9])")}
 # Which result kinds a search target is, and next steps per selector type (menu paths, shown as text)
 TARGET_TYPE = {"username": "username", "email": "email", "ghunt": "email", "domain": "domain", "crawl": "domain",
                "lookalike": "domain", "telegram": "telegram", "darkweb": "onion"}
@@ -1228,10 +1230,53 @@ PIVOTS = {"username": [("Username & email → Username search", "Username search
           "onion": [("Dark web → capture the page", "Dark web")],
           "telegram": [("Telegram → User profile / Look up", "Telegram")],
           "coordinates": [("Case map → Add a place", "Case map"), ("Photo geolocation", "Photo geolocation")],
-          "url": [("Capture web pages", "Page capture")]}
+          "url": [("Capture web pages", "Page capture")],
+          "crypto": [("Bookmarks → Crypto (Blockchair, WalletExplorer, Etherscan)", "Crypto lookup"),
+                     ("Breach data / Dark web: search the address as text", "Dark web")]}
 
 
 SEARCHED = "(search target)"        # listed, but a search target isn't something a tool saw
+
+
+B58 = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz"
+BECH32 = "qpzry9x8gf2tvdw0s3jn54khce6mua7l"
+
+
+def bech32_ok(addr):
+    """BIP 173/350: bech32 (witness v0) or bech32m (v1+) checksum."""
+    hrp, _, data = addr.lower().rpartition("1")
+    if hrp != "bc" or len(data) < 7 or any(c not in BECH32 for c in data):
+        return False
+    vals = [BECH32.index(c) for c in data]
+    chk = 1
+    for v in [ord(c) >> 5 for c in hrp] + [0] + [ord(c) & 31 for c in hrp] + vals:
+        top = chk >> 25
+        chk = (chk & 0x1ffffff) << 5 ^ v
+        for i, g in enumerate((0x3b6a57b2, 0x26508e6d, 0x1ea119fa, 0x3d4233dd, 0x2a1462b3)):
+            chk ^= g if (top >> i) & 1 else 0
+    return chk == (1 if vals[0] == 0 else 0x2bc830a3)
+
+
+def base58check_ok(addr):
+    n = 0
+    for c in addr:
+        n = n * 58 + B58.index(c)
+    raw = n.to_bytes(25, "big") if n.bit_length() <= 200 else b""
+    return len(raw) == 25 and raw[0] in (0, 5) and hashlib.sha256(hashlib.sha256(raw[:21]).digest()).digest()[:4] == raw[21:]
+
+
+def crypto_ok(v):
+    """A real address, not just the right shape: Bitcoin checksums are verified (a random string
+    of the right shape fails 1 time in 4 billion); Ethereum-style 0x addresses can only be checked
+    for shape here (EIP-55 needs Keccak-256, which Python doesn't ship)."""
+    if v.startswith("0x"):
+        return len(v) == 42 and v[2:] not in ("0" * 40, "f" * 40)
+    if v.lower().startswith("bc1"):
+        return (v == v.lower() or v == v.upper()) and bech32_ok(v)
+    try:
+        return base58check_ok(v)
+    except ValueError:
+        return False
 
 
 def norm(kind, v):
@@ -1249,6 +1294,9 @@ def norm(kind, v):
     if kind == "phone":
         d = re.sub(r"[^\d+]", "", v)
         return d if 8 <= len(d.lstrip("+")) <= 15 else ""
+    if kind == "crypto":
+        v = v.lower() if v.lower().startswith(("bc1", "0x")) else v
+        return v if crypto_ok(v) else ""
     if kind == "coordinates":
         try:
             lat, lon = (float(x) for x in v.split(","))
@@ -1303,6 +1351,10 @@ def extract(case_dir, result_dir, info, console, files):
         scan(base["summary.txt"], ("email",))
     if "onion_addresses.txt" in base:
         scan(base["onion_addresses.txt"], ("onion",))
+    # Crypto addresses are checksum-verified, so free text is safe to read for them
+    for n in ("page.txt", "posts.csv", "messages.csv", "links.txt", "summary.txt"):
+        if n in base:
+            scan(base[n], ("crypto",))
     for n in ("lookup.json", "user.json", "chat.json"):
         d = read_json(os.path.join(result_dir, base[n]), {}) if n in base else {}
         if isinstance(d, dict):

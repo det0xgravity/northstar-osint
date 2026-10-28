@@ -461,9 +461,13 @@ touch "$SC/domain/example.com_20261027-130000/console.log"
 printf 'www.example.com\nmail.example.com\n' > "$SC/domain/example.com_20261027-130000/subdomains.txt"
 printf 'Registrant: admin@example.com, +1 613 555 0123\n' > "$SC/domain/example.com_20261027-130000/rdap.txt"
 printf -- '---\ntype: person\n---\n# Jane Doe\n' > "$SC/People/Jane Doe.md"
+mkdir -p "$SC/darkweb/forum_20261027-140000"; touch "$SC/darkweb/forum_20261027-140000/console.log"
+printf 'Pay BTC 1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa or bc1qar0srrr7xfkvy5l643lydnw9re59gtzzwf5mdq\nTypo 1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNb\nETH 0x52908400098527886E0F7030069857D2E4169EE7\n' > "$SC/darkweb/forum_20261027-140000/page.txt"
 printf -- '---\ntype: account\nplatform: reddit.com\nusername: "jdoe"\nowner: "[[Jane Doe]]"\n---\n# My reddit note\n' > "$SC/Accounts/reddit.com - jdoe.md"
 python3 "$R/lib/ns_vault.py" refresh "$SC" > /dev/null
 check "selectors are collected and typed" "grep -q '^| \`jdoe\` | 2 (maigret, sherlock)' '$SC/Selectors.md' && grep -q 'admin@example.com' '$SC/Selectors.md' && grep -q '+16135550123' '$SC/Selectors.md' && grep -q 'mail.example.com' '$SC/Selectors.md'"
+check "crypto addresses are collected only when their checksum is valid" \
+  "grep -q '## Crypto addresses' '$SC/Selectors.md' && grep -q 1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa '$SC/Selectors.md' && grep -q bc1qar0srrr7xfkvy5l643lydnw9re59gtzzwf5mdq '$SC/Selectors.md' && grep -q 0x52908400098527886e0f7030069857d2e4169ee7 '$SC/Selectors.md' && ! grep -q 1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNb '$SC/Selectors.md'"
 check "pivots already run are marked done" "grep '^| \`jdoe\`' '$SC/Selectors.md' | grep -q '✓ Username'"
 check "an account reported by two tools gets an Account note" "grep -q 'Reported by 2 tools (unverified)' '$SC/Accounts/github.com - jdoe.md'"
 check "an Account note you wrote is left alone" "grep -q '^# My reddit note' '$SC/Accounts/reddit.com - jdoe.md' && ! grep -q 'northstar:auto' '$SC/Accounts/reddit.com - jdoe.md'"
