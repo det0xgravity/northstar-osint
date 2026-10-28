@@ -1,31 +1,31 @@
 # Menus
 
-All menus save their output to `~/Northstar/Cases/<active case>/<kind>/<target>_<timestamp>/`, seal it with `manifest.sha256` and `provenance.json`, and add a line to the case's hash-chained `audit.log`. Each result folder also has a `console.log` with everything the tools printed. When a tool you started on its own finishes, its folder opens automatically. From the main menu, use **Open latest results** instead, so the menu stays in front.
+All menus save their output to `~/TrueBearing/Cases/<active case>/<kind>/<target>_<timestamp>/`, seal it with `manifest.sha256` and `provenance.json`, and add a line to the case's hash-chained `audit.log`. Each result folder also has a `console.log` with everything the tools printed. When a tool you started on its own finishes, its folder opens automatically. From the main menu, use **Open latest results** instead, so the menu stays in front.
 
-Launch everything from `northstar`, or each tool on its own (`ns-domain`, etc.) from a terminal or the applications menu.
+Launch everything from `truebearing`, or each tool on its own (`tb-domain`, etc.) from a terminal or the applications menu.
 
-## northstar
+## True Bearing
 
 The hub. Besides opening each menu, it lets you:
 
 - **Switch / create case**: sets the active case. Names are sanitised to letters, numbers, `.`, `_`, `@` and `-`.
 - **Open latest results**: the folder from the last search you ran
 - **Open case folder**
-- **LAN isolation (firewall)**: `ns-lan`, see [below](#ns-lan-linux).
-- **Guides (how to investigate, manuals)**: these guides as offline web pages (`ns-guides`). They're also linked on the desktop.
-- **Health check**: `ns-doctor`.
-- **Update northstar**: runs `ns-update`.
+- **LAN isolation (firewall)**: `tb-lan`, see [below](#tb-lan-linux).
+- **Guides (how to investigate, manuals)**: these guides as offline web pages (`tb-guides`). They're also linked on the desktop.
+- **Health check**: `tb-doctor`.
+- **Update True Bearing**: runs `tb-update`.
 
-## ns-missing
+## tb-missing
 
 **Missing person**: subject profile, a timeline built from the whole case and placed relative to the last-seen moment, a findings (CTF flag) log with evidence hashes, duplicate warnings and an export, and **Missing-persons databases** (a country's missing-persons search with the subject's name pre-filled). See [MISSING-PERSONS.md](MISSING-PERSONS.md).
 
-## ns-username
+## tb-username
 
 | Option | Runs | Output |
 |---|---|---|
 | Username search | sherlock, maigret (HTML report), socialscan, blackbird; opens WhatsMyName and a Google search | `sherlock.txt`, `maigret/`, `blackbird/` (CSV, JSON), `console.log` |
-| Email search | holehe (registered sites only), socialscan; opens HIBP, Epieos, IntelX. For breach data use **Breach data** (`ns-breach`) | `console.log` |
+| Email search | holehe (registered sites only), socialscan; opens HIBP, Epieos, IntelX. For breach data use **Breach data** (`tb-breach`) | `console.log` |
 | Google account | `ghunt email` | `ghunt.json` |
 | Generate username and email variants | From a full name and birth year (pre-filled from the Missing person profile): likely usernames (`janedoe`, `jane.doe`, `jdoe`, `janedoe99`, …; accents removed, compound surnames handled) and emails at common providers. Optionally checks the top 10 usernames with Sherlock and the top 10 emails with holehe | `usernames.txt`, `emails.txt`, `sherlock/`, `console.log` |
 | Instagram profile details | toutatis (session ID **redacted** from the audit log) | `console.log` |
@@ -35,7 +35,7 @@ The search term is copied to your clipboard for the web services that open.
 
 **Adult (NSFW) sites** are left out of username searches unless the case allows them (Case → **Adult-site (NSFW) searches**). Then Sherlock adds its NSFW sites (`--nsfw`), Maigret also checks every site it tags porn, erotic or webcam (a second report in `maigret-adult/`), and Blackbird keeps its NSFW sites (otherwise `--no-nsfw`). Each result folder's `search-settings.txt` says which applied. Dating sites are searched either way. Username variants are never checked against adult sites: they're guesses.
 
-## ns-telegram
+## tb-telegram
 
 Telegram research. The first options need no account: they read Telegram's public web pages (text only). The rest use a Telegram **research** account, never a personal one.
 
@@ -50,12 +50,12 @@ Telegram research. The first options need no account: they read Telegram's publi
 | User profile | ID, names, all usernames, bio, premium, birthday and personal channel when public, chats in common with the research account, and the current profile photo | `user.json`, `profile_photo.jpg` |
 | Collect a public channel | [telegram-tracker](https://github.com/estebanpdl/telegram-tracker): posts, channel metadata and forward sources, optionally since a date, then a dataset and forward network | `data/` |
 | Collect a list of channels | The same for every channel in a text file (`name`, `@name` or t.me links) | `channels.txt`, `data/` |
-| Log in for searches | One-time login in the terminal for the searches above. Add the API ID and hash from [my.telegram.org/apps](https://my.telegram.org/apps) under **API keys** first, then type the phone number, Telegram's code and the 2FA password. The session is kept in `~/.config/northstar/telegram/` (readable only by you) | |
+| Log in for searches | One-time login in the terminal for the searches above. Add the API ID and hash from [my.telegram.org/apps](https://my.telegram.org/apps) under **API keys** first, then type the phone number, Telegram's code and the 2FA password. The session is kept in `~/.config/truebearing/telegram/` (readable only by you) | |
 | Log in for channel collection | telegram-tracker's own login, saved in `~/.telegram_tracker` | |
 
-Searches are read-only, but they use the account: Telegram rate-limits heavy use and the menu says how long to wait. Viewing doesn't notify anyone, but joining a group or messaging someone would: don't. Neither the API hash nor the login code ever reaches `audit.log`, and `ns-seal` removes both sessions from template clones.
+Searches are read-only, but they use the account: Telegram rate-limits heavy use and the menu says how long to wait. Viewing doesn't notify anyone, but joining a group or messaging someone would: don't. Neither the API hash nor the login code ever reaches `audit.log`, and `tb-seal` removes both sessions from template clones.
 
-## ns-domain
+## tb-domain
 
 | Option | Runs | Output |
 |---|---|---|
@@ -70,7 +70,7 @@ Searches are read-only, but they use the account: Telegram rate-limits heavy use
 
 You can paste a full URL as the domain. The scheme, path and `www.` are stripped automatically, and anything that isn't a valid domain name is refused.
 
-## ns-media
+## tb-media
 
 | Option | Runs | Notes |
 |---|---|---|
@@ -84,7 +84,7 @@ You can paste a full URL as the domain. The scheme, path and `www.` are stripped
 
 Addresses must start with `http://` or `https://`, so nothing typed in can be mistaken for a command-line option.
 
-## ns-archive
+## tb-archive
 
 Evidence-grade web page capture. Each page gets its own folder:
 
@@ -97,7 +97,7 @@ Evidence-grade web page capture. Each page gets its own folder:
 
 Options: capture one page, capture a list of URLs from a text file, or look up existing archived copies (Wayback, archive.today, Ghostarchive). The folder is sealed, you can record it as an exhibit straight away, and archive.today opens so you can add an independent public copy (it needs a CAPTCHA). Pages are fetched over your own connection: use a VPN if your work needs it.
 
-## ns-video
+## tb-video
 
 Video verification, from a URL (downloaded with yt-dlp, plus its info JSON, description, thumbnail and comments) or a local file (copied with its timestamps, and the original's SHA-256 recorded).
 
@@ -110,7 +110,7 @@ Video verification, from a URL (downloaded with yt-dlp, plus its info JSON, desc
 
 Transcription runs entirely on your computer. The first time, it downloads a ~500 MB speech model; after that, nothing is sent anywhere. At the end, the reverse image search pages and the frames folder open so you can drag in the most distinctive frames.
 
-## ns-geo
+## tb-geo
 
 Photo geolocation. **Images never leave your computer.** Only coordinates are looked up, and only if you agree.
 
@@ -123,7 +123,7 @@ Photo geolocation. **Images never leave your computer.** Only coordinates are lo
 
 GeoCLIP is often right to the country or region, sometimes the city, rarely the street. Treat its candidates as leads, and confirm them with street-level imagery, landmarks and shadows. The first run downloads its model (about 2 GB). Never upload victim photos, especially of minors, to online services; this menu keeps them on your machine.
 
-## ns-face
+## tb-face
 
 Face comparison **within the active case only**: a reference face (for example a missing-person poster) against faces in photos you've already collected in the case. It runs locally with OpenCV's YuNet detector (MIT) and SFace recogniser (Apache-2.0). Nothing is uploaded, and no outside or online photos are searched.
 
@@ -141,7 +141,7 @@ Face comparison **within the active case only**: a reference face (for example a
 
 Accuracy drops for small, blurred or angled faces, children, large age gaps, and differs between demographic groups. A score is a lead for human review and independent corroboration, never an identification on its own. Faces are biometric data: you need a lawful basis to process them, and images of minors only with a law-enforcement partner or equivalent authority.
 
-## ns-watch
+## tb-watch
 
 Page monitoring: watch public pages (a subject's profile, a `t.me/s/<channel>` preview, a fundraising or missing-person post) for changes, as proof of life or new activity. Each page's visible text is compared with the last snapshot. Pages that need a login or render entirely in JavaScript can't be watched this way.
 
@@ -155,7 +155,7 @@ Page monitoring: watch public pages (a subject's profile, a `t.me/s/<channel>` p
 
 Everything is kept in the case's `watch/` folder: `watches.json`, a text snapshot and a diff for every change under `watch/<ID>/` (UTC file names), and `changes.log`. Every baseline and change is also written to the hash-chained `audit.log`. Checks come from your own connection, so keep the number of watched pages and the frequency modest.
 
-## ns-map
+## tb-map
 
 Every coordinate in the active case on one map.
 
@@ -167,20 +167,20 @@ Every coordinate in the active case on one map.
 
 **Build the case map** writes `case.geojson` and `case.kml` (open them offline in QGIS or Google Earth Pro; **Open the latest case map in QGIS** does it for you, with no background map until you add one), `points.csv`, and `map.html`, an interactive map with a layer for each kind. Opening `map.html` loads Leaflet from unpkg (pinned and integrity-checked) and map tiles from CARTO or OpenStreetMap, so those services see which areas you view; the menu asks first. Address lookups use OpenStreetMap Nominatim and are logged in the audit log. Recorded places are kept in the case's `map/places.csv`.
 
-## ns-translate
+## tb-translate
 
 Offline text translation with [Argos Translate](https://github.com/argosopentech/argos-translate) (MIT). The text never leaves your computer: only the one-time download of each language model (about 100 MB per pair) uses the internet. Pairs without a direct model go through English.
 
 | Option | What it does |
 |---|---|
 | Translate text | Translates a short passage, shows it and copies it to the clipboard |
-| Translate text files | Posts, transcripts (`ns-video`), subtitles (`.srt`, `.vtt`), captured page text: each file is copied into the result folder beside `<name>.<language>.<ext>` |
+| Translate text files | Posts, transcripts (`tb-video`), subtitles (`.srt`, `.vtt`), captured page text: each file is copied into the result folder beside `<name>.<language>.<ext>` |
 
 Results are saved under `translation/` in the case and sealed. Machine translation is a lead: slang, names and dialect are often wrong, so have anything that matters checked by a qualified translator. For speech, use Video verification, which transcribes and translates the audio.
 
-## ns-notes
+## tb-notes
 
-**Notes (Obsidian)**: `~/Northstar/Cases` is one [Obsidian](https://obsidian.md) vault that works as the case hub, from intake to the final report.
+**Notes (Obsidian)**: `~/TrueBearing/Cases` is one [Obsidian](https://obsidian.md) vault that works as the case hub, from intake to the final report.
 
 | In each case | What it is |
 |---|---|
@@ -191,7 +191,7 @@ Results are saved under `translation/` in the case and sealed. Machine translati
 | `Handover.md` | For whoever takes the case over: intake and lawful basis, integrity checks, where the findings and report stand, the last review, open leads with who owns them (**assigned_to**), unticked next steps from Case.md, decisions (contemporaneous notes that start with `DECISION:`) and the latest notes |
 | `Selectors.md` | Every identifier the tools reported (usernames, emails, phone numbers, domains, IP and onion addresses, Telegram IDs, coordinates, crypto addresses, profile URLs), read from each tool's result files, never from whole captured pages. The exception is **crypto addresses** (Bitcoin legacy, P2SH and bech32, and Ethereum-style `0x…`), which are also read from captured onion pages, Telegram posts and messages: Bitcoin addresses are kept only if their checksum is valid, so a typo or a random string never appears; `0x…` addresses can only be checked for shape. For each: how many different tools saw it, when it was first seen, the result notes it's in, and the searches that would take it further (✓ marks one already run on that value). Candidate usernames from the variants tool aren't included: they're guesses |
 | `Accounts.md` | Account tool hits merged across tools. Accounts reported by two or more tools get a generated Account note (`Accounts/`), labelled unverified, where you record whether it's verified and whose it is. Account notes you write yourself are never changed |
-| `Link chart.canvas` | A link chart (Obsidian's core Canvas): people, accounts and identifiers seen by two or more tools, with "owned by" and username links. Rebuilt while you haven't changed it; once you edit it, northstar writes `Link chart (generated).canvas` beside it instead |
+| `Link chart.canvas` | A link chart (Obsidian's core Canvas): people, accounts and identifiers seen by two or more tools, with "owned by" and username links. Rebuilt while you haven't changed it; once you edit it, True Bearing writes `Link chart (generated).canvas` beside it instead |
 | `People/`, `Accounts/`, `Organisations/`, `Places/`, `Events/`, `Leads/` | Working notes from the templates in `Cases/_templates/` |
 
 | Option | What it does |
@@ -234,11 +234,11 @@ Results are saved under `translation/` in the case and sealed. Machine translati
 
 Each result note opens with **Highlights** for its tool (hits and the tools that reported them, subdomain and live-host counts and registration details, breach summary lines, Telegram IDs and member or message counts, top face-comparison scores with the similarity caveat, top GeoCLIP estimates with the caveat that they're leads, dark-web page details, downloaded media titles). Notes for result folders that have been deleted are removed, or kept with **folder_missing: true** if you wrote in them.
 
-**Finding your way:** `Home.md` has ready-made searches (findings for the report, unverified accounts, open leads, results not yet reviewed, searches that saved nothing), and Obsidian's bookmarks get a **northstar** group with every case's dashboard, chronology, selectors, accounts, handover and results.
+**Finding your way:** `Home.md` has ready-made searches (findings for the report, unverified accounts, open leads, results not yet reviewed, searches that saved nothing), and Obsidian's bookmarks get a **True Bearing** group with every case's dashboard, chronology, selectors, accounts, handover and results.
 
-**Times:** every time northstar writes is UTC (properties ending `_utc`). Obsidian's own Templates command fills `{{date}}` with your computer's local date: use it only for `created`, and give event and finding times in UTC.
+**Times:** every time True Bearing writes is UTC (properties ending `_utc`). Obsidian's own Templates command fills `{{date}}` with your computer's local date: use it only for `created`, and give event and finding times in UTC.
 
-**Look:** a northstar theme snippet, and a snippet that hides raw tool folders and case files from the file list. Links and embeds still work; to browse them, turn off **northstar-hide-raw** in Settings → Appearance → CSS snippets.
+**Look:** a True Bearing theme snippet, and a snippet that hides raw tool folders and case files from the file list. Links and embeds still work; to browse them, turn off **truebearing-hide-raw** in Settings → Appearance → CSS snippets.
 
 **Safety:**
 - **Result notes are views of the sealed folders;** your conclusions live in Findings.
@@ -246,7 +246,7 @@ Each result note opens with **Highlights** for its tool (hits and the tools that
 - **`notes.md` is read-only on disk,** so Obsidian can't edit it by accident. Add to it through Case → Add a note.
 - **Community plugins stay off** unless you turn them on.
 
-## ns-metadata
+## tb-metadata
 
 | Option | Runs | Output |
 |---|---|---|
@@ -255,7 +255,7 @@ Each result note opens with **Highlights** for its tool (hits and the tools that
 | Make clean copies | Copies files, then strips metadata with mat2 (or exiftool) | Cleaned copies. **Originals are never modified.** |
 | Make a scanned PDF searchable | OCRmyPDF on a copy (pages that already have text are skipped) | `<name>.original.pdf`, `<name>.searchable.pdf`, `<name>.txt` |
 
-## ns-image
+## tb-image
 
 | Option | What happens |
 |---|---|
@@ -265,38 +265,38 @@ Each result note opens with **Highlights** for its tool (hits and the tools that
 | Analyze a local image | Copies the image to the case, saves its EXIF and a SHA-256 hash, opens Maps if GPS is present, and opens reverse-search pages ready for drag-and-drop |
 | Face search engines (online; read the warning) | Opens PimEyes, FaceCheck.ID, Search4faces and Lenso.ai, after a warning: the photo leaves your computer, a face is biometric data, results are look-alikes, not identifications. It won't open them if the person could be under 18 or the photo is of a victim, and asks for your reason and lawful basis, written to the notes as a `DECISION:` and to the audit log. The bookmark of the same name opens the warning as a page, which records nothing |
 
-## ns-country
+## tb-country
 
-Country-specific public-records searches. `ns-country` asks for a country, or takes a code: `ns-country GB`. `ns-canada` opens the Canada pack directly. See [COUNTRIES.md](COUNTRIES.md).
+Country-specific public-records searches. `tb-country` asks for a country, or takes a code: `tb-country GB`. `tb-canada` opens the Canada pack directly. See [COUNTRIES.md](COUNTRIES.md).
 
-## ns-breach
+## tb-breach
 
 Breach and infostealer lookups by email, username, domain or phone, a password exposure check, and HIBP's breach catalogue. Free sources always run; paid ones run with your API keys. See [BREACH-DARKWEB.md](BREACH-DARKWEB.md).
 
-## ns-darkweb
+## tb-darkweb
 
 Tor connection check, onion search (Ahmia), text-only capture of an onion page, ransomware leak-site claims, Tor Browser, and OnionShare: a private drop box that receives files from a source into the case, and sending files (such as a case export) over a private .onion link. See [BREACH-DARKWEB.md](BREACH-DARKWEB.md).
 
-## ns-lan *(Linux)*
+## tb-lan *(Linux)*
 
-**LAN isolation (firewall)** in the main menu. An nftables table (`inet northstar_lan`) that stops this machine from **opening** connections to private networks: `10.0.0.0/8`, `172.16.0.0/12`, `192.168.0.0/16`, carrier-grade NAT `100.64.0.0/10`, link-local, multicast, and their IPv6 equivalents. A hostile page, document or tool output opened during an investigation then can't reach your router's admin page, NAS, printers, other VMs or the hypervisor host.
+**LAN isolation (firewall)** in the main menu. An nftables table (`inet truebearing_lan`) that stops this machine from **opening** connections to private networks: `10.0.0.0/8`, `172.16.0.0/12`, `192.168.0.0/16`, carrier-grade NAT `100.64.0.0/10`, link-local, multicast, and their IPv6 equivalents. A hostile page, document or tool output opened during an investigation then can't reach your router's admin page, NAS, printers, other VMs or the hypervisor host.
 
 What still works: the internet, DNS and DHCP from the local router, IPv6 neighbour discovery, and replies to connections made **to** this machine, so RDP from Kasm and SSH keep working.
 
 | Option (or command) | What it does |
 |---|---|
-| Status (`ns-lan status`) | On or off, the allow list, and how many packets have been blocked |
-| Turn on / off (`ns-lan on`, `ns-lan off`) | Loads or removes the rules; a systemd service (`northstar-lan-block`) loads them at every boot |
-| Allow an address or network (`ns-lan allow 192.168.1.20`) | An exception, for example a NAS holding case data (`NS_DATA` on a share) or a Tailscale network (`100.64.0.0/10`) |
-| Remove an allowed address (`ns-lan remove …`) | |
+| Status (`tb-lan status`) | On or off, the allow list, and how many packets have been blocked |
+| Turn on / off (`tb-lan on`, `tb-lan off`) | Loads or removes the rules; a systemd service (`truebearing-lan-block`) loads them at every boot |
+| Allow an address or network (`tb-lan allow 192.168.1.20`) | An exception, for example a NAS holding case data (`TB_DATA` on a share) or a Tailscale network (`100.64.0.0/10`) |
+| Remove an allowed address (`tb-lan remove …`) | |
 
-The `lan` module turns it on during the first install **in a VM**, and leaves it alone afterwards if you turn it off. On a physical machine it stays off (it would block your own printers and NAS) until you run `ns-lan on`. The rules are in `/etc/northstar/lan-block.nft` and the allow list in `/etc/northstar/lan-allow`. Changes are written to the active case's audit log.
+The `lan` module turns it on during the first install **in a VM**, and leaves it alone afterwards if you turn it off. On a physical machine it stays off (it would block your own printers and NAS) until you run `tb-lan on`. The rules are in `/etc/truebearing/lan-block.nft` and the allow list in `/etc/truebearing/lan-allow`. Changes are written to the active case's audit log.
 
-## ns-keys
+## tb-keys
 
-Add, check or remove API keys (Have I Been Pwned, Intelligence X, DeHashed, LeakCheck). Keys are typed into a hidden field, stored in `~/.config/northstar/keys.env` (readable only by you), and never logged.
+Add, check or remove API keys (Have I Been Pwned, Intelligence X, DeHashed, LeakCheck). Keys are typed into a hidden field, stored in `~/.config/truebearing/keys.env` (readable only by you), and never logged.
 
-## ns-case
+## tb-case
 
 Case records (main menu: **Case: notes, details, report, close**; **Switch / create case** opens the same flow).
 
@@ -310,30 +310,30 @@ Case records (main menu: **Case: notes, details, report, close**; **Switch / cre
 | Record a supervisor review | Reviewer, role, decision and comments, written to the notes with the fingerprint of the findings reviewed | `notes.md` |
 | Adult-site (NSFW) searches | Allows or stops adult sites in username searches for this case. Allowing them asks whether anyone searched for could be under 18 (if so, they stay off) and for a reason, recorded as a `DECISION:` note | `case.json`, `notes.md` |
 | Verify notes and audit log | Checks both hash chains | |
-| Close this case | First lists anything unfinished: notes, audit log or exhibits that don't verify, no report or one older than the findings, no review covering the current findings and summary, an incomplete intake, open leads. Closing anyway writes those points to the notes. Then it verifies the audit log, exports the case with a SHA-256 to `~/Northstar/Exports`, and marks it closed. Nothing is deleted | `case.json` status |
+| Close this case | First lists anything unfinished: notes, audit log or exhibits that don't verify, no report or one older than the findings, no review covering the current findings and summary, an incomplete intake, open leads. Closing anyway writes those points to the notes. Then it verifies the audit log, exports the case with a SHA-256 to `~/TrueBearing/Exports`, and marks it closed. Nothing is deleted | `case.json` status |
 | Reopen this case | Shown instead of Close on a closed case. Asks for the reason, which goes into the notes | `case.json` status |
 
-## ns-evidence
+## tb-evidence
 
 Record result folders as numbered exhibits (optional OpenTimestamps proof), verify folders and the audit log's hash chain, list exhibits, and export the case with a SHA-256. Every result folder is sealed automatically when a search finishes. See [EVIDENCE.md](EVIDENCE.md).
 
-## ns-doctor
+## tb-doctor
 
-**Health check** in the main menu. Lists every tool with its version, flags anything missing, and checks API key and case folder permissions, ports listening on the network (xrdp 3389, the amass engine 4000, Tor 9050), Firefox policies, free disk space and recent install warnings. The report is saved to `~/Northstar/support/` for bug reports. It contains no API keys or case data.
+**Health check** in the main menu. Lists every tool with its version, flags anything missing, and checks API key and case folder permissions, ports listening on the network (xrdp 3389, the amass engine 4000, Tor 9050), Firefox policies, free disk space and recent install warnings. The report is saved to `~/TrueBearing/support/` for bug reports. It contains no API keys or case data.
 
-## ns-update
+## tb-update
 
-Pulls the latest northstar-osint and runs `install.sh --update --yes` for every module except the ones you chose to skip, so modules added in a new release are installed too. If the download fails (usually because files in the checkout were edited by hand), it says so clearly, still upgrades the installed tools, and exits with an error.
+Pulls the latest truebearing-osint and runs `install.sh --update --yes` for every module except the ones you chose to skip, so modules added in a new release are installed too. If the download fails (usually because files in the checkout were edited by hand), it says so clearly, still upgrades the installed tools, and exits with an error.
 
-## ns-seal *(Linux, run with sudo)*
+## tb-seal *(Linux, run with sudo)*
 
 Prepares a **clone** for templating. See [KASM.md](KASM.md).
 
-## ns-linkcheck
+## tb-linkcheck
 
 Checks every URL in the bookmark collection. Codes 401/403/405/429 usually mean the site blocks scripts, so check those by hand.
 
 ```bash
-ns-linkcheck                                  # installed bookmarks
-ns-linkcheck ~/.config/northstar/bookmarks.local.json
+tb-linkcheck                                  # installed bookmarks
+tb-linkcheck ~/.config/truebearing/bookmarks.local.json
 ```

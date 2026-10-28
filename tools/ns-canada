@@ -1,4 +1,0 @@
-#!/usr/bin/env bash
-# ns-canada — kept for existing launchers and habits; Canada is now one of the
-# country packs in ns-country.
-exec "$(dirname "$0")/ns-country" CA "$@"

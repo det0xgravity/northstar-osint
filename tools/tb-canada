@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+# tb-canada — kept for existing launchers and habits; Canada is now one of the
+# country packs in tb-country.
+exec "$(dirname "$0")/tb-country" CA "$@"

@@ -1,0 +1,194 @@
+#!/usr/bin/env bash
+# tb-lan — LAN isolation (Linux): a firewall table that stops this machine from
+# opening connections to private networks (your home or office LAN, other VMs,
+# routers, NAS boxes, printers), while the internet, DNS and DHCP keep working
+# and connections made TO this machine (RDP from Kasm, SSH) still get replies.
+# An allow list takes exceptions, e.g. a NAS that holds case data.
+# Usage: tb-lan [status|on|off|allow ADDRESS[/BITS]|remove ADDRESS[/BITS]|list|rules]
+#        (no argument: a menu)
+# shellcheck source=../lib/ui.sh
+. "${TB_HOME:-$HOME/.local/share/truebearing}/lib/ui.sh"
+
+ETC="${TB_LAN_ETC:-/etc/truebearing}"
+ALLOW="$ETC/lan-allow"
+RULES="$ETC/lan-block.nft"
+UNIT=/etc/systemd/system/truebearing-lan-block.service
+TABLE="inet truebearing_lan"
+
+# Allow-list entries (one address or network per line, # comments), checked and
+# split by family: "4 10.0.0.5/32" / "6 fd00::5/128"
+allowed() {
+  [ -f "$ALLOW" ] || return 0
+  python3 - "$ALLOW" <<'PY'
+import ipaddress, sys
+for line in open(sys.argv[1], encoding="utf-8"):
+    v = line.split("#", 1)[0].strip()
+    if not v:
+        continue
+    try:
+        n = ipaddress.ip_network(v, strict=False)
+    except ValueError:
+        continue
+    print(n.version, n)
+PY
+}
+
+# The nftables ruleset. Loading it replaces any earlier copy of the table.
+rules() {
+  local a4 a6 e4="" e6=""
+  a4=$(allowed | sed -n 's/^4 //p' | paste -sd, - | sed 's/,/, /g')
+  a6=$(allowed | sed -n 's/^6 //p' | paste -sd, - | sed 's/,/, /g')
+  # An empty set takes no elements line
+  [ -n "$a4" ] && e4=$(printf '\n\t\telements = { %s }' "$a4")
+  [ -n "$a6" ] && e6=$(printf '\n\t\telements = { %s }' "$a6")
+  cat <<EOF
+# True Bearing LAN isolation (tb-lan). Generated: edit the allow list with
+# "tb-lan allow" instead of this file.
+table $TABLE
+delete table $TABLE
+table $TABLE {
+	set allow4 {
+		type ipv4_addr; flags interval;$e4
+	}
+	set allow6 {
+		type ipv6_addr; flags interval;$e6
+	}
+	set private4 {
+		type ipv4_addr; flags interval;
+		# RFC 1918, carrier-grade NAT, link-local, multicast
+		elements = { 10.0.0.0/8, 100.64.0.0/10, 169.254.0.0/16, 172.16.0.0/12, 192.168.0.0/16, 224.0.0.0/4 }
+	}
+	set private6 {
+		type ipv6_addr; flags interval;
+		# unique local, link-local, multicast
+		elements = { fc00::/7, fe80::/10, ff00::/8 }
+	}
+	chain output {
+		type filter hook output priority filter; policy accept;
+		ct state established,related accept comment "replies to connections made to this machine"
+		oifname "lo" accept
+		udp dport { 53, 67, 547 } accept comment "DNS and DHCP from the local router"
+		tcp dport 53 accept comment "DNS over TCP"
+		icmpv6 type { nd-router-solicit, nd-neighbor-solicit, nd-neighbor-advert, mld-listener-report, mld2-listener-report } accept comment "IPv6 needs these to work"
+		ip daddr @allow4 accept comment "tb-lan allow list"
+		ip6 daddr @allow6 accept comment "tb-lan allow list"
+		ip daddr @private4 counter reject comment "truebearing: no connections to private networks"
+		ip6 daddr @private6 counter reject comment "truebearing: no connections to private networks"
+	}
+}
+EOF
+}
+
+# Logged in the active case (not when the installer turns it on)
+audit() { [ -n "${TB_LAN_NOAUDIT:-}" ] || tb_audit tb-lan "$1" "$2"; }
+
+need_linux() {
+  [ "$(uname -s)" = Linux ] || { ui_error "LAN isolation is for Linux (True Bearing's VM). On a Mac, use your router or the hypervisor's network settings."; exit 1; }
+  tb_cmd nft || { ui_error "nftables isn't installed: ./install.sh --only lan"; exit 1; }
+}
+
+# Write the rules and (re)load them; with systemd, also at every boot
+apply() {
+  local nft tmp
+  nft=$(command -v nft)
+  tmp=$(mktemp); rules > "$tmp"
+  sudo mkdir -p "$ETC" || return 1
+  sudo nft -c -f "$tmp" || { rm -f "$tmp"; ui_error "The firewall rules didn't validate; nothing was changed."; return 1; }
+  sudo install -m 644 "$tmp" "$RULES"; rm -f "$tmp"
+  if [ -d /run/systemd/system ]; then
+    sudo tee "$UNIT" >/dev/null <<EOF
+[Unit]
+Description=True Bearing: block connections to private networks (LAN isolation)
+After=nftables.service
+Before=network-pre.target
+Wants=network-pre.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=$nft -f $RULES
+ExecStop=-$nft delete table $TABLE
+
+[Install]
+WantedBy=multi-user.target
+EOF
+    sudo systemctl daemon-reload && sudo systemctl enable truebearing-lan-block >/dev/null 2>&1 \
+      && sudo systemctl restart truebearing-lan-block
+  else
+    sudo nft -f "$RULES"
+  fi
+}
+
+status() {
+  local s
+  if [ -f "$RULES" ] && { [ ! -d /run/systemd/system ] || systemctl is-enabled truebearing-lan-block >/dev/null 2>&1; }; then
+    s="ON: connections from this machine to private networks are blocked"
+  else
+    s="OFF: this machine can connect to your local network"
+  fi
+  printf '%s\n' "$s"
+  if [ -s "$ALLOW" ]; then
+    printf 'Allowed: %s\n' "$(allowed | cut -d' ' -f2 | paste -sd' ' -)"
+  fi
+  if [ -f "$RULES" ]; then
+    sudo -n nft list table $TABLE 2>/dev/null | sed -n 's/.*counter packets \([0-9]*\).*reject.*/Blocked so far (packets): \1/p' | head -2
+  fi
+}
+
+allow_edit() {         # allow_edit add|remove ADDRESS
+  local net
+  net=$(python3 -c 'import ipaddress,sys; print(ipaddress.ip_network(sys.argv[1], strict=False))' "$2" 2>/dev/null) \
+    || { ui_error "Not an IP address or network: $2"; return 1; }
+  sudo mkdir -p "$ETC"
+  sudo touch "$ALLOW"
+  if [ "$1" = add ]; then
+    grep -qx "$net" "$ALLOW" 2>/dev/null || printf '%s\n' "$net" | sudo tee -a "$ALLOW" >/dev/null
+  else
+    grep -vx "$net" "$ALLOW" | sudo tee "$ALLOW.new" >/dev/null; sudo mv "$ALLOW.new" "$ALLOW"
+  fi
+  [ -f "$RULES" ] && apply
+  audit "$net" "allow list: $1"
+  echo "$1: $net"
+}
+
+cmd="${1:-}"
+if [ -z "$cmd" ]; then
+  need_linux
+  pick=$(ui_list "LAN isolation: $(status | head -1 | cut -d: -f1)" \
+    "Status" \
+    "Turn on (block connections to private networks)" \
+    "Turn off" \
+    "Allow an address or network (e.g. a NAS)" \
+    "Remove an allowed address") || exit 0
+  case "$pick" in
+    Status) r=$(status); printf '%s\n' "$r"; ui_info "$r" ;;
+    "Turn on"*) exec "$0" on ;;
+    "Turn off") exec "$0" off ;;
+    Allow*) a=$(ui_entry "IP address or network to allow (e.g. 192.168.1.20 or 192.168.1.0/24):") || exit 0; exec "$0" allow "$a" ;;
+    Remove*) a=$(ui_entry "Allowed address or network to remove:") || exit 0; exec "$0" remove "$a" ;;
+  esac
+  exit 0
+fi
+
+case "$cmd" in
+  rules)  rules ;;
+  list)   allowed | cut -d' ' -f2 ;;
+  status) need_linux; status ;;
+  on)
+    need_linux
+    apply || exit 1
+    audit "on" "LAN isolation on"
+    echo "LAN isolation is on. Exceptions: tb-lan allow ADDRESS (e.g. a NAS). To turn it off: tb-lan off" ;;
+  off)
+    need_linux
+    if [ -d /run/systemd/system ]; then
+      sudo systemctl disable --now truebearing-lan-block >/dev/null 2>&1
+    fi
+    sudo nft delete table $TABLE 2>/dev/null
+    sudo rm -f "$RULES"
+    audit "off" "LAN isolation off"
+    echo "LAN isolation is off: this machine can reach your local network again." ;;
+  allow)  need_linux; [ -n "${2:-}" ] || { echo "Usage: tb-lan allow ADDRESS[/BITS]"; exit 2; }; allow_edit add "$2" ;;
+  remove) need_linux; [ -n "${2:-}" ] || { echo "Usage: tb-lan remove ADDRESS[/BITS]"; exit 2; }; allow_edit remove "$2" ;;
+  *) sed -n '2,8s/^# \{0,1\}//p' "$0"; exit 2 ;;
+esac

@@ -1,17 +1,17 @@
 # shellcheck shell=bash
 # =============================================================================
-#  northstar-osint — runtime library for the menu tools
+#  truebearing-osint — runtime library for the menu tools
 #  Dialogs use zenity on Linux and AppleScript on macOS. Bash 3.2 compatible.
 # =============================================================================
 
-NS_HOME="${NS_HOME:-$HOME/.local/share/northstar}"
-NS_CONF="${XDG_CONFIG_HOME:-$HOME/.config}/northstar"
-NS_DATA="${NS_DATA:-$HOME/Northstar}"
-NS_TITLE="Northstar"
-export PATH="$NS_HOME/bin:$NS_HOME/go/bin:$HOME/.local/bin:$HOME/go/bin:/opt/homebrew/bin:/usr/local/bin:$PATH"
+TB_HOME="${TB_HOME:-$HOME/.local/share/truebearing}"
+TB_CONF="${XDG_CONFIG_HOME:-$HOME/.config}/truebearing"
+TB_DATA="${TB_DATA:-${NS_DATA:-$HOME/TrueBearing}}"
+TB_TITLE="True Bearing"
+export PATH="$TB_HOME/bin:$TB_HOME/go/bin:$HOME/.local/bin:$HOME/go/bin:/opt/homebrew/bin:/usr/local/bin:$PATH"
 
 ui_mac() { [ "$(uname -s)" = "Darwin" ]; }
-ns_cmd() { command -v "$1" >/dev/null 2>&1; }
+tb_cmd() { command -v "$1" >/dev/null 2>&1; }
 
 # Escape a string for use inside an AppleScript "quoted string"
 _as_q() { printf '%s' "$1" | sed 's/\\/\\\\/g; s/"/\\"/g'; }
@@ -22,22 +22,22 @@ ui_list() {
   local prompt="$1" r items="" i h; shift
   if ui_mac; then
     for i in "$@"; do items="$items\"$(_as_q "$i")\","; done
-    r=$(osascript -e "choose from list {${items%,}} with title \"$NS_TITLE\" with prompt \"$(_as_q "$prompt")\"" 2>/dev/null) || return 1
+    r=$(osascript -e "choose from list {${items%,}} with title \"$TB_TITLE\" with prompt \"$(_as_q "$prompt")\"" 2>/dev/null) || return 1
     [ "$r" = "false" ] && return 1
   else
     h=$((170 + 30 * $#)); [ $h -gt 640 ] && h=640
-    r=$(zenity --list --title="$NS_TITLE" --text="$prompt" --column="Option" \
+    r=$(zenity --list --title="$TB_TITLE" --text="$prompt" --column="Option" \
           --width=540 --height=$h "$@" 2>/dev/null) || return 1
   fi
   [ -n "$r" ] || return 1
   printf '%s\n' "$r"
 }
 
-# ns_ocr_langs <image>   -> the Tesseract languages for this image, e.g. "rus+ukr+eng".
+# tb_ocr_langs <image>   -> the Tesseract languages for this image, e.g. "rus+ukr+eng".
 # Tesseract's script detection (OSD) picks the writing system; only installed
 # languages of that script are used, plus English, which signs often add.
 # Passing every installed language at once is slow and less accurate.
-ns_ocr_langs() {
+tb_ocr_langs() {
   local have script want l out=""
   have=$(tesseract --list-langs 2>/dev/null | tail -n +2)
   script=""
@@ -64,16 +64,16 @@ ns_ocr_langs() {
 }
 
 # ui_entry "Prompt" ["default"]   -> prints the text entered (fails on cancel/empty;
-#                                    with NS_ALLOW_EMPTY=1 only cancel fails)
+#                                    with TB_ALLOW_EMPTY=1 only cancel fails)
 ui_entry() {
   local r
   if ui_mac; then
-    r=$(osascript -e "text returned of (display dialog \"$(_as_q "$1")\" default answer \"$(_as_q "${2:-}")\" with title \"$NS_TITLE\")" 2>/dev/null) || return 1
+    r=$(osascript -e "text returned of (display dialog \"$(_as_q "$1")\" default answer \"$(_as_q "${2:-}")\" with title \"$TB_TITLE\")" 2>/dev/null) || return 1
   else
-    r=$(zenity --entry --title="$NS_TITLE" --width=460 --text="$1" --entry-text="${2:-}" 2>/dev/null) || return 1
+    r=$(zenity --entry --title="$TB_TITLE" --width=460 --text="$1" --entry-text="${2:-}" 2>/dev/null) || return 1
   fi
   r=$(printf '%s' "$r" | sed 's/^[[:space:]]*//; s/[[:space:]]*$//')
-  [ -n "$r" ] || [ -n "${NS_ALLOW_EMPTY:-}" ] || return 1
+  [ -n "$r" ] || [ -n "${TB_ALLOW_EMPTY:-}" ] || return 1
   printf '%s\n' "$r"
 }
 
@@ -81,9 +81,9 @@ ui_entry() {
 ui_secret() {
   local r
   if ui_mac; then
-    r=$(osascript -e "text returned of (display dialog \"$(_as_q "$1")\" default answer \"\" with hidden answer with title \"$NS_TITLE\")" 2>/dev/null) || return 1
+    r=$(osascript -e "text returned of (display dialog \"$(_as_q "$1")\" default answer \"\" with hidden answer with title \"$TB_TITLE\")" 2>/dev/null) || return 1
   else
-    r=$(zenity --entry --hide-text --title="$NS_TITLE" --width=460 --text="$1" 2>/dev/null) || return 1
+    r=$(zenity --entry --hide-text --title="$TB_TITLE" --width=460 --text="$1" 2>/dev/null) || return 1
   fi
   [ -n "$r" ] || return 1
   printf '%s\n' "$r"
@@ -91,25 +91,25 @@ ui_secret() {
 
 ui_info() {
   if ui_mac; then
-    osascript -e "display dialog \"$(_as_q "$1")\" buttons {\"OK\"} default button 1 with title \"$NS_TITLE\"" >/dev/null 2>&1
+    osascript -e "display dialog \"$(_as_q "$1")\" buttons {\"OK\"} default button 1 with title \"$TB_TITLE\"" >/dev/null 2>&1
   else
-    zenity --info --no-markup --title="$NS_TITLE" --width=480 --text="$1" 2>/dev/null
+    zenity --info --no-markup --title="$TB_TITLE" --width=480 --text="$1" 2>/dev/null
   fi
 }
 
 ui_error() {
   if ui_mac; then
-    osascript -e "display dialog \"$(_as_q "$1")\" buttons {\"OK\"} default button 1 with icon stop with title \"$NS_TITLE\"" >/dev/null 2>&1
+    osascript -e "display dialog \"$(_as_q "$1")\" buttons {\"OK\"} default button 1 with icon stop with title \"$TB_TITLE\"" >/dev/null 2>&1
   else
-    zenity --error --no-markup --title="$NS_TITLE" --width=440 --text="$1" 2>/dev/null
+    zenity --error --no-markup --title="$TB_TITLE" --width=440 --text="$1" 2>/dev/null
   fi
 }
 
 ui_question() {   # returns 0 for Yes
   if ui_mac; then
-    [ "$(osascript -e "button returned of (display dialog \"$(_as_q "$1")\" buttons {\"No\",\"Yes\"} default button \"Yes\" with title \"$NS_TITLE\")" 2>/dev/null)" = "Yes" ]
+    [ "$(osascript -e "button returned of (display dialog \"$(_as_q "$1")\" buttons {\"No\",\"Yes\"} default button \"Yes\" with title \"$TB_TITLE\")" 2>/dev/null)" = "Yes" ]
   else
-    zenity --question --no-markup --title="$NS_TITLE" --width=440 --text="$1" 2>/dev/null
+    zenity --question --no-markup --title="$TB_TITLE" --width=440 --text="$1" 2>/dev/null
   fi
 }
 
@@ -137,7 +137,7 @@ ui_dir() {
 # _ui_detach CMD...  Starts a GUI program in its own session, so it survives
 # the menu's terminal closing (which would otherwise kill it with SIGHUP).
 _ui_detach() {
-  if ns_cmd setsid; then
+  if tb_cmd setsid; then
     setsid -f "$@" >/dev/null 2>&1 </dev/null
   else
     # same as setsid -f: the child detaches before this call returns
@@ -153,9 +153,9 @@ ui_open() {
   [ $# -gt 0 ] || return 0
   if ui_mac; then
     if [ -d "/Applications/Firefox.app" ]; then open -a Firefox "$@"; else open "$@"; fi
-  elif ns_cmd firefox; then
+  elif tb_cmd firefox; then
     _ui_detach firefox "$@"
-  elif ns_cmd firefox-esr; then
+  elif tb_cmd firefox-esr; then
     _ui_detach firefox-esr "$@"
   else
     local u; for u in "$@"; do _ui_detach xdg-open "$u"; done
@@ -167,13 +167,13 @@ ui_open() {
 # XWayland on GNOME, and under xrdp), cap each attempt at 3 seconds, and keep
 # the background clipboard owner off our stdout/stderr.
 _ui_clip_run() {
-  if ns_cmd timeout; then timeout 3 "$@"; else "$@"; fi
+  if tb_cmd timeout; then timeout 3 "$@"; else "$@"; fi
 }
 ui_clip() {
   if ui_mac; then printf '%s' "$1" | pbcopy
-  elif [ -n "${DISPLAY:-}" ] && ns_cmd xclip; then
+  elif [ -n "${DISPLAY:-}" ] && tb_cmd xclip; then
     printf '%s' "$1" | _ui_clip_run xclip -selection clipboard >/dev/null 2>&1
-  elif [ -n "${WAYLAND_DISPLAY:-}" ] && ns_cmd wl-copy; then
+  elif [ -n "${WAYLAND_DISPLAY:-}" ] && tb_cmd wl-copy; then
     printf '%s' "$1" | _ui_clip_run wl-copy >/dev/null 2>&1
   fi
   return 0
@@ -183,9 +183,9 @@ ui_clip() {
 # all windows, unlike dialogs, which a browser opening a moment later covers.
 ui_notify() {
   if ui_mac; then
-    osascript -e "display notification \"$(_as_q "$1")\" with title \"$NS_TITLE\"" >/dev/null 2>&1
-  elif ns_cmd notify-send; then
-    notify-send -a "$NS_TITLE" "$NS_TITLE" "$1" >/dev/null 2>&1
+    osascript -e "display notification \"$(_as_q "$1")\" with title \"$TB_TITLE\"" >/dev/null 2>&1
+  elif tb_cmd notify-send; then
+    notify-send -a "$TB_TITLE" "$TB_TITLE" "$1" >/dev/null 2>&1
   fi
   return 0
 }
@@ -195,147 +195,147 @@ ui_reveal() {
 }
 
 # --- helpers ---------------------------------------------------------------------
-ns_enc()    { python3 -c 'import sys,urllib.parse;print(urllib.parse.quote_plus(sys.argv[1]))' "$1"; }
-ns_google() { echo "https://www.google.com/search?q=$(ns_enc "$1")"; }
-ns_lower()  { printf '%s' "$1" | tr '[:upper:]' '[:lower:]'; }
-ns_upper()  { printf '%s' "$1" | tr '[:lower:]' '[:upper:]'; }
-ns_slug()   { printf '%s' "$1" | tr -c 'A-Za-z0-9._@-' '_' | cut -c1-60; }
+tb_enc()    { python3 -c 'import sys,urllib.parse;print(urllib.parse.quote_plus(sys.argv[1]))' "$1"; }
+tb_google() { echo "https://www.google.com/search?q=$(tb_enc "$1")"; }
+tb_lower()  { printf '%s' "$1" | tr '[:upper:]' '[:lower:]'; }
+tb_upper()  { printf '%s' "$1" | tr '[:lower:]' '[:upper:]'; }
+tb_slug()   { printf '%s' "$1" | tr -c 'A-Za-z0-9._@-' '_' | cut -c1-60; }
 
 # --- API keys ----------------------------------------------------------------------
-# One NAME=value per line in ~/.config/northstar/keys.env, mode 600. Read by the
+# One NAME=value per line in ~/.config/truebearing/keys.env, mode 600. Read by the
 # Python engines directly; keys never go on a command line or into audit.log.
-NS_KEYS="$NS_CONF/keys.env"
-export NS_KEYS                       # the engines (ns_breach) read keys from here
-ns_key_get() { grep -m1 "^$1=" "$NS_KEYS" 2>/dev/null | cut -d= -f2-; }
+TB_KEYS="$TB_CONF/keys.env"
+export TB_KEYS                       # the engines (tb_breach) read keys from here
+tb_key_get() { grep -m1 "^$1=" "$TB_KEYS" 2>/dev/null | cut -d= -f2-; }
 
-# ns_key_set NAME VALUE   (an empty VALUE removes the key)
-ns_key_set() {
+# tb_key_set NAME VALUE   (an empty VALUE removes the key)
+tb_key_set() {
   local tmp
-  ( umask 077; mkdir -p "$NS_CONF" )
-  tmp=$(mktemp "$NS_CONF/.keys.XXXXXX") || return 1      # mktemp files are mode 600
-  grep -v "^$1=" "$NS_KEYS" > "$tmp" 2>/dev/null
+  ( umask 077; mkdir -p "$TB_CONF" )
+  tmp=$(mktemp "$TB_CONF/.keys.XXXXXX") || return 1      # mktemp files are mode 600
+  grep -v "^$1=" "$TB_KEYS" > "$tmp" 2>/dev/null
   [ -n "$2" ] && printf '%s=%s\n' "$1" "$2" >> "$tmp"
-  mv "$tmp" "$NS_KEYS"
+  mv "$tmp" "$TB_KEYS"
 }
 
 # --- cases & audit trail --------------------------------------------------------------
-# Output for every search lands in ~/Northstar/Cases/<active case>/, and every
+# Output for every search lands in ~/TrueBearing/Cases/<active case>/, and every
 # action is appended to that case's audit.log (tab-separated).
-ns_case() {
+tb_case() {
   local c
-  c=$(cat "$NS_CONF/active_case" 2>/dev/null)
+  c=$(cat "$TB_CONF/active_case" 2>/dev/null)
   printf '%s\n' "${c:-general}"
 }
 
 # Case data is private: folders are created mode 700 (only you can read them)
-ns_case_dir() {
+tb_case_dir() {
   local d
-  d="$NS_DATA/Cases/$(ns_case)"
+  d="$TB_DATA/Cases/$(tb_case)"
   ( umask 077; mkdir -p "$d" )
-  chmod 700 "$NS_DATA" "$NS_DATA/Cases" "$d" 2>/dev/null
+  chmod 700 "$TB_DATA" "$TB_DATA/Cases" "$d" 2>/dev/null
   printf '%s\n' "$d"
 }
 
-ns_set_case() {
-  mkdir -p "$NS_CONF"
-  ns_slug "$1" > "$NS_CONF/active_case"
-  ( umask 077; mkdir -p "$NS_DATA/Cases/$(ns_case)" )
+tb_set_case() {
+  mkdir -p "$TB_CONF"
+  tb_slug "$1" > "$TB_CONF/active_case"
+  ( umask 077; mkdir -p "$TB_DATA/Cases/$(tb_case)" )
 }
 
-# ns_outdir <kind> <target>   -> creates and prints a timestamped result folder
-ns_outdir() {
+# tb_outdir <kind> <target>   -> creates and prints a timestamped result folder
+tb_outdir() {
   local d
-  d="$(ns_case_dir)/$1/$(ns_slug "$2")_$(date +%Y%m%d-%H%M%S)"
+  d="$(tb_case_dir)/$1/$(tb_slug "$2")_$(date +%Y%m%d-%H%M%S)"
   ( umask 077; mkdir -p "$d" )
   printf '%s\n' "$d"
 }
 
-# ns_hash_str <text>   SHA-256 of a string (Linux sha256sum or macOS shasum)
-ns_hash_str() {
-  if ns_cmd sha256sum; then printf '%s' "$1" | sha256sum | cut -d' ' -f1
+# tb_hash_str <text>   SHA-256 of a string (Linux sha256sum or macOS shasum)
+tb_hash_str() {
+  if tb_cmd sha256sum; then printf '%s' "$1" | sha256sum | cut -d' ' -f1
   else printf '%s' "$1" | shasum -a 256 | cut -d' ' -f1; fi
 }
 
 _ns_field() { printf '%s' "$1" | tr '\t\n\r' '   '; }      # one TSV field: no tabs/newlines
 
-# ns_audit <tool> <target> <detail>
+# tb_audit <tool> <target> <detail>
 # Appends: UTC time, case, tool, target, detail, operator, chain hash. The hash
 # is SHA-256(previous line + this line's other fields), so editing, inserting or
-# deleting any line breaks every hash after it (ns-evidence verifies the chain).
-ns_audit() {
+# deleting any line breaks every hash after it (tb-evidence verifies the chain).
+tb_audit() {
   local log body prev
-  log="$(ns_case_dir)/audit.log"
-  body=$(printf '%s\t%s\t%s\t%s\t%s\t%s' "$(date -u '+%Y-%m-%dT%H:%M:%SZ')" "$(ns_case)" \
+  log="$(tb_case_dir)/audit.log"
+  body=$(printf '%s\t%s\t%s\t%s\t%s\t%s' "$(date -u '+%Y-%m-%dT%H:%M:%SZ')" "$(tb_case)" \
     "$(_ns_field "$1")" "$(_ns_field "$2")" "$(_ns_field "$3")" "$(id -un)")
   prev=""
   [ -s "$log" ] && prev=$(tail -n 1 "$log")
-  printf '%s\t%s\n' "$body" "$(ns_hash_str "$prev$body")" >> "$log"
+  printf '%s\t%s\n' "$body" "$(tb_hash_str "$prev$body")" >> "$log"
 }
 
-# ns_run <outdir> <command> [args...]
+# tb_run <outdir> <command> [args...]
 # Runs a command inside the result folder, echoes it, logs it and keeps console output.
-ns_run() {
+tb_run() {
   local out="$1"; shift
-  if ! ns_cmd "$1"; then
+  if ! tb_cmd "$1"; then
     printf '  [skip] %s is not installed\n' "$1" | tee -a "$out/console.log"
     return 127
   fi
   printf '\n\033[1m▶ %s\033[0m\n' "$*"
   printf '▶ %s\n' "$*" >> "$out/console.log"     # which tool printed what follows (for the case notes)
-  ns_audit "$1" "$(basename "$out")" "$*"
-  printf '%s\n' "$1" >> "$out/.ns-tools"          # provenance.json lists each tool's version
+  tb_audit "$1" "$(basename "$out")" "$*"
+  printf '%s\n' "$1" >> "$out/.tb-tools"          # provenance.json lists each tool's version
   ( cd "$out" && "$@" ) 2>&1 | tee -a "$out/console.log"
   return "${PIPESTATUS[0]}"
 }
 
-# ns_seal_result <outdir>   hash every file into manifest.sha256 + provenance.json
-ns_seal_result() {
-  ns_cmd ns_evidence || return 0
+# tb_seal_result <outdir>   hash every file into manifest.sha256 + provenance.json
+tb_seal_result() {
+  tb_cmd tb_evidence || return 0
   [ -f "$1/manifest.sha256" ] && return 0      # sealed once: an exhibit's fingerprint must stay valid
-  ns_evidence seal "$1" "$(cat "$NS_HOME/VERSION" 2>/dev/null || echo unknown)" 2>/dev/null \
-    && ns_audit ns-evidence "$(basename "$1")" "sealed: $(ns_hash_file "$1/manifest.sha256")"
+  tb_evidence seal "$1" "$(cat "$TB_HOME/VERSION" 2>/dev/null || echo unknown)" 2>/dev/null \
+    && tb_audit tb-evidence "$(basename "$1")" "sealed: $(tb_hash_file "$1/manifest.sha256")"
 }
 
-# ns_hash_file <file>
-ns_hash_file() {
-  if ns_cmd sha256sum; then sha256sum "$1" | cut -d' ' -f1; else shasum -a 256 "$1" | cut -d' ' -f1; fi
+# tb_hash_file <file>
+tb_hash_file() {
+  if tb_cmd sha256sum; then sha256sum "$1" | cut -d' ' -f1; else shasum -a 256 "$1" | cut -d' ' -f1; fi
 }
 
-# ns_finish <outdir> — shows where results went and keeps a launched terminal open.
+# tb_finish <outdir> — shows where results went and keeps a launched terminal open.
 # From the main menu the folder isn't opened: GNOME would put the file manager
 # in front and open the menu's next dialog behind it, which looks like a hang.
-ns_finish() {
+tb_finish() {
   printf '\n\033[1mResults saved to:\033[0m %s\n' "$1"
-  ns_seal_result "$1"
-  ns_cmd ns_vault && ns_vault result "$(ns_case_dir)" "$1" >/dev/null 2>&1   # listed in the case's Results.md
-  mkdir -p "$NS_CONF" && printf '%s\n' "$1" > "$NS_CONF/last_result"
-  if [ "${NS_FROM_MAIN:-0}" = 1 ]; then
-    printf 'Back to the Northstar menu: choose "Open latest results" to see them.\n'
+  tb_seal_result "$1"
+  tb_cmd tb_vault && tb_vault result "$(tb_case_dir)" "$1" >/dev/null 2>&1   # listed in the case's Results.md
+  mkdir -p "$TB_CONF" && printf '%s\n' "$1" > "$TB_CONF/last_result"
+  if [ "${TB_FROM_MAIN:-0}" = 1 ]; then
+    printf 'Back to the True Bearing menu: choose "Open latest results" to see them.\n'
   else
     ui_reveal "$1"
   fi
-  ns_pause
+  tb_pause
 }
 
-ns_pause() {
-  [ "${NS_FROM_MAIN:-0}" = 1 ] && return 0
+tb_pause() {
+  [ "${TB_FROM_MAIN:-0}" = 1 ] && return 0
   [ -t 0 ] || return 0
   printf '\nPress Enter to close… '
   read -r _
 }
 
 # --- scripted dialogs (tests and CI) ---------------------------------------------------
-# NS_UI=script NS_UI_ANSWERS=<file>: every dialog takes the next line of the file
+# TB_UI=script TB_UI_ANSWERS=<file>: every dialog takes the next line of the file
 # (an empty line cancels; "<default>" accepts an entry's pre-filled value)
 # instead of asking. ui_list picks the first option starting with that line;
 # ui_question takes y/yes as yes; a missing line cancels. Browser, clipboard,
 # notification and folder actions are logged to stderr and not performed.
-if [ "${NS_UI:-}" = script ]; then
+if [ "${TB_UI:-}" = script ]; then
   _ui_next() {
     local n line
-    n=$(cat "$NS_UI_ANSWERS.pos" 2>/dev/null || echo 1)
-    line=$(sed -n "${n}p" "$NS_UI_ANSWERS")
-    echo $((n + 1)) > "$NS_UI_ANSWERS.pos"
+    n=$(cat "$TB_UI_ANSWERS.pos" 2>/dev/null || echo 1)
+    line=$(sed -n "${n}p" "$TB_UI_ANSWERS")
+    echo $((n + 1)) > "$TB_UI_ANSWERS.pos"
     [ -n "$line" ] || return 1
     printf '%s\n' "$line"
   }

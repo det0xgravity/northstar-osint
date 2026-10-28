@@ -1,0 +1,131 @@
+#!/usr/bin/env bash
+# tb-username — account discovery by username or email address.
+# shellcheck source=../lib/ui.sh
+. "${TB_HOME:-$HOME/.local/share/truebearing}/lib/ui.sh"
+
+choice=$(ui_list "Username & email" \
+  "Username search (sherlock, maigret, socialscan, blackbird)" \
+  "Email search (holehe, socialscan)" \
+  "Google account from email (GHunt — run 'ghunt login' once first)" \
+  "Instagram profile details (toutatis — needs a session ID)" \
+  "Generate username and email variants from a name" \
+  "Analyse email headers (offline)") || exit 0
+
+case "$choice" in
+Username*)
+  u=$(ui_entry "Username (without @):") || exit 0
+  u="${u#@}"
+  out=$(tb_outdir username "$u")
+  # Adult (NSFW) sites only when the case allows them (Case → Adult-site searches)
+  adult=off; tb_cmd tb_casework && adult=$(tb_casework nsfw "$(tb_case_dir)")
+  adult_tags="porn,erotic,webcam"
+  if [ "$adult" = on ]; then
+    echo "Adult (NSFW) sites: included (allowed for this case; see the case notes)" | tee "$out/search-settings.txt"
+    tb_audit tb-username "$u" "adult (NSFW) sites included"
+    tb_run "$out" sherlock "$u" --nsfw --print-found --txt --output "$out/sherlock.txt"
+  else
+    echo "Adult (NSFW) sites: not searched" > "$out/search-settings.txt"
+    tb_run "$out" sherlock "$u" --print-found --txt --output "$out/sherlock.txt"
+  fi
+  mg_x=""
+  maigret --help 2>/dev/null | grep -q -- '--exclude-tags' && mg_x=1
+  if [ "$adult" != on ] && [ -n "$mg_x" ]; then
+    tb_run "$out" maigret "$u" --exclude-tags "$adult_tags" --html --folderoutput "$out/maigret"
+  else
+    tb_run "$out" maigret "$u" --html --folderoutput "$out/maigret"
+  fi
+  # Maigret's default scan covers its most popular sites; check every adult-tagged site too
+  [ "$adult" = on ] && tb_run "$out" maigret "$u" --tags "$adult_tags" --all-sites --html --folderoutput "$out/maigret-adult"
+  tb_run "$out" socialscan "$u"
+  # Blackbird always saves into its own install folder; move this run's files
+  bb="$TB_HOME/src/blackbird/results"; mark="$out/.blackbird-start"; touch "$mark"
+  if [ "$adult" = on ]; then
+    tb_run "$out" blackbird --username "$u" --csv --json
+  else
+    tb_run "$out" blackbird --username "$u" --csv --json --no-nsfw
+  fi
+  if [ -d "$bb" ]; then
+    mkdir -p "$out/blackbird"
+    find "$bb" -mindepth 1 -maxdepth 1 -newer "$mark" -exec mv {} "$out/blackbird/" \;
+  fi
+  rm -f "$mark"
+  ui_clip "$u"
+  ui_open "https://whatsmyname.app/" "$(tb_google "\"$u\"")"
+  echo "Username copied to clipboard for WhatsMyName."
+  [ "$adult" = on ] && echo "WhatsMyName can filter by category: include its NSFW category there too."
+  ui_notify "\"$u\" is on your clipboard: paste it into WhatsMyName"
+  tb_finish "$out" ;;
+
+Email*)
+  e=$(ui_entry "Email address:") || exit 0
+  out=$(tb_outdir email "$e")
+  tb_run "$out" holehe "$e" --only-used
+  tb_run "$out" socialscan "$e"
+  ui_clip "$e"
+  ui_open "https://haveibeenpwned.com/" "https://epieos.com/" "https://intelx.io/" \
+          "$(tb_google "\"$e\"")"
+  echo "Email copied to clipboard for the breach/lookup sites."
+  ui_notify "\"$e\" is on your clipboard: paste it into the breach and lookup sites"
+  tb_finish "$out" ;;
+
+"Analyse email headers"*)
+  ui_info "Save the message with its full headers first: in Gmail, ⋮ → Show original → Download original; in Outlook, File → Properties (copy the headers into a text file) or save as .eml; in Thunderbird, File → Save As. Then choose that file.
+
+Nothing is looked up: the analysis runs on this computer." || true
+  f=$(ui_files "Choose the saved message (.eml) or a text file with its headers") || exit 0
+  f=$(printf '%s\n' "$f" | head -1)
+  [ -f "$f" ] || exit 0
+  out=$(tb_outdir email-headers "$(basename "$f")")
+  cp "$f" "$out/"                      # the message itself is part of the record
+  tb_run "$out" tb_email --json "$out/headers.json" "$out/$(basename "$f")"
+  sed -n '/^Email header analysis/,$p' "$out/console.log" > "$out/headers.txt"
+  tb_audit tb-username "$(basename "$f")" "email headers analysed: $(grep -c '^  !!' "$out/headers.txt") warning sign(s)"
+  tb_finish "$out" ;;
+
+Google*)
+  e=$(ui_entry "Gmail / Google account email:") || exit 0
+  out=$(tb_outdir ghunt "$e")
+  tb_run "$out" ghunt email "$e" --json "$out/ghunt.json"
+  tb_finish "$out" ;;
+
+Generate*)
+  sub="$(tb_case_dir)/subject"
+  pre_name=""; pre_year=""
+  if tb_cmd tb_missing && [ -f "$sub/subject.json" ]; then
+    pre_name=$(tb_missing profile-get "$(tb_case_dir)" name)
+    pre_year=$(tb_missing profile-get "$(tb_case_dir)" dob | grep -oE '(19|20)[0-9]{2}' | head -1)
+  fi
+  name=$(ui_entry "Full name:" "$pre_name") || exit 0
+  year=$(ui_entry "Birth year (optional):" "$pre_year") || year=""
+  out=$(tb_outdir variants "$name")
+  tb_missing variants "$name" "$year" > "$out/variants.tsv"
+  grep '^username' "$out/variants.tsv" | cut -f2 > "$out/usernames.txt"
+  grep '^email' "$out/variants.tsv" | cut -f2 > "$out/emails.txt"
+  tb_audit variants "$name" "$(wc -l < "$out/usernames.txt" | tr -d ' ') usernames, $(wc -l < "$out/emails.txt" | tr -d ' ') emails"
+  echo "Likely usernames:"; sed 's/^/  /' "$out/usernames.txt" | head -12
+  if ui_question "Check the 10 most likely usernames with Sherlock? (a few minutes)"; then
+    # shellcheck disable=SC2046  # one argument per username, on purpose
+    tb_run "$out" sherlock $(head -10 "$out/usernames.txt") --print-found --txt --folderoutput sherlock
+  fi
+  if ui_question "Check the 10 most likely emails with holehe (which sites they're registered on)?"; then
+    while IFS= read -r e; do tb_run "$out" holehe "$e" --only-used; done <<EMAILS
+$(head -10 "$out/emails.txt")
+EMAILS
+  fi
+  tb_finish "$out" ;;
+
+Instagram*)
+  u=$(ui_entry "Instagram username:") || exit 0
+  sid=$(ui_secret "Instagram sessionid cookie from a sock-puppet login (input is hidden):") || exit 0
+  out=$(tb_outdir instagram "$u")
+  if tb_cmd toutatis; then
+    # Run directly (not via tb_run) so the session cookie never reaches the audit
+    # log. toutatis only takes it as an argument, so other processes on this
+    # machine could see it in `ps` while it runs: use a throwaway puppet account.
+    tb_audit toutatis "$u" "toutatis -u $u -s <redacted>"
+    ( cd "$out" && toutatis -u "$u" -s "$sid" ) 2>&1 | tee -a "$out/console.log"
+  else
+    echo "  [skip] toutatis is not installed"
+  fi
+  tb_finish "$out" ;;
+esac

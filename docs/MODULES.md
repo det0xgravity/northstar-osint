@@ -1,10 +1,10 @@
 # Modules
 
-Every tool is installed from its official source. Each project keeps its own license; northstar-osint only automates installing them.
+Every tool is installed from its official source. Each project keeps its own license; truebearing-osint only automates installing them.
 
 ## core *(always installed)*
 
-System packages (git, curl, jq, Python, pipx, Go, whois, dig, zenity, clipboard tools, flatpak, pandoc, age and GnuPG for encrypted exports) and the northstar runtime: menu tools, the UI library, configuration and PATH setup.
+System packages (git, curl, jq, Python, pipx, Go, whois, dig, zenity, clipboard tools, flatpak, pandoc, age and GnuPG for encrypted exports) and the True Bearing runtime: menu tools, the UI library, configuration and PATH setup.
 
 ## username
 
@@ -22,7 +22,7 @@ System packages (git, curl, jq, Python, pipx, Go, whois, dig, zenity, clipboard 
 
 | Tool | Command | Purpose |
 |---|---|---|
-| northstar's Telegram engine ([Telethon](https://github.com/LonamiWebs/Telethon), private venv) | `ns_telegram` | Lookups and channel-preview search without a login; with a research account, Telegram search, message search, group members and user profiles |
+| True Bearing's Telegram engine ([Telethon](https://github.com/LonamiWebs/Telethon), private venv) | `tb_telegram` | Lookups and channel-preview search without a login; with a research account, Telegram search, message search, group members and user profiles |
 | [telegram-tracker](https://github.com/estebanpdl/telegram-tracker) | `tgtracker` | Channel collection: posts, metadata, forward networks (its own Python 3.14 through uv) |
 
 ## domain
@@ -45,9 +45,9 @@ System packages (git, curl, jq, Python, pipx, Go, whois, dig, zenity, clipboard 
 
 | Tool | Command | Purpose |
 |---|---|---|
-| [whisper-ctranslate2](https://github.com/Softcatala/whisper-ctranslate2) | `whisper-ctranslate2` | Offline speech-to-text and translation (used by `ns-video`) |
+| [whisper-ctranslate2](https://github.com/Softcatala/whisper-ctranslate2) | `whisper-ctranslate2` | Offline speech-to-text and translation (used by `tb-video`) |
 | [Tesseract](https://github.com/tesseract-ocr/tesseract) / [OCRmyPDF](https://github.com/ocrmypdf/OCRmyPDF) | `tesseract`, `ocrmypdf` | Text recognition in images and scanned PDFs. On Linux, languages for 22 languages in 10 scripts are added (French, German, Spanish, Portuguese, Italian, Dutch, Polish, Turkish, Vietnamese, Indonesian, Russian, Ukrainian, Arabic, Persian, Hebrew, Greek, Hindi, Thai, Chinese simplified and traditional, Japanese, Korean); macOS gets Homebrew's `tesseract-lang` |
-| [monolith](https://github.com/Y2Z/monolith) | `monolith` | Saves a web page as one self-contained, isolated HTML file (used by `ns-archive`) |
+| [monolith](https://github.com/Y2Z/monolith) | `monolith` | Saves a web page as one self-contained, isolated HTML file (used by `tb-archive`) |
 | [yt-dlp](https://github.com/yt-dlp/yt-dlp) | `yt-dlp` | Video/audio from thousands of sites |
 | [gallery-dl](https://github.com/mikf/gallery-dl) | `gallery-dl` | Image galleries and social posts |
 | [Instaloader](https://github.com/instaloader/instaloader) | `instaloader` | Instagram profiles, posts, stories |
@@ -62,9 +62,9 @@ System packages (git, curl, jq, Python, pipx, Go, whois, dig, zenity, clipboard 
 
 | Tool | Command | Purpose |
 |---|---|---|
-| [SpiderFoot](https://github.com/smicallef/spiderfoot) | `spiderfoot` | Automated multi-source recon (`spiderfoot -l 127.0.0.1:5001` for the web UI). Unmaintained since 2023, so northstar installs it with newer dependencies than it asks for |
+| [SpiderFoot](https://github.com/smicallef/spiderfoot) | `spiderfoot` | Automated multi-source recon (`spiderfoot -l 127.0.0.1:5001` for the web UI). Unmaintained since 2023, so True Bearing installs it with newer dependencies than it asks for |
 | [recon-ng](https://github.com/lanmaster53/recon-ng) | `recon-ng` | Modular recon framework |
-| [changedetection.io](https://github.com/dgtlmoon/changedetection.io) | `changedetection.io` | Watch pages for changes (`changedetection.io -d ~/Northstar/changedetection -p 5000`) |
+| [changedetection.io](https://github.com/dgtlmoon/changedetection.io) | `changedetection.io` | Watch pages for changes (`changedetection.io -d ~/TrueBearing/changedetection -p 5000`) |
 | [search-that-hash](https://github.com/HashPals/Search-That-Hash) | `sth` | Look up hashes in public databases |
 | [name-that-hash](https://github.com/HashPals/Name-That-Hash) | `nth` | Identify hash types |
 
@@ -77,11 +77,11 @@ System packages (git, curl, jq, Python, pipx, Go, whois, dig, zenity, clipboard 
 
 ## face
 
-OpenCV (private venv) with the OpenCV Zoo [YuNet](https://github.com/opencv/opencv_zoo/tree/main/models/face_detection_yunet) face detector (MIT) and [SFace](https://github.com/opencv/opencv_zoo/tree/main/models/face_recognition_sface) face recogniser (Apache-2.0). The model files are checked against the SHA-256 published in the opencv_zoo repository. Used by `ns-face`.
+OpenCV (private venv) with the OpenCV Zoo [YuNet](https://github.com/opencv/opencv_zoo/tree/main/models/face_detection_yunet) face detector (MIT) and [SFace](https://github.com/opencv/opencv_zoo/tree/main/models/face_recognition_sface) face recogniser (Apache-2.0). The model files are checked against the SHA-256 published in the opencv_zoo repository. Used by `tb-face`.
 
 ## translate
 
-[Argos Translate](https://github.com/argosopentech/argos-translate) (MIT) in a private venv (CPU PyTorch on x86_64 Linux), used by `ns-translate`. Language models download from the Argos package index the first time a language pair is used, then everything runs offline.
+[Argos Translate](https://github.com/argosopentech/argos-translate) (MIT) in a private venv (CPU PyTorch on x86_64 Linux), used by `tb-translate`. Language models download from the Argos package index the first time a language pair is used, then everything runs offline.
 
 ## browsers
 
@@ -102,7 +102,7 @@ On arm64 Linux, such as a VM on Apple Silicon, Mullvad Browser isn't installed b
 
 ## darkweb
 
-The Tor client as a service (a SOCKS proxy on `127.0.0.1:9050`, never a relay) and `torsocks`, used by `ns-darkweb`, and [OnionShare](https://onionshare.org) for sending and receiving files over private .onion links: the app (Flathub, verified by the OnionShare project, x86_64 and arm64; Homebrew cask on macOS) and `onionshare-cli` (pipx). Tor Browser itself comes with `browsers`. See [BREACH-DARKWEB.md](BREACH-DARKWEB.md).
+The Tor client as a service (a SOCKS proxy on `127.0.0.1:9050`, never a relay) and `torsocks`, used by `tb-darkweb`, and [OnionShare](https://onionshare.org) for sending and receiving files over private .onion links: the app (Flathub, verified by the OnionShare project, x86_64 and arm64; Homebrew cask on macOS) and `onionshare-cli` (pipx). Tor Browser itself comes with `browsers`. See [BREACH-DARKWEB.md](BREACH-DARKWEB.md).
 
 ## gis
 
@@ -114,14 +114,14 @@ Tools for checking received or suspicious files without opening them: [ClamAV](h
 
 ## countries
 
-Creates a private Python environment with Google's [libphonenumber](https://github.com/daviddrysdale/python-phonenumbers) for the phone analysis in `ns-country`. The country packs themselves are installed by `core`, and their bookmark folders by `browsers`. See [COUNTRIES.md](COUNTRIES.md).
+Creates a private Python environment with Google's [libphonenumber](https://github.com/daviddrysdale/python-phonenumbers) for the phone analysis in `tb-country`. The country packs themselves are installed by `core`, and their bookmark folders by `browsers`. See [COUNTRIES.md](COUNTRIES.md).
 
 ## desktop
 
 - **Linux**: `.desktop` launchers for every menu in `~/.local/share/applications` (they show up in any desktop's app menu), plus GNOME dock favourites. On GNOME it also sets a 24-hour clock, shows tray icons (AppIndicator extension), and stops the Activities overview from opening at every login (the packaged *No overview at start-up* extension, where the distribution has it). In a VM it also uses a single fixed workspace, so the screen doesn't slide away when a search reuses a browser window on another workspace, and turns off the top-left hot corner and the lone Super-key trigger. Otherwise the overview opens whenever the pointer leaves the VM window through that corner, or the host's ⌘/Windows key reaches the VM.
-- **Guides** (Linux and macOS): every guide in `docs/` as an offline web page in `~/Northstar/Guides` (pandoc), rebuilt on each update, with **Northstar guides** and **Northstar investigation guide** linked on the desktop. On GNOME it enables the packaged *Desktop Icons NG* extension so desktop icons show. Your own files on the desktop are never replaced.
-- **Wallpaper** (GNOME and XFCE): northstar's own desktop background, a night sky with a north star, aurora borealis and a Canadian maple leaf. It's only set if you're still on the distribution's default background. The image is in `~/.local/share/northstar/share/wallpaper/`.
-- **macOS**: `~/Applications/Northstar.app`. Your Mac's wallpaper is never changed.
+- **Guides** (Linux and macOS): every guide in `docs/` as an offline web page in `~/TrueBearing/Guides` (pandoc), rebuilt on each update, with **True Bearing guides** and **True Bearing investigation guide** linked on the desktop. On GNOME it enables the packaged *Desktop Icons NG* extension so desktop icons show. Your own files on the desktop are never replaced.
+- **Wallpaper** (GNOME and XFCE): True Bearing's own desktop background, a night sky with a north star, aurora borealis and a Canadian maple leaf. It's only set if you're still on the distribution's default background. The image is in `~/.local/share/truebearing/share/wallpaper/`.
+- **macOS**: `~/Applications/TrueBearing.app`. Your Mac's wallpaper is never changed.
 
 ## shell *(Linux only)*
 
@@ -141,12 +141,12 @@ Creates a private Python environment with Google's [libphonenumber](https://gith
 | `copypath`, `copyfile`, `copybuffer` | Copy the current folder's path, a file's contents, or (**Ctrl+O**) the command you're typing, for your notes |
 | `command-not-found` | Tells you which package provides a command that isn't installed |
 | `sudo`, `colored-man-pages`, `git` | **Esc Esc** adds sudo to a command; coloured manuals; git shortcuts |
-| [Powerlevel10k](https://github.com/romkatv/powerlevel10k) | The prompt: its "rainbow" style on one line, with a clock (HH:MM:SS) so terminal screenshots show when each command ran; commands taking 3 s or more also show their duration. Restyle any time with `p10k configure` (northstar never replaces a style you made) |
+| [Powerlevel10k](https://github.com/romkatv/powerlevel10k) | The prompt: its "rainbow" style on one line, with a clock (HH:MM:SS) so terminal screenshots show when each command ran; commands taking 3 s or more also show their duration. Restyle any time with `p10k configure` (True Bearing never replaces a style you made) |
 | [zsh-autosuggestions](https://github.com/zsh-users/zsh-autosuggestions) | Suggests commands from your history as you type (→ to accept) |
 | [zsh-syntax-highlighting](https://github.com/zsh-users/zsh-syntax-highlighting) | Colours commands as you type, so typos show in red |
 | [MesloLGS NF](https://github.com/romkatv/powerlevel10k-media) | The font Powerlevel10k's icons need. Set, along with a dark theme, in GNOME Console, Ptyxis, GNOME Terminal and the XFCE terminal (custom navy colours where the terminal allows them) |
 
-All of it is cloned from the official repositories and updated by `ns-update`. Your existing `~/.zshrc`, if any, is kept as `~/.zshrc.pre-northstar`. The new `~/.zshrc` is yours to edit: northstar won't rewrite it. Commands that start with a space aren't saved in history, which is handy for anything sensitive. On macOS this module doesn't run, and your shell is left alone.
+All of it is cloned from the official repositories and updated by `tb-update`. Your existing `~/.zshrc`, if any, is kept as `~/.zshrc.pre-truebearing`. The new `~/.zshrc` is yours to edit: True Bearing won't rewrite it. Commands that start with a space aren't saved in history, which is handy for anything sensitive. On macOS this module doesn't run, and your shell is left alone.
 
 ## extras
 
@@ -164,16 +164,16 @@ All of it is cloned from the official repositories and updated by `ns-update`. Y
 | [Signal](https://signal.org) | Signal's apt repository, Homebrew on macOS | x86_64 only on Linux: Signal has no official arm64 Linux build yet |
 | [Element](https://element.io) | Element's apt repository, Homebrew on macOS | Matrix client, x86_64 and arm64 |
 
-For research accounts only. `ns-seal` removes their logins from template clones.
+For research accounts only. `tb-seal` removes their logins from template clones.
 
 ## notes
 
-[Obsidian](https://obsidian.md) from Flathub (verified; x86_64 and arm64) or Homebrew, with `~/Northstar/Cases` set up as a vault: settings (dark theme, core Templates plugin, attachments beside notes), templates for people, accounts, organisations, places, events and leads, `Home.md`, and a `Case.md` per case. The vault is added to Obsidian's vault list while Obsidian is closed. Used by `ns-notes`.
+[Obsidian](https://obsidian.md) from Flathub (verified; x86_64 and arm64) or Homebrew, with `~/TrueBearing/Cases` set up as a vault: settings (dark theme, core Templates plugin, attachments beside notes), templates for people, accounts, organisations, places, events and leads, `Home.md`, and a `Case.md` per case. The vault is added to Obsidian's vault list while Obsidian is closed. Used by `tb-notes`.
 
 ## lan *(Linux only)*
 
-LAN isolation: installs `nftables` and, **in a VM only**, turns on `ns-lan`, a firewall table that blocks connections from the machine to private networks (your LAN, other VMs, the hypervisor host) while the internet, DNS, DHCP and replies to incoming RDP/SSH keep working. On a physical machine it's left off until you run `ns-lan on`. See [MENUS.md](MENUS.md#ns-lan-linux).
+LAN isolation: installs `nftables` and, **in a VM only**, turns on `tb-lan`, a firewall table that blocks connections from the machine to private networks (your LAN, other VMs, the hypervisor host) while the internet, DNS, DHCP and replies to incoming RDP/SSH keep working. On a physical machine it's left off until you run `tb-lan on`. See [MENUS.md](MENUS.md#tb-lan-linux).
 
 ## vm *(Linux only)*
 
-Guest tools for the detected hypervisor (QEMU guest agent and SPICE agent on Proxmox/UTM, open-vm-tools on VMware, a Parallels Tools reminder on Parallels), xrdp with the correct desktop session, a polkit rule that removes the colour-profile prompt over RDP, a first-boot service that regenerates SSH host keys on clones, and `ns-seal`. See [KASM.md](KASM.md).
+Guest tools for the detected hypervisor (QEMU guest agent and SPICE agent on Proxmox/UTM, open-vm-tools on VMware, a Parallels Tools reminder on Parallels), xrdp with the correct desktop session, a polkit rule that removes the colour-profile prompt over RDP, a first-boot service that regenerates SSH host keys on clones, and `tb-seal`. See [KASM.md](KASM.md).

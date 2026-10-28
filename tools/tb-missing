@@ -1,0 +1,113 @@
+#!/usr/bin/env bash
+# tb-missing — missing-person casework and Trace Labs-style CTFs: a subject
+# profile, a timeline built from everything in the case, and a findings (flag)
+# log with evidence hashes, duplicate warnings and an export.
+# Passive research only: never contact the subject or the people around them.
+# shellcheck source=../lib/ui.sh
+. "${TB_HOME:-$HOME/.local/share/truebearing}/lib/ui.sh"
+
+case_dir=$(tb_case_dir)
+sub="$case_dir/subject"
+
+choice=$(ui_list "Missing person: case $(tb_case)" \
+  "Log a finding (flag)" \
+  "Subject profile (create or update)" \
+  "Add subject photos" \
+  "Add a timeline event" \
+  "Build the timeline" \
+  "Show the subject profile" \
+  "Export findings" \
+  "Missing-persons databases and resources") || exit 0
+
+case "$choice" in
+  "Log a finding"*)
+    cats=()
+    while IFS= read -r c; do
+      case "$c" in ""|\#*) ;; *) cats+=("$c") ;; esac
+    done < "$TB_HOME/config/ctf-categories.txt"
+    cat=$(ui_list "Category" "${cats[@]}") || exit 0
+    url=$(ui_entry "URL of the finding:") || exit 0
+    why=$(ui_entry "What it shows and why it matters (include a date as YYYY-MM-DD if it has one):") || exit 0
+    ev=""
+    if ui_question "Attach evidence (screenshot or file)? It's copied into the case with its SHA-256."; then
+      ev=$(ui_files "Choose the evidence file") && ev=$(printf '%s\n' "$ev" | head -1)
+    fi
+    r=$(tb_missing finding-add "$case_dir" "$cat" "$url" "$why" "${ev:-}")
+    tb_audit tb-missing "$url" "finding: $cat"
+    printf '%s\n' "$r"; ui_notify "$r"
+    # Flags are the event's log; a Finding note is what reaches the Word report
+    id=$(printf '%s' "$r" | sed -n 's/^\(F[0-9]*\) logged.*/\1/p')
+    if [ -n "$id" ] && tb_cmd tb_vault && ui_question "Also make it a Finding in the case notes, so it can go into the report?
+
+It starts as a lead: capture the page, grade it and corroborate it before marking it reportable."; then
+      tb_vault from-flag "$case_dir" "$id" >/dev/null && tb_audit tb-notes "finding" "finding created from flag $id"
+    fi ;;
+
+  "Subject profile"*)
+    # key|question (each pre-filled with the current value)
+    fields="name|Full name
+aliases|Aliases and nicknames
+dob|Date of birth or age
+last_seen|Last seen (UTC, YYYY-MM-DD HH:MM)
+last_seen_place|Last seen where
+description|Description (height, build, hair, eyes, marks, clothing)
+usernames|Known usernames (comma-separated)
+emails|Known emails
+phones|Known phone numbers
+vehicles|Vehicles (make, model, colour, plate)
+notes|Other context"
+    answers=$(mktemp)
+    while IFS='|' read -r k label; do
+      cur=$(tb_missing profile-get "$case_dir" "$k")
+      v=$(ui_entry "$label:" "$cur") || v="$cur"      # Cancel keeps the current value
+      printf '%s\t%s\n' "$k" "$(printf '%s' "$v" | tr '\t\n' '  ')" >> "$answers"
+    done <<FIELDS
+$fields
+FIELDS
+    python3 -c 'import json,sys; print(json.dumps(dict(l.rstrip("\n").split("\t", 1) for l in open(sys.argv[1]) if "\t" in l)))' "$answers" \
+      | tb_missing profile-set "$case_dir" >/dev/null
+    rm -f "$answers"
+    tb_audit tb-missing "profile" "subject profile saved"
+    r=$(tb_missing profile-show "$case_dir"); printf '%s\n' "$r"; ui_info "$r" ;;
+
+  "Add subject photos")
+    files=$(ui_files "Choose photos of the subject") || exit 0
+    mkdir -p "$sub/photos"
+    n=0
+    while IFS= read -r f; do
+      [ -f "$f" ] || continue
+      cp -p "$f" "$sub/photos/" && n=$((n+1))
+      printf '%s  %s\n' "$(tb_hash_file "$f")" "$(basename "$f")" >> "$sub/photos/hashes.sha256"
+    done <<LIST
+$files
+LIST
+    tb_audit tb-missing "photos" "$n subject photos added"
+    ui_notify "$n photos added to the subject profile" ;;
+
+  "Add a timeline event")
+    when=$(ui_entry "When (UTC): YYYY-MM-DD or YYYY-MM-DD HH:MM") || exit 0
+    what=$(ui_entry "What happened:") || exit 0
+    src=$(ui_entry "Source (URL, file or note):") || exit 0
+    r=$(tb_missing event-add "$case_dir" "$when" "$what" "$src")
+    tb_audit tb-missing "timeline" "event: $when"
+    printf '%s\n' "$r"; ui_notify "$r" ;;
+
+  "Build the timeline")
+    r=$(tb_missing timeline "$case_dir"); printf '%s\n' "$r"
+    tb_audit tb-missing "timeline" "built"
+    ui_info "$r" || true
+    [ -s "$sub/timeline.html" ] && ui_reveal "$sub/timeline.html" ;;
+
+  "Show the subject"*)
+    r=$(tb_missing profile-show "$case_dir"); printf '%s\n' "$r"; ui_info "$r" ;;
+
+  "Export findings")
+    r=$(tb_missing findings-export "$case_dir"); printf '%s\n' "$r"
+    tb_audit tb-missing "findings" "exported"
+    ui_info "$r" || true
+    ui_reveal "$sub" ;;
+
+  "Missing-persons"*)
+    # Missing-persons databases for a country (or International), the subject's name pre-filled
+    tb-country "" "Missing persons" "$(tb_missing profile-get "$case_dir" name)" ;;
+esac

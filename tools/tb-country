@@ -1,0 +1,73 @@
+#!/usr/bin/env bash
+# tb-country — country-specific public-records searches. Pick a country, then a
+# search type: opens targeted searches and that country's registries in the
+# browser, copies the query for registries that can't be pre-filled, and logs
+# every search to the case. Countries are data packs in config/countries/.
+# Usage: tb-country [COUNTRY-CODE [SEARCH-LABEL [QUERY]]]  (empty code: pick a country)
+# shellcheck source=../lib/ui.sh
+. "${TB_HOME:-$HOME/.local/share/truebearing}/lib/ui.sh"
+
+PY="$TB_HOME/venvs/core/bin/python"          # has phonenumbers for phone analysis
+[ -x "$PY" ] || PY=python3
+pack() { TB_COUNTRIES="$TB_HOME/config/countries" "$PY" "$TB_HOME/lib/tb_country.py" "$@"; }
+
+code=$(tb_upper "${1:-}")
+if [ -z "$code" ]; then
+  last=$(cat "$TB_CONF/last_country" 2>/dev/null)
+  items=()
+  while IFS=$'\t' read -r c name; do
+    [ -n "$c" ] || continue
+    if [ "$c" = "$last" ]; then
+      items=("$name ($c)" ${items[@]+"${items[@]}"})     # last-used country first
+    else
+      items+=("$name ($c)")
+    fi
+  done < <(pack list)
+  [ ${#items[@]} -gt 0 ] || { ui_error "No country packs found in $TB_HOME/config/countries. Run tb-update."; exit 1; }
+  pick=$(ui_list "Country search" "${items[@]}") || exit 0
+  code=${pick##*(}; code=${code%)}
+fi
+
+labels=()
+while IFS= read -r l; do
+  case "$l" in error*) ui_error "${l#error?}"; exit 1 ;; esac
+  [ -n "$l" ] && labels+=("$l")
+done < <(pack searches "$code")
+[ ${#labels[@]} -gt 0 ] || { ui_error "Unknown country code: $code"; exit 1; }
+mkdir -p "$TB_CONF" && printf '%s\n' "$code" > "$TB_CONF/last_country"
+
+choice=""
+for l in "${labels[@]}"; do [ "$l" = "${2:-}" ] && choice="$l"; done   # preselected search, if this pack has it
+[ -n "$choice" ] || choice=$(ui_list "$(pack name "$code") search" "${labels[@]}") || exit 0
+q=$(ui_entry "$(pack prompt "$code" "$choice")" "${3:-}") || exit 0
+
+urls=(); info=""; clip="$q"; dir="$code"; what="search"
+while IFS=$'\t' read -r kind val; do
+  case "$kind" in
+    url)   urls+=("$val") ;;
+    info)  info="$info$val
+" ;;
+    clip)  clip="$val" ;;
+    dir)   dir="$val" ;;
+    kind)  what="$val" ;;
+    error) ui_error "$val"; exit 1 ;;
+  esac
+done < <(pack run "$code" "$choice" "$q")
+
+out=$(tb_outdir "$dir" "$clip")
+printf 'country\t%s\nsearch\t%s\nquery\t%s\n' "$code" "$choice" "$clip" > "$out/query.txt"
+[ -n "$info" ] && printf '%s' "$info" > "$out/details.txt"
+printf '%s\n' ${urls[@]+"${urls[@]}"} > "$out/links.txt"
+tb_audit "tb-country:$code:$what" "$clip" "${#urls[@]} searches opened in browser"
+tb_seal_result "$out" >/dev/null
+mkdir -p "$TB_CONF" && printf '%s\n' "$out" > "$TB_CONF/last_result"
+ui_clip "$clip"
+# Dialog first: once the browser opens it covers any dialog shown after it
+ui_info "${info:+$info
+}Click OK to open ${#urls[@]} searches in your browser.
+
+\"$clip\" is on your clipboard - paste it (Ctrl/Cmd+V) into any registry page that opens without a search.${info:+
+
+These details are saved in the case folder (details.txt).}"
+ui_open ${urls[@]+"${urls[@]}"}
+ui_notify "\"$clip\" is on your clipboard"

@@ -23,15 +23,15 @@ jobs:
         run: |
           if grep -nE 'declare -A|local -A|mapfile|readarray|\$\{[A-Za-z_]+(,,|\^\^)|&>>' \
                install.sh lib/*.sh modules/*.sh tools/*; then
-            echo "::error::Bash 4+ construct found — northstar must run on macOS Bash 3.2"
+            echo "::error::Bash 4+ construct found — True Bearing must run on macOS Bash 3.2"
             exit 1
           fi
 
       - name: Python and JSON
         run: |
-          python3 -m py_compile lib/gen_policies.py lib/ns_country.py lib/ns_breach.py lib/ns_darkweb.py lib/ns_evidence.py lib/ns_case.py lib/ns_doctor.py lib/ns_geo.py lib/ns_face.py lib/ns_missing.py lib/ns_photomatch.py lib/ns_watch.py lib/ns_casemap.py lib/ns_translate.py lib/ns_telegram.py lib/ns_vault.py lib/ns_guides.py lib/ns_triage.py lib/ns_email.py
+          python3 -m py_compile lib/gen_policies.py lib/tb_country.py lib/tb_breach.py lib/tb_darkweb.py lib/tb_evidence.py lib/tb_case.py lib/tb_doctor.py lib/tb_geo.py lib/tb_face.py lib/tb_missing.py lib/tb_photomatch.py lib/tb_watch.py lib/tb_casemap.py lib/tb_translate.py lib/tb_telegram.py lib/tb_vault.py lib/tb_guides.py lib/tb_triage.py lib/tb_email.py
           python3 -m json.tool config/bookmarks.json > /dev/null
-          python3 lib/ns_country.py validate
+          python3 lib/tb_country.py validate
 
       - name: Installer smoke test
         run: ./install.sh --list

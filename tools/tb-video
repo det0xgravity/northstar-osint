@@ -1,0 +1,67 @@
+#!/usr/bin/env bash
+# tb-video — verify a video: download it (or take a local file) with its
+# metadata, extract keyframes for reverse image search, and transcribe and
+# translate its audio offline (whisper-ctranslate2). Everything is sealed.
+# shellcheck source=../lib/ui.sh
+. "${TB_HOME:-$HOME/.local/share/truebearing}/lib/ui.sh"
+
+# analyse <video-file> <dir>
+analyse() {
+  local v="$1" d="$2" n lang
+  tb_audit ffprobe "$(basename "$v")" "technical metadata"
+  ffprobe -hide_banner -show_format -show_streams "$v" > "$d/ffprobe.txt" 2>&1
+  tb_cmd mediainfo && mediainfo "$v" > "$d/mediainfo.txt" 2>&1
+  exiftool -a -G1 -s "$v" > "$d/exif.txt" 2>/dev/null
+
+  # Keyframes: every scene change, plus one frame every 10 seconds
+  mkdir -p "$d/frames"
+  tb_run "$d" ffmpeg -hide_banner -loglevel error -i "$v" -vf "select='gt(scene,0.35)'" \
+    -fps_mode vfr -q:v 2 frames/scene_%04d.jpg
+  tb_run "$d" ffmpeg -hide_banner -loglevel error -i "$v" -vf fps=1/10 -q:v 2 frames/every10s_%04d.jpg
+  n=$(find "$d/frames" -name '*.jpg' | wc -l | tr -d ' ')
+  echo "  $n keyframes in frames/"
+
+  # Transcript (and translation), entirely offline once the model is downloaded
+  if tb_cmd whisper-ctranslate2 && ui_question "Transcribe the audio? It runs offline on this computer; the first time, a ~500 MB speech model is downloaded. Long videos can take a while."; then
+    tb_run "$d" whisper-ctranslate2 "$v" --model small --compute_type int8 \
+      --output_dir transcript --output_format all
+    lang=$(grep -m1 -oE 'Detected language[^0-9]*[a-z]{2}' "$d/console.log" | grep -oE '[a-z]{2}$')
+    if [ "${lang:-en}" != en ] && ui_question "The speech looks like \"$lang\". Also translate it to English?"; then
+      tb_run "$d" whisper-ctranslate2 "$v" --model small --compute_type int8 --task translate \
+        --output_dir translation --output_format all
+    fi
+  fi
+}
+
+choice=$(ui_list "Video verification" \
+  "Verify a video from a URL" \
+  "Verify a video file on this computer") || exit 0
+
+case "$choice" in
+  *URL)
+    url=$(ui_entry "Video URL (https://…):") || exit 0
+    case "$url" in http://*|https://*) ;; *) ui_error "Enter a full web address starting with https://"; exit 1 ;; esac
+    out=$(tb_outdir video "$(printf '%s' "$url" | sed -E 's#^[a-zA-Z]+://##; s#/.*$##')")
+    printf '%s\n' "$url" > "$out/source_url.txt"
+    tb_run "$out" yt-dlp --write-info-json --write-description --write-thumbnail --write-comments \
+      --no-overwrites --restrict-filenames -o "video_[%(id)s].%(ext)s" -- "$url"
+    v=$(find "$out" -maxdepth 1 -name 'video_*' ! -name '*.json' ! -name '*.description' \
+          ! -name '*.jpg' ! -name '*.webp' ! -name '*.png' | head -1)
+    [ -n "$v" ] || { ui_error "The video couldn't be downloaded; see console.log in the case folder."; tb_finish "$out"; exit 1; } ;;
+  *computer)
+    f=$(ui_files "Choose a video file") || exit 0
+    f=$(printf '%s\n' "$f" | head -1)
+    [ -f "$f" ] || exit 0
+    out=$(tb_outdir video "$(basename "$f")")
+    cp -p "$f" "$out/" && v="$out/$(basename "$f")"
+    printf 'Original: %s\nSHA-256: %s\n' "$f" "$(tb_hash_file "$f")" > "$out/source_url.txt" ;;
+esac
+
+analyse "$v" "$out"
+tb_seal_result "$out" >/dev/null
+ui_info "Done: keyframes are in frames/, and any transcript is in transcript/.
+
+Click OK to open the reverse image search pages and the frames folder: drag the most distinctive frames into each one."
+ui_open "https://lens.google.com/" "https://yandex.com/images/" "https://tineye.com/" "https://www.bing.com/visualsearch"
+ui_reveal "$out/frames"
+tb_finish "$out"

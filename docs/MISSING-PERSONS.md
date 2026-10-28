@@ -1,6 +1,6 @@
 # Missing persons and Trace Labs-style CTFs
 
-northstar's **Missing person** menu (`ns-missing`) supports missing-person casework and OSINT search-party events such as Trace Labs Search Party. Everything goes into the active case under `subject/`.
+True Bearing's **Missing person** menu (`tb-missing`) supports missing-person casework and OSINT search-party events such as Trace Labs Search Party. Everything goes into the active case under `subject/`.
 
 ## Ground rules
 
@@ -16,7 +16,7 @@ northstar's **Missing person** menu (`ns-missing`) supports missing-person casew
    - **Page monitoring** watches the subject's public profiles and channels for new activity (proof of life), with scheduled checks and a snapshot and diff of every change.
    - **Case map** puts the last-seen place, sightings, photo GPS and geolocation estimates on one map, with KML and GeoJSON for Google Earth or QGIS.
    - **Translate (offline)** translates posts, captions and transcripts without sending them anywhere.
-4. **Log findings as you go** (**Log a finding**): category, URL, what it shows and why it matters, and optionally a screenshot or file, copied in with its SHA-256. Logging the same URL twice gives a warning. Put a date (YYYY-MM-DD) in the explanation and the finding also joins the timeline. northstar then offers to make the flag an Obsidian **Finding** (a lead, with the URL, explanation, date and evidence hash), which is how it can reach the Word report once it's captured, graded and corroborated.
+4. **Log findings as you go** (**Log a finding**): category, URL, what it shows and why it matters, and optionally a screenshot or file, copied in with its SHA-256. Logging the same URL twice gives a warning. Put a date (YYYY-MM-DD) in the explanation and the finding also joins the timeline. True Bearing then offers to make the flag an Obsidian **Finding** (a lead, with the URL, explanation, date and evidence hash), which is how it can reach the Word report once it's captured, graded and corroborated.
 5. **Build the timeline:** dated events from your own entries, the last-seen moment, dated findings, posts in downloaded media (yt-dlp and gallery-dl metadata) and photo capture times (EXIF). Each event is placed relative to the last-seen moment (`+2.5 days`), and everything after it, which "advances the timeline", is highlighted. It's saved as `timeline.csv` and `timeline.html`.
 6. **Export findings:** `findings.md`, grouped by category, plus `findings.csv`, ready to transcribe into the event platform or hand over.
 

@@ -1,0 +1,66 @@
+#!/usr/bin/env bash
+# tb-translate — offline text translation (Argos Translate). The text never
+# leaves this computer; only the one-time language model download uses the
+# internet. Results are saved to the case with the source text, and sealed.
+# shellcheck source=../lib/ui.sh
+. "${TB_HOME:-$HOME/.local/share/truebearing}/lib/ui.sh"
+
+if ! tb_cmd tb_translate; then
+  ui_error "Offline translation isn't installed: ./install.sh --only translate"; exit 1
+fi
+
+choice=$(ui_list "Translate (offline): case $(tb_case)" \
+  "Translate text" \
+  "Translate text files (posts, transcripts, subtitles, captures)") || exit 0
+
+# Language lists: common investigation languages first, then everything else
+langs=$(tb_translate languages 2>/dev/null)
+[ -n "$langs" ] || { ui_error "Couldn't list languages. The first use needs the internet to fetch the model index."; exit 1; }
+pick_lang() {   # $1 = title, $2 = preferred code
+  local items=() code name c
+  for c in "$2" en fr es de pt ar ru uk zh ja ko vi th id tl it nl pl tr fa hi ur; do
+    name=$(printf '%s\n' "$langs" | awk -F'\t' -v c="$c" '$1==c {print $2}')
+    [ -n "$name" ] && items+=("$name ($c)")
+  done
+  while IFS="$(printf '\t')" read -r code name; do
+    case " en fr es de pt ar ru uk zh ja ko vi th id tl it nl pl tr fa hi ur $2 " in *" $code "*) ;; *) items+=("$name ($code)") ;; esac
+  done <<LIST
+$langs
+LIST
+  ui_list "$1" "${items[@]}" | sed -E 's/.*\(([^)]*)\)$/\1/'
+}
+src=$(pick_lang "Translate from" "es") || exit 0
+[ -n "$src" ] || exit 0
+dst=$(pick_lang "Translate to" "en") || exit 0
+[ -n "$dst" ] || exit 0
+[ "$src" != "$dst" ] || { ui_error "Choose two different languages."; exit 0; }
+
+case "$choice" in
+  "Translate text")
+    text=$(ui_entry "Text to translate ($src → $dst):") || exit 0
+    out=$(tb_outdir translation "$src-$dst")
+    printf '%s\n' "$text" > "$out/source.txt"
+    files="$out/source.txt" ;;
+  *)
+    files=$(ui_files "Choose text files (.txt, .srt, .vtt, .md, .csv)") || exit 0
+    out=$(tb_outdir translation "$src-$dst") ;;
+esac
+
+if ! tb_run "$out" tb_translate get "$src" "$dst"; then
+  ui_error "Couldn't get the $src → $dst language models (the first use needs the internet)."; tb_finish "$out"; exit 0
+fi
+while IFS= read -r f; do
+  [ -f "$f" ] || continue
+  b=$(basename "$f")
+  [ "$(dirname "$f")" = "$out" ] || cp -p "$f" "$out/$b"        # keep the source beside its translation
+  tb_run "$out" tb_translate file "$src" "$dst" "$b" "${b%.*}.$dst.${b##*.}"
+done <<LIST
+$files
+LIST
+if [ "$choice" = "Translate text" ] && [ -s "$out/source.$dst.txt" ]; then
+  r=$(cat "$out/source.$dst.txt"); ui_clip "$r"
+  ui_info "$r
+
+(Machine translation, copied to the clipboard. Have important passages checked by a qualified translator.)"
+fi
+tb_finish "$out"

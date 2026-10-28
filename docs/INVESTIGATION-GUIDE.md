@@ -1,24 +1,24 @@
 # Investigation guide: from zero to a case ready for submission
 
-This guide takes you through a whole investigation on the northstar VM, step by step: preparing the VM, opening a case, collecting, sealing evidence, analysing in Obsidian, writing findings, review, and the report you hand over. It uses one fictional worked example throughout, a missing adult called **Jane Doe**, but the same steps work for due diligence, fraud or threat cases.
+This guide takes you through a whole investigation on the True Bearing VM, step by step: preparing the VM, opening a case, collecting, sealing evidence, analysing in Obsidian, writing findings, review, and the report you hand over. It uses one fictional worked example throughout, a missing adult called **Jane Doe**, but the same steps work for due diligence, fraud or threat cases.
 
 Two more worked examples follow the main guide: [a dark-web vendor traced from their username](#13-worked-example-a-a-dark-web-vendor-from-a-username-to-a-name) and [a photo traced to where it was taken and who is in it](#14-worked-example-b-one-photo-to-where-it-was-taken-and-who-is-in-it).
 
 It draws on reviews by an experienced case manager (evidence, supervision, handover) and a senior OSINT specialist (collection, verification, OPSEC).
 
-**Where to find this guide:** on the VM's desktop (**Northstar investigation guide**, and the **Northstar guides** folder for the other manuals), under **Guides** in the northstar main menu, or on GitHub. The copies on the VM work offline and are refreshed by every update.
+**Where to find this guide:** on the VM's desktop (**True Bearing investigation guide**, and the **True Bearing guides** folder for the other manuals), under **Guides** in the True Bearing main menu, or on GitHub. The copies on the VM work offline and are refreshed by every update.
 
-You don't need to know the command line. Everything here is in the **northstar** menu (the compass icon in the dock, or type `northstar` in a terminal). Menu names in **bold** are exactly what you'll see.
+You don't need to know the command line. Everything here is in the **True Bearing** menu (the compass icon in the dock, or type `truebearing` in a terminal). Menu names in **bold** are exactly what you'll see.
 
 > **📷 Screenshots.** Places marked 📷 show what you should see at that step. To capture your own, press **Print Screen** in the VM (Flameshot).
 
 ## Quick start checklist
 
-For diving straight in. Each step links to the full explanation for when you need it. Menu names are in the **northstar** main menu.
+For diving straight in. Each step links to the full explanation for when you need it. Menu names are in the **True Bearing** main menu.
 
 **Before you start**
 - [ ] VM snapshot taken; VPN or research connection on if your work needs it ([1](#1-before-your-first-case))
-- [ ] **Update northstar** ends with *All modules completed.*; **Health check** shows nothing missing
+- [ ] **Update True Bearing** ends with *All modules completed.*; **Health check** shows nothing missing
 - [ ] Research accounts only, never personal ones. API keys (optional) under **API keys**
 
 **Open the case**
@@ -69,7 +69,7 @@ Before you submit, go through the full [pre-submission checklist](#11-pre-submis
 
 | Where | What it holds | Can it be edited? |
 |---|---|---|
-| **Result folders** (`~/Northstar/Cases/<case>/<kind>/<target>_<time>/`) | Everything a tool collected, sealed with SHA-256 hashes when the search finishes | No: any change shows when it's verified |
+| **Result folders** (`~/TrueBearing/Cases/<case>/<kind>/<target>_<time>/`) | Everything a tool collected, sealed with SHA-256 hashes when the search finishes | No: any change shows when it's verified |
 | **`audit.log`** | Every search you ran, with the UTC time, the tool and the operator, hash-chained | No: edits break the chain |
 | **`notes.md`** (Case → **Add a note**) | Your contemporaneous notes, hash-chained | No: you can only add to it |
 | **Obsidian notes** (Case.md, Findings, People, Accounts…) | Your working analysis and conclusions | Yes: this is your workspace |
@@ -85,12 +85,12 @@ Do this once when the VM is new, and the update and health check before every ca
 
 ### 1.1 Take a clean snapshot
 
-In UTM, with the VM shut down, take a snapshot called *clean baseline*. Go back to it between unrelated cases so nothing (browser history, logins, cookies) carries over. Case data lives in `~/Northstar`: export it before you revert (step 10).
+In UTM, with the VM shut down, take a snapshot called *clean baseline*. Go back to it between unrelated cases so nothing (browser history, logins, cookies) carries over. Case data lives in `~/TrueBearing`: export it before you revert (step 10).
 
 ### 1.2 Update and check health
 
-1. Main menu → **Update northstar**. A good update ends with **All modules completed.**; otherwise it lists the modules that failed (see [TROUBLESHOOTING.md](TROUBLESHOOTING.md)).
-2. Main menu → **Health check**. Read the summary at the end: anything missing, and the keys file or Northstar folders readable by other accounts. Note which of ports 3389 (xrdp), 4000 (amass) and 9050 (Tor) are listening, and whether you expected them to be. The report is saved in `~/Northstar/support/`.
+1. Main menu → **Update True Bearing**. A good update ends with **All modules completed.**; otherwise it lists the modules that failed (see [TROUBLESHOOTING.md](TROUBLESHOOTING.md)).
+2. Main menu → **Health check**. Read the summary at the end: anything missing, and the keys file or True Bearing folders readable by other accounts. Note which of ports 3389 (xrdp), 4000 (amass) and 9050 (Tor) are listening, and whether you expected them to be. The report is saved in `~/TrueBearing/support/`.
 
 📷 *The Health check report, with the Tools section and no problems listed.*
 
@@ -98,7 +98,7 @@ In UTM, with the VM shut down, take a snapshot called *clean baseline*. Go back 
 
 Every search leaves from the VM's internet connection. If your organisation requires a VPN or a dedicated research line, connect it **before** you open the browser or run any menu. Check your public IP in the browser before you start.
 
-**LAN isolation.** In a VM, northstar blocks connections from the VM to your own network (router, NAS, printers, other machines), so nothing you open during an investigation can reach them. Check it's on with main menu → **LAN isolation (firewall)** → **Status**. If your cases are saved to a NAS, allow it there.
+**LAN isolation.** In a VM, True Bearing blocks connections from the VM to your own network (router, NAS, printers, other machines), so nothing you open during an investigation can reach them. Check it's on with main menu → **LAN isolation (firewall)** → **Status**. If your cases are saved to a NAS, allow it there.
 
 ### 1.4 Research accounts and API keys
 
@@ -110,7 +110,7 @@ Every search leaves from the VM's internet connection. If your organisation requ
 
 ### 1.5 Open the vault in Obsidian
 
-Main menu → **Notes (Obsidian)** → **Open the Cases vault (all cases)**. If Obsidian asks whether to trust the vault, either answer works: northstar uses no community plugins, so you can keep restricted mode on. You'll see `Home.md`, the list of every case.
+Main menu → **Notes (Obsidian)** → **Open the Cases vault (all cases)**. If Obsidian asks whether to trust the vault, either answer works: True Bearing uses no community plugins, so you can keep restricted mode on. You'll see `Home.md`, the list of every case.
 
 📷 *Obsidian showing Home.md with the case list.*
 
@@ -173,7 +173,7 @@ The profile pre-fills other menus: the missing-persons database search, the user
 
 ### 3.3 The case dashboard
 
-Main menu → **Notes (Obsidian)** → **Open this case's notes**. This is `Case.md`, the dashboard. The top part is generated by northstar and refreshed after every search. **Write below the end marker:**
+Main menu → **Notes (Obsidian)** → **Open this case's notes**. This is `Case.md`, the dashboard. The top part is generated by True Bearing and refreshed after every search. **Write below the end marker:**
 
 - **Summary**: what you know so far, in a few lines.
 - **Analysis**: hypotheses and what would settle them.
@@ -197,7 +197,7 @@ Work outwards from what you were given: **identifiers → accounts → content �
 
 Below is the order used for the Jane Doe example. Skip what doesn't apply to your case, and **stay within the scope** you recorded: don't collect friends', family's or group members' data beyond what the case needs.
 
-> **What leaves the VM.** Image files never leave it through northstar's own tools. But **Reverse search an image URL** sends the URL to Google, Yandex, Bing and TinEye, and anything you **drag into** a reverse-search page that a menu opens (from **Analyze a local image**, **Video verification** or **Photo geolocation**) is uploaded to that service. Never do that with photos of victims or minors. Use the local tools (same-photo finder, face comparison, GeoCLIP) instead.
+> **What leaves the VM.** Image files never leave it through True Bearing's own tools. But **Reverse search an image URL** sends the URL to Google, Yandex, Bing and TinEye, and anything you **drag into** a reverse-search page that a menu opens (from **Analyze a local image**, **Video verification** or **Photo geolocation**) is uploaded to that service. Never do that with photos of victims or minors. Use the local tools (same-photo finder, face comparison, GeoCLIP) instead.
 >
 > Other things that go out: **Reverse search an image URL** may download a copy of the image over your connection (it asks first unless Tor is running); case-map address lookups and GeoCLIP place names send text or coordinates to OpenStreetMap; opening `map.html` loads map tiles. Every web search and page capture goes out over your connection.
 
@@ -246,7 +246,7 @@ Profiles change and posts get deleted. When you find something relevant, capture
 2. **Image analysis** → **Find the same photo across this case**: the same picture on two accounts often shows they're connected.
 3. **Image analysis** → **Reverse search an image URL** (Google Lens, Yandex, Bing, TinEye), or **Analyze a local image**, which opens Google Lens, Yandex, TinEye and FotoForensics for you to drag it into (and Google Maps if it has GPS). Never upload photos of victims or minors to online services.
 4. **Photo geolocation** → **Where was this photo taken?**: EXIF, the text visible in the photo (OCR) and, optionally, GeoCLIP's estimate, all on your computer. GeoCLIP gives **leads, not answers**: confirm them with street-level imagery, signs, landmarks or **Shadow analysis**.
-5. **Image analysis** → **Face search engines (online; read the warning)**: PimEyes, FaceCheck.ID, Search4faces and Lenso.ai search the web for a face. The photo leaves the VM, a face is biometric data, and results are look-alikes, never identifications. northstar warns you first, won't open them for a child or a victim, and records your reason and lawful basis in the notes. Use them only when the case needs it and your basis covers it. The **Face search engines** bookmark opens the same warning as a page, but records nothing.
+5. **Image analysis** → **Face search engines (online; read the warning)**: PimEyes, FaceCheck.ID, Search4faces and Lenso.ai search the web for a face. The photo leaves the VM, a face is biometric data, and results are look-alikes, never identifications. True Bearing warns you first, won't open them for a child or a victim, and records your reason and lawful basis in the notes. Use them only when the case needs it and your basis covers it. The **Face search engines** bookmark opens the same warning as a page, but records nothing.
 6. **Face comparison (within this case)**: compares a reference face (the official photo) with faces in photos already in the case. It asks for the lawful basis the first time. A score is similarity, never identification: treat it as a reason to look closer.
 
 **Material from a source.** If someone (a witness, a family member, a whistle-blower) needs to send you files and has no safe way to do it, **Dark web** → **OnionShare: receive files from a source into this case** gives them a private .onion drop box. Send them the address and the private key, and ask them to use Tor Browser. What arrives is hashed, checked for warning signs (a program disguised as a document, macros, PDF scripts, known malware), sealed and listed in the case; record it as an exhibit, and treat every file as hostile (no programs, no macros). For files that reach you any other way, use **Evidence & exhibits** → **Check received or suspicious files (triage)** before you open them.
@@ -287,7 +287,7 @@ It can't watch pages that need a login or are built entirely by JavaScript, whic
 
 ### 4.12 Search-party events: flags
 
-At a Trace Labs-style event, log each submission as you find it with **Missing person** → **Log a finding (flag)** (category, URL, why it matters, optional screenshot), then **Export findings** for the event platform. These flags are the event's log; the Word report is built from Obsidian **Findings** (step 7). When you log a flag, northstar offers to **make it a Finding too**: it starts as a lead with the URL, explanation, date and evidence hash filled in, so you can capture the page, grade it and corroborate it before it goes into a report.
+At a Trace Labs-style event, log each submission as you find it with **Missing person** → **Log a finding (flag)** (category, URL, why it matters, optional screenshot), then **Export findings** for the event platform. These flags are the event's log; the Word report is built from Obsidian **Findings** (step 7). When you log a flag, True Bearing offers to **make it a Finding too**: it starts as a lead with the URL, explanation, date and evidence hash filled in, so you can capture the page, grade it and corroborate it before it goes into a report.
 
 ### 4.13 Log nil results
 
@@ -310,20 +310,20 @@ Every result folder is already sealed. **Record the ones you'll rely on as exhib
 
 ## 6. Analyse in Obsidian
 
-Everything you've collected is now in the vault. Key pages, from the case's dashboard (`Case.md`) or the **northstar** bookmarks group:
+Everything you've collected is now in the vault. Key pages, from the case's dashboard (`Case.md`) or the **True Bearing** bookmarks group:
 
 | Page | Use it to |
 |---|---|
 | **Results/** | Read each tool's output as tables. Write what you checked in **Analyst notes** at the bottom, and set `relevance`, `reviewed` or `nil_return` in the properties. Your text is kept when the note is rebuilt |
 | **Selectors.md** | Every identifier found, how many tools saw it and when, and the searches that would take it further (✓ = already run). This is your pivot list |
 | **Accounts.md** | Account hits merged across tools. Two tools agreeing is still **unverified** |
-| **Link chart.canvas** | People, accounts and identifiers seen by two or more tools, connected. Drag, add and annotate: once you edit it, northstar stops overwriting it |
+| **Link chart.canvas** | People, accounts and identifiers seen by two or more tools, connected. Drag, add and annotate: once you edit it, True Bearing stops overwriting it |
 | **Chronology.md** | The timeline from Event notes, findings, the missing-person timeline and timed places, oldest first, with the kind of each time (camera clock, platform, analyst, witness) |
 | **People/, Places/, Organisations/, Events/** | Your working notes. Create them from Notes → **New note: …** |
 
 Things to keep in mind:
 
-- **Times:** northstar writes everything in UTC (properties ending `_utc`). Write event and finding times in UTC too, and note what kind of time it is: a camera clock can be wrong, and a platform shows its own time zone.
+- **Times:** True Bearing writes everything in UTC (properties ending `_utc`). Write event and finding times in UTC too, and note what kind of time it is: a camera clock can be wrong, and a platform shows its own time zone.
 - **Rebuild a note** after you change a result folder by hand: Notes → **Refresh this case's notes**.
 - **Getting events into the report:** the report's chronology holds Event notes with **`reportable: true`**, the reportable findings that have a `when_utc`, and the last-seen time. Everything else stays in Chronology.md.
 - **Missing-person timeline:** **Missing person** → **Build the timeline** places everything relative to the last-seen moment; anything after it "advances the timeline".
@@ -413,7 +413,7 @@ The review is written to the contemporaneous notes with two fingerprints: the re
 
 Main menu → **Case** → **Build a report (Word document)**.
 
-If anything doesn't hold up, northstar lists **warnings** first and asks whether to build anyway. Fix them instead, unless you have a reason you'll write down:
+If anything doesn't hold up, True Bearing lists **warnings** first and asks whether to build anyway. Fix them instead, unless you have a reason you'll write down:
 
 | Warning | Fix |
 |---|---|
@@ -448,10 +448,10 @@ The report's hash is written to the contemporaneous notes. **Read the whole .doc
 ## 10. Submit, hand over and close
 
 1. Case → **Verify notes and audit log**: both chains should report 0 broken.
-2. **Evidence & exhibits** → **Export the case (archive + SHA-256)**: a `.tar.gz` of the whole case in `~/Northstar/Exports/`, readable only by you, with a `.sha256` beside it. If the export leaves the VM, use **Export the case, encrypted (age or PGP)** instead: encrypted for the recipient's public key (age, SSH or PGP), or a passphrase you send by another channel. For a PGP key, check the fingerprint shown with the recipient before you send.
+2. **Evidence & exhibits** → **Export the case (archive + SHA-256)**: a `.tar.gz` of the whole case in `~/TrueBearing/Exports/`, readable only by you, with a `.sha256` beside it. If the export leaves the VM, use **Export the case, encrypted (age or PGP)** instead: encrypted for the recipient's public key (age, SSH or PGP), or a passphrase you send by another channel. For a PGP key, check the fingerprint shown with the recipient before you send.
 3. Submit `report.docx` with `hashes.sha256` (and the export, if the recipient needs the evidence) through your organisation's approved channel, and send the SHA-256 values separately so they can check what they received. If no approved channel exists and the recipient has Tor Browser, **Dark web** → **OnionShare: send files over a private .onion link** sends them end to end encrypted; give the address and the private key by two different channels.
 4. If someone else takes over, give them **Handover.md**: intake and lawful basis, integrity, findings and report status, the last review, open leads and owners, next steps and decisions.
-5. Case → **Close this case (verify, export, mark closed)**. Before closing, northstar checks that the notes, audit log and exhibits verify, a report has been built since the last change to findings, a review covers the current findings and summary, the intake is complete and no leads are open. Anything not done is listed; if you close anyway, the open points are written to the notes. Nothing is deleted, and scheduled page checks skip closed cases.
+5. Case → **Close this case (verify, export, mark closed)**. Before closing, True Bearing checks that the notes, audit log and exhibits verify, a report has been built since the last change to findings, a review covers the current findings and summary, the intake is complete and no leads are open. Anything not done is listed; if you close anyway, the open points are written to the notes. Nothing is deleted, and scheduled page checks skip closed cases.
 
    A closed case takes no more notes, reviews or reports. To work on it again, Case → **Reopen this case**, with a reason (recorded in the notes).
 
@@ -541,7 +541,7 @@ Preparation:
    - `page.txt`: the readable text;
    - `page.html.txt`: the page source, kept as text (never open it in a browser);
    - `links.txt`, `onion_addresses.txt`, `headers.txt`, `metadata.json`.
-2. Do the same for the seller's public profile page, if the forum shows it without a login. If the forum asks for a login or a CAPTCHA, **stop**: northstar won't get around it, and you mustn't either. Note it.
+2. Do the same for the seller's public profile page, if the forum shows it without a login. If the forum asks for a login or a CAPTCHA, **stop**: True Bearing won't get around it, and you mustn't either. Note it.
 3. **Evidence & exhibits** → **Record a result folder as an exhibit** for both: `EX-001 forum post`, `EX-002 seller profile`.
 4. **Dark web** → **Ransomware leak-site check (organisation)** with the company's name and domain. A listing would mean a ransomware group claims an attack; that's a criminal's claim, not a fact.
 
@@ -580,7 +580,7 @@ Each identifier becomes a search. After each one, the result note appears in Obs
 3. **Telegram** → **Look up a channel, group, bot or user** for `example_vendor_ops` (no login), then **User profile (login)** with your research account: the numeric ID, all usernames, bio and profile photo. Record the ID: usernames change, the ID doesn't.
 4. **Breach data** with the email and the usernames. Lookups only: nothing is downloaded. Two kinds of result are common:
    - the email appears in old breaches of ordinary sites (a forum, a game), sometimes with a username or a name;
-   - an **infostealer** hit (Hudson Rock): a computer that used this email or username was infected with password-stealing malware. For a criminal, that's a frequent route to their real identity, but details beyond the summary come from the service, not from northstar, and must be handled under your legal basis.
+   - an **infostealer** hit (Hudson Rock): a computer that used this email or username was infected with password-stealing malware. For a criminal, that's a frequent route to their real identity, but details beyond the summary come from the service, not from True Bearing, and must be handled under your legal basis.
 
    Passwords are masked in `summary.txt` and never reach your notes. Don't put them in findings or the report.
 5. **Domain & infrastructure** → **WHOIS, RDAP & DNS records** and **Archived URLs** for any website the seller mentions: registration dates, name servers and old versions of pages can carry the same email or handle.

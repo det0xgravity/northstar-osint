@@ -1,0 +1,43 @@
+#!/usr/bin/env bash
+# tb-keys — add, check or remove API keys for the paid services True Bearing can
+# use. Keys live in ~/.config/truebearing/keys.env (readable only by you); they
+# are never shown in full, put on a command line, or written to audit.log.
+# shellcheck source=../lib/ui.sh
+. "${TB_HOME:-$HOME/.local/share/truebearing}/lib/ui.sh"
+
+# name | label | where to get one
+KEYS="HIBP_API_KEY|Have I Been Pwned|https://haveibeenpwned.com/API/Key
+INTELX_API_KEY|Intelligence X|https://intelx.io/account?tab=developer
+DEHASHED_API_KEY|DeHashed|https://app.dehashed.com/
+LEAKCHECK_API_KEY|LeakCheck|https://leakcheck.io/
+TELEGRAM_API_ID|Telegram API ID|https://my.telegram.org/apps
+TELEGRAM_API_HASH|Telegram API hash|https://my.telegram.org/apps"
+
+while true; do
+  items=()
+  while IFS='|' read -r k label _; do
+    v=$(tb_key_get "$k")
+    if [ -n "$v" ]; then st="set (ends …${v#"${v%????}"})"; else st="not set"; fi
+    items+=("$label: $st")
+  done <<EOF
+$KEYS
+EOF
+  choice=$(ui_list "API keys (stored only on this computer)" "${items[@]}") || exit 0
+  label=${choice%%:*}
+  line=$(printf '%s\n' "$KEYS" | grep "|$label|")
+  k=${line%%|*}; url=${line##*|}
+
+  action=$(ui_list "$label" "Set or replace the key" "Remove the key" "Get a key (opens the website)") || continue
+  case "$action" in
+    Set*)
+      v=$(ui_secret "$label API key (input is hidden):") || continue
+      v=$(printf '%s' "$v" | tr -d '[:space:]')
+      tb_key_set "$k" "$v" && tb_audit tb-keys "$k" "API key set (value not recorded)"
+      ui_info "$label key saved." ;;
+    Remove*)
+      tb_key_set "$k" "" && tb_audit tb-keys "$k" "API key removed"
+      ui_info "$label key removed." ;;
+    Get*)
+      ui_open "$url" ;;
+  esac
+done

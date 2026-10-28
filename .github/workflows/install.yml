@@ -33,28 +33,28 @@ jobs:
         run: su ns -c "cd '$GITHUB_WORKSPACE' && ./install.sh --yes --only username,countries"
       - name: Tools work
         run: |
-          su ns -c 'export PATH="$HOME/.local/share/northstar/bin:$HOME/.local/bin:$PATH"
+          su ns -c 'export PATH="$HOME/.local/share/truebearing/bin:$HOME/.local/bin:$PATH"
             set -e
             sherlock --version
             maigret --version
-            python3 "$HOME/.local/share/northstar/lib/ns_country.py" list | head -3
-            ns_evidence --help > /dev/null || true
-            test -x "$HOME/.local/share/northstar/bin/ns-country"
+            python3 "$HOME/.local/share/truebearing/lib/tb_country.py" list | head -3
+            tb_evidence --help > /dev/null || true
+            test -x "$HOME/.local/share/truebearing/bin/tb-country"
             ./install.sh --version'
         working-directory: ${{ github.workspace }}
       - name: PyTorch modules (translate, geo) install the CPU build and work
         run: |
           su ns -c "cd '$GITHUB_WORKSPACE' && ./install.sh --yes --only translate,geo"
           for v in translate geo; do
-            if su ns -c "~/.local/share/northstar/venvs/$v/bin/pip list" | grep -i nvidia; then
+            if su ns -c "~/.local/share/truebearing/venvs/$v/bin/pip list" | grep -i nvidia; then
               echo "NVIDIA CUDA packages in the $v venv: the CPU build wasn't used"; exit 1
             fi
           done
-          su ns -c '~/.local/share/northstar/venvs/geo/bin/python -c "import geoclip, torch; print(\"geoclip ok, torch\", torch.__version__)"'
-          su ns -c 'export PATH="$HOME/.local/share/northstar/bin:$PATH"
+          su ns -c '~/.local/share/truebearing/venvs/geo/bin/python -c "import geoclip, torch; print(\"geoclip ok, torch\", torch.__version__)"'
+          su ns -c 'export PATH="$HOME/.local/share/truebearing/bin:$PATH"
             set -e
-            ns_translate get es en
-            echo "Hola, estoy bien." | ns_translate text es en | tee /tmp/t.txt
+            tb_translate get es en
+            echo "Hola, estoy bien." | tb_translate text es en | tee /tmp/t.txt
             grep -qi "fine\|well\|good\|okay" /tmp/t.txt'
       - name: Functional tests
         run: su ns -c "cd '$GITHUB_WORKSPACE' && bash tests/run.sh"

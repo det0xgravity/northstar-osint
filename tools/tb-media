@@ -1,0 +1,80 @@
+#!/usr/bin/env bash
+# tb-media — collect video, audio, image galleries and live streams, keeping
+# the platform's own metadata alongside every file.
+# shellcheck source=../lib/ui.sh
+. "${TB_HOME:-$HOME/.local/share/truebearing}/lib/ui.sh"
+
+choice=$(ui_list "Media download" \
+  "Video (best quality + metadata, subtitles, thumbnail)" \
+  "Audio only (MP3)" \
+  "Whole channel or playlist" \
+  "Image gallery / social media post (gallery-dl)" \
+  "Instagram profile (instaloader)" \
+  "Record a live stream (streamlink)" \
+  "Save a page to the Internet Archive (Wayback)") || exit 0
+
+url=$(ui_entry "URL (or Instagram username):") || exit 0
+case "$choice" in
+  Instagram*) ;;
+  *) # Only web addresses: anything else could be read as a command-line option
+     case "$url" in http://*|https://*) ;; *) ui_error "Enter a full web address starting with https://"; exit 1 ;; esac ;;
+esac
+host=$(printf '%s' "$url" | sed -E 's#^[a-zA-Z]+://##; s#/.*$##')
+
+YTDLP_META=(--write-info-json --write-description --write-thumbnail
+            --write-subs --write-auto-subs --sub-langs "en.*"
+            --no-overwrites --restrict-filenames)
+
+case "$choice" in
+Video*)
+  out=$(tb_outdir media "$host")
+  tb_run "$out" yt-dlp "${YTDLP_META[@]}" -o "%(uploader)s_%(title).80s_[%(id)s].%(ext)s" -- "$url"
+  tb_finish "$out" ;;
+
+Audio*)
+  out=$(tb_outdir media "$host")
+  tb_run "$out" yt-dlp -x --audio-format mp3 --write-info-json \
+                       -o "%(uploader)s_%(title).80s_[%(id)s].%(ext)s" -- "$url"
+  tb_finish "$out" ;;
+
+"Whole channel"*)
+  out=$(tb_outdir media "$host")
+  tb_run "$out" yt-dlp "${YTDLP_META[@]}" --yes-playlist --download-archive archive.txt \
+                       -o "%(playlist_title|uploader)s/%(upload_date)s_%(title).80s_[%(id)s].%(ext)s" -- "$url"
+  tb_finish "$out" ;;
+
+"Image gallery"*)
+  out=$(tb_outdir gallery "$host")
+  tb_run "$out" gallery-dl --write-metadata -d . -- "$url"
+  tb_finish "$out" ;;
+
+Instagram*)
+  user="${url#@}"; user="${user%/}"; user="${user##*/}"
+  user=$(printf '%s' "$user" | tr -cd 'A-Za-z0-9._')       # Instagram usernames: letters, digits, . and _
+  [ -n "$user" ] || { ui_error "That isn't an Instagram username."; exit 1; }
+  out=$(tb_outdir instagram "$user")
+  tb_run "$out" instaloader --dirname-pattern="{target}" --no-compress-json "$user"
+  echo "Tip: logged-out access is heavily rate-limited — use 'instaloader --login <puppet>' once."
+  tb_finish "$out" ;;
+
+"Record a live stream"*)
+  out=$(tb_outdir stream "$host")
+  echo "Recording — press Ctrl+C to stop."
+  tb_run "$out" streamlink -o "stream_{time:%Y%m%d-%H%M%S}.ts" -- "$url" best
+  tb_finish "$out" ;;
+
+"Save a page"*)
+  out=$(tb_outdir archive "$host")
+  echo "Requesting a Wayback Machine capture…"
+  r=$(curl -s -o /dev/null --max-time 120 -w '%{http_code} %{redirect_url}' -A "truebearing-osint" "https://web.archive.org/save/$url")
+  code=${r%% *}; loc=${r#* }
+  case "$code" in
+    2*|3*) msg="Wayback capture: ${loc:-requested (HTTP $code); it can take a few minutes to appear}" ;;
+    429)   msg="Wayback refused the request: too many captures from this IP recently (HTTP 429). Try again later." ;;
+    *)     msg="Wayback capture failed (HTTP ${code:-no response}). Try again later, or use archive.today." ;;
+  esac
+  printf '%s\n%s UTC\n%s\n' "$url" "$(date -u '+%Y-%m-%d %H:%M:%S')" "$msg" | tee "$out/wayback.txt"
+  tb_audit wayback "$url" "save request: HTTP ${code:-none} ${loc}"
+  ui_open "https://web.archive.org/web/*/$url" "https://archive.ph/?url=$(tb_enc "$url")"
+  tb_finish "$out" ;;
+esac

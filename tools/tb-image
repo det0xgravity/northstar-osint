@@ -1,0 +1,137 @@
+#!/usr/bin/env bash
+# tb-image — reverse image search and location clues from image metadata.
+# shellcheck source=../lib/ui.sh
+. "${TB_HOME:-$HOME/.local/share/truebearing}/lib/ui.sh"
+
+choice=$(ui_list "Image analysis" \
+  "Reverse search an image URL (Google Lens, Yandex, Bing, TinEye)" \
+  "Analyze a local image (EXIF, GPS, then reverse search)" \
+  "Read the text in images (OCR)" \
+  "Find the same photo across this case (perceptual hash)" \
+  "Face search engines (online; read the warning)") || exit 0
+
+case "$choice" in
+"Reverse search an image URL"*)
+  u=$(ui_entry "Direct image URL:") || exit 0
+  e=$(tb_enc "$u")
+  out=$(tb_outdir image "$(printf '%s' "$u" | sed -E 's#^[a-zA-Z]+://##; s#/.*$##')")
+  echo "$u" > "$out/source_url.txt"
+  tb_audit reverse-image "$u" "lens, yandex, bing, tineye"
+  ui_open "https://lens.google.com/uploadbyurl?url=$e" \
+          "https://yandex.com/images/search?rpt=imageview&url=$e" \
+          "https://www.bing.com/images/search?view=detailv2&iss=sbi&q=imgurl:$e" \
+          "https://tineye.com/search?url=$e"
+  # Downloading a copy contacts the image's server directly. Use Tor when it's
+  # running; otherwise ask, since the server would see your own IP address.
+  if tb_cmd curl && tb_cmd exiftool; then
+    via=""
+    if tb_cmd tb_darkweb && tb_darkweb check >/dev/null 2>&1; then
+      via="--socks5-hostname ${TB_TOR_SOCKS:-127.0.0.1:9050}"
+    elif ! ui_question "Also download a copy of the image to check its EXIF data?
+
+This contacts the image's server from YOUR IP address (Tor isn't running). The reverse searches above don't."; then
+      via="skip"
+    fi
+    if [ "$via" != skip ]; then
+      # shellcheck disable=SC2086  # $via is empty or two words on purpose
+      curl -fsSL $via -A "Mozilla/5.0" -- "$u" -o "$out/image" 2>/dev/null &&
+        exiftool -a -G1 -s "$out/image" > "$out/image.exif.txt" &&
+        echo "  Downloaded copy + EXIF saved${via:+ (via Tor)} (most platforms strip EXIF on upload)."
+      tb_audit image-download "$u" "copy downloaded${via:+ via Tor}"
+    fi
+  fi
+  tb_finish "$out" ;;
+
+"Find the same photo"*)
+  tb_cmd tb_photomatch || { ui_error "The same-photo finder isn't installed: ./install.sh --only media"; exit 1; }
+  case_dir=$(tb_case_dir)
+  if ui_question "Look for one particular photo?
+
+Yes: choose a photo and find every copy of it in the case.
+No: find every photo that appears more than once in the case."; then
+    p=$(ui_files "Choose the photo to look for") || exit 0
+    p=$(printf '%s\n' "$p" | head -1)
+    [ -f "$p" ] || exit 0
+    out=$(tb_outdir same-photo "$(basename "$p")")
+    cp -p "$p" "$out/searched_$(basename "$p")"
+    tb_run "$out" tb_photomatch find "searched_$(basename "$p")" "$case_dir" .
+  else
+    out=$(tb_outdir same-photo "whole-case")
+    tb_run "$out" tb_photomatch groups "$case_dir" .
+  fi
+  tb_seal_result "$out" >/dev/null
+  [ -s "$out/same_photos.html" ] && ui_reveal "$out/same_photos.html"
+  tb_finish "$out" ;;
+
+"Read the text"*)
+  tb_cmd tesseract || { ui_error "Tesseract isn't installed: ./install.sh --only media"; exit 1; }
+  files=$(ui_files "Choose image(s)") || exit 0
+  out=$(tb_outdir ocr "images")
+  while IFS= read -r f; do
+    [ -f "$f" ] || continue
+    base=$(basename "$f")
+    cp -p "$f" "$out/"
+    # Languages chosen per image from its script (Latin, Cyrillic, Arabic, Han…)
+    langs=$(cd "$out" && tb_ocr_langs "$base")
+    tb_run "$out" tesseract "$base" "${base%.*}" -l "$langs" >/dev/null
+    printf '\n\033[1m=== %s ===\033[0m\n' "$base"; cat "$out/${base%.*}.txt" 2>/dev/null
+  done <<EOF
+$files
+EOF
+  tb_finish "$out" ;;
+
+"Analyze a local image"*)
+  f=$(ui_files "Choose an image") || exit 0
+  f=$(printf '%s\n' "$f" | head -1)
+  [ -f "$f" ] || exit 0
+  base=$(basename "$f")
+  out=$(tb_outdir image "$base")
+  cp "$f" "$out/"
+  tb_audit exiftool "$base" "exiftool -a -G1 -s"
+  exiftool -a -G1 -s "$f" | tee "$out/$base.exif.txt" | \
+    grep -iE 'Make|Model|DateTimeOriginal|GPS|Software|Artist|Owner|Serial' || true
+  if tb_cmd sha256sum; then sha256sum "$f" > "$out/$base.sha256"; else shasum -a 256 "$f" > "$out/$base.sha256"; fi
+  gps=$(exiftool -n -p '$GPSLatitude,$GPSLongitude' "$f" 2>/dev/null)
+  urls=("https://lens.google.com/" "https://yandex.com/images/" "https://tineye.com/" "https://fotoforensics.com/")
+  [ -n "$gps" ] && urls=("https://www.google.com/maps/search/?api=1&query=$gps" "${urls[@]}")
+  # Dialog first: once the browser opens it covers any dialog shown after it
+  ui_info "${gps:+GPS found: $gps (it will open in Maps)
+
+}Click OK to open the reverse-search pages and the case folder. Drag the image from the folder into each page.
+
+The EXIF report and a SHA-256 hash of the original are saved in the case folder."
+  ui_open "${urls[@]}"
+  ui_reveal "$out"     # opened even from the main menu: you drag the image from here
+  ui_notify "Drag $base from the case folder into the search pages"
+  tb_finish "$out" ;;
+
+"Face search engines"*)
+  # Online face search sends a face to a third party: warn, rule out children and
+  # victims, and record the reason in the case's notes and audit log first
+  case_dir=$(tb_case_dir)
+  if [ "$(tb_casework status "$case_dir" 2>/dev/null)" = closed ]; then
+    ui_error "Case $(tb_case) is closed. Reopen it first (Case → Reopen this case)."; exit 1
+  fi
+  ui_question "Face search engines: read this first
+
+- The photo LEAVES this computer. PimEyes, FaceCheck.ID, Search4faces and Lenso.ai are commercial services that may keep, index or analyse what you upload.
+- A face is biometric data. Many laws give it special protection (the GDPR, Illinois' BIPA). You need a lawful basis, and your organisation's permission. Some services only allow searching for your own face: check their terms.
+- Results are look-alikes, not identifications. False matches are common, especially with poor photos, and accuracy differs between groups. A match is a lead to corroborate, never proof.
+- Results can include adult sites, mugshots and offender registries.
+
+Continue?" || exit 0
+  if ui_question "Could the person be under 18, or is the photo of a victim (or from a victim or their family)?"; then
+    ui_error "Don't use online face search for this photo. Use Face comparison (within this case), which runs on this computer, or leave it to law enforcement."
+    tb_audit tb-image "face-search" "not used: possible minor or victim"
+    exit 0
+  fi
+  why=$(ui_entry "Why is an online face search needed, and on what lawful basis? (recorded in the case notes)") || exit 0
+  [ -n "$why" ] || exit 0
+  tb_casework note "$case_dir" "DECISION: online face search engines used. Reason and basis: $why" >/dev/null \
+    || { ui_error "The reason couldn't be recorded in the case notes, so the engines weren't opened."; exit 1; }
+  tb_audit tb-image "face-search" "opened PimEyes, FaceCheck.ID, Search4faces, Lenso.ai"
+  ui_info "Click OK to open the face search engines. Upload or drag in the photo yourself.
+
+Capture any result you'll rely on with Capture web pages, and treat every match as a lead."
+  ui_open "https://pimeyes.com/en" "https://facecheck.id/" "https://search4faces.com/" "https://lenso.ai/en" ;;
+esac

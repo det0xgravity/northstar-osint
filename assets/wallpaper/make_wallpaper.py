@@ -1,15 +1,15 @@
 #!/usr/bin/env python3
-"""Generate the northstar-osint desktop wallpaper (original artwork, MIT).
+"""Generate the truebearing-osint desktop wallpaper (original artwork, MIT).
 
 A night sky with map contours and a coordinate grid: the pointer stars of a
 stylised dipper lead to a north star inside a compass ring. The Canadian
 touches: aurora borealis curtains, a small maple leaf by the signature, and
 the coordinates of Alert, Nunavut, the northernmost permanently inhabited
 place on Earth. The output is
-deterministic, so re-running it reproduces northstar.svg exactly.
+deterministic, so re-running it reproduces truebearing.svg exactly.
 
 Usage: python3 assets/wallpaper/make_wallpaper.py
-Then render northstar.png at 3840x2160 (see assets/wallpaper/README.md).
+Then render truebearing.png at 3840x2160 (see assets/wallpaper/README.md).
 """
 import math
 import os
@@ -193,7 +193,7 @@ add(f'<circle cx="{sx}" cy="{sy}" r="11" fill="#ffffff"/>')
 
 # Signature
 add(f'<text x="{W - 110}" y="{H - 96}" text-anchor="end" {font} font-size="36" '
-    f'fill="#9fd8ff" fill-opacity="0.38" letter-spacing="8">northstar-osint</text>')
+    f'fill="#9fd8ff" fill-opacity="0.38" letter-spacing="8">truebearing-osint</text>')
 add(f'<text x="{W - 110}" y="{H - 52}" text-anchor="end" {font} font-size="22" '
     f'fill="#9fd8ff" fill-opacity="0.24" letter-spacing="4">82° 30′ N · 62° 20′ W · ALERT, NUNAVUT</text>')
 
@@ -207,7 +207,7 @@ pts = " ".join(f"{f(lx + x * ls)},{f(ly + y * ls)}" for x, y in leaf)
 add(f'<polygon points="{pts}" fill="#e0525a" fill-opacity="0.55"/>')
 add("</svg>")
 
-path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "northstar.svg")
+path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "truebearing.svg")
 with open(path, "w", encoding="utf-8") as fh:
     fh.write("\n".join(out) + "\n")
 print(f"wrote {path}")

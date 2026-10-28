@@ -1,0 +1,71 @@
+#!/usr/bin/env bash
+# tb-seal — prepare a CLONE of your master VM to become a Proxmox template.
+# Removes machine identity (machine-id, SSH and xrdp keys), browser history,
+# saved logins, API keys and tool sessions, and per-user traces, then shuts
+# down. Never run this on the master itself. Linux only.
+
+if [ "$(id -u)" -ne 0 ]; then
+  echo "Run with sudo:  sudo tb-seal"; exit 1
+fi
+
+U="${SUDO_USER:-}"
+[ -n "$U" ] || { echo "Run via sudo from your normal account so tb-seal knows whose profile to clean."; exit 1; }
+H=$(getent passwd "$U" | cut -d: -f6)
+
+cat <<EOF
+This will seal $(hostname) for templating:
+  - clear browser history, cookies, sessions and SAVED LOGINS for $U (settings and extensions are kept)
+  - remove API keys (tb-keys) and logged-in tool sessions (GHunt, instaloader, Censys, Shodan, Telegram) and messaging-app logins (Telegram Desktop, Signal, Element) and OnionShare's saved onion keys
+  - clear shell history, recent files and thumbnails
+  - reset machine-id, SSH host keys, xrdp keys and DHCP leases (regenerated on first boot)
+  - shut the VM down
+EOF
+printf 'Also delete all case data in %s/TrueBearing/Cases? [y/N] ' "$H"
+read -r wipe
+printf 'Seal and shut down now? [y/N] '
+read -r go
+case "$go" in [Yy]*) ;; *) echo "Cancelled."; exit 0 ;; esac
+
+# Browsers: Firefox / ESR profiles (keep prefs + extensions)
+find "$H/.mozilla/firefox" "$H/.config/mozilla/firefox" -maxdepth 2 \
+  \( -name 'places.sqlite*' -o -name 'cookies.sqlite*' -o -name 'formhistory.sqlite' \
+     -o -name 'sessionstore.jsonlz4' -o -name 'sessionstore-backups' \
+     -o -name 'logins*.json' -o -name 'key4.db' -o -name 'storage' -o -name 'webappsstore.sqlite*' \) \
+  -exec rm -rf {} + 2>/dev/null
+rm -rf "$H/.cache/mozilla" 2>/dev/null
+# Brave / Chromium
+for b in "$H/.config/BraveSoftware/Brave-Browser" "$H/.config/chromium"; do
+  [ -d "$b" ] || continue
+  find "$b" -maxdepth 2 \( -name 'History*' -o -name 'Cookies*' -o -name 'Sessions' \
+       -o -name 'Current Session' -o -name 'Last Session' -o -name 'Login Data*' \
+       -o -name 'Web Data*' -o -name 'Local Storage' -o -name 'IndexedDB' \) -exec rm -rf {} + 2>/dev/null
+done
+
+# Credentials: API keys and logged-in tool sessions must never reach every clone
+rm -f "$H/.config/truebearing/keys.env" "$H/.config/truebearing/last_result" "$H/.config/truebearing/last_country"
+rm -rf "$H/.malfrats" "$H/.config/instaloader" "$H/.config/cencli" "$H/.shodan" "$H/.config/shodan" \
+       "$H/.telegram_tracker" "$H/.config/truebearing/telegram" 2>/dev/null
+# Messaging apps: logged-in research accounts (Telegram Desktop, Signal, Element)
+rm -rf "$H/.var/app/org.telegram.desktop" "$H/.config/Signal" "$H/.config/Element" 2>/dev/null
+# OnionShare: saved (persistent) onion addresses and their keys, and received files
+rm -rf "$H/.var/app/org.onionshare.OnionShare" "$H/.config/onionshare" "$H/OnionShare" 2>/dev/null
+
+# Per-user traces
+rm -rf "$H/.bash_history" "$H/.zsh_history" "$H/.python_history" \
+       "$H/.local/share/recently-used.xbel" "$H/.xsession-errors"* "$H/.cache/thumbnails" 2>/dev/null
+case "$wipe" in [Yy]*) rm -rf "$H/TrueBearing/Cases/"* && echo "Case data removed." ;; esac
+
+# Machine identity
+rm -f /etc/ssh/ssh_host_* 2>/dev/null
+rm -f /etc/xrdp/rsakeys.ini 2>/dev/null       # truebearing-xrdp-keys.service regenerates it and the TLS cert
+truncate -s 0 /etc/machine-id
+rm -f /var/lib/dbus/machine-id && ln -s /etc/machine-id /var/lib/dbus/machine-id
+rm -f /var/lib/dhcp/*.leases /var/lib/NetworkManager/*.lease 2>/dev/null
+
+# Logs and caches
+journalctl --rotate >/dev/null 2>&1 && journalctl --vacuum-time=1s >/dev/null 2>&1
+apt-get clean
+
+echo "Sealed. Shutting down — convert the VM to a template once it is off."
+sync
+shutdown -h now

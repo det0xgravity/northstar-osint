@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+# tb-doctor — health check: tools and versions, permissions, listening ports,
+# browser policies, disk space and recent install problems. Writes a report you
+# can attach to a bug report (it contains no API keys or case data).
+# shellcheck source=../lib/ui.sh
+. "${TB_HOME:-$HOME/.local/share/truebearing}/lib/ui.sh"
+
+report="$TB_DATA/support/doctor_$(date -u '+%Y%m%dT%H%M%SZ').txt"
+echo "Checking… (tool versions can take a minute)"
+tb_doctor "$report"
+rc=$?
+echo "Report saved to: $report"
+[ $rc -eq 0 ] && ui_notify "Health check: no problems found" || ui_notify "Health check found problems: see the terminal"
+tb_pause

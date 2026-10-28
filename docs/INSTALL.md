@@ -13,8 +13,8 @@
 
 ```bash
 sudo apt install -y git
-git clone https://github.com/det0xgravity/northstar-osint.git
-cd northstar-osint
+git clone https://github.com/det0xgravity/truebearing-osint.git
+cd truebearing-osint
 ./install.sh
 ```
 
@@ -24,8 +24,8 @@ Per-distribution notes:
 
 - **Debian 13**: Firefox ESR is the default browser; policies go to `/etc/firefox-esr/policies` and `/etc/firefox/policies`.
 - **Ubuntu 24.04 and 26.04**: Firefox and Chromium are snaps. The policy file at `/etc/firefox/policies/policies.json` is read by the snap. If Firefox is missing, install it with `sudo snap install firefox`.
-- **Kali**: most tools are already in Kali's repositories, but northstar installs its own current versions through pipx and Go so behaviour matches other platforms. The two don't conflict: northstar's copies live in `~/.local/share/northstar/bin` and `~/.local/bin`.
-- **Parrot 6**: Parrot's Go is too old for current ProjectDiscovery tools, so northstar automatically installs the current Go release into `~/.local/share/northstar/go`.
+- **Kali**: most tools are already in Kali's repositories, but True Bearing installs its own current versions through pipx and Go so behaviour matches other platforms. The two don't conflict: True Bearing's copies live in `~/.local/share/truebearing/bin` and `~/.local/bin`.
+- **Parrot 6**: Parrot's Go is too old for current ProjectDiscovery tools, so True Bearing automatically installs the current Go release into `~/.local/share/truebearing/go`.
 
 ## macOS (Apple Silicon)
 
@@ -34,23 +34,23 @@ Per-distribution notes:
 3. Then:
 
 ```bash
-git clone https://github.com/det0xgravity/northstar-osint.git
-cd northstar-osint
+git clone https://github.com/det0xgravity/truebearing-osint.git
+cd truebearing-osint
 ./install.sh
 ```
 
 macOS differences:
 
-- Menus use native macOS dialogs, and `~/Applications/Northstar.app` opens the main menu in Terminal.
-- **Firefox policies** are written inside the app bundle (`Firefox.app/Contents/Resources/distribution/`). Firefox's self-updater can remove them, so run `ns-update` after a Firefox update.
-- **Brave** managed bookmarks need an MDM configuration profile on macOS. Instead, import `~/Northstar/northstar-bookmarks.html` through Brave's *Bookmarks → Import*.
+- Menus use native macOS dialogs, and `~/Applications/TrueBearing.app` opens the main menu in Terminal.
+- **Firefox policies** are written inside the app bundle (`Firefox.app/Contents/Resources/distribution/`). Firefox's self-updater can remove them, so run `tb-update` after a Firefox update.
+- **Brave** managed bookmarks need an MDM configuration profile on macOS. Instead, import `~/TrueBearing/truebearing-bookmarks.html` through Brave's *Bookmarks → Import*.
 - **gowitness** needs Google Chrome for screenshots (`brew install --cask google-chrome`).
-- **mat2** isn't available, so `ns-metadata` falls back to exiftool for cleaning.
-- The `vm` module and `ns-seal` are Linux-only.
+- **mat2** isn't available, so `tb-metadata` falls back to exiftool for cleaning.
+- The `vm` module and `tb-seal` are Linux-only.
 
 ## Running in a VM on Apple Silicon
 
-You can also install northstar in an arm64 Linux guest under UTM, Parallels Desktop or VMware Fusion. This keeps investigation browsing separate from your Mac. Use the **arm64 (aarch64)** installer for Debian 13 or Ubuntu 24.04 or 26.04. Kali and Parrot publish arm64 images too.
+You can also install True Bearing in an arm64 Linux guest under UTM, Parallels Desktop or VMware Fusion. This keeps investigation browsing separate from your Mac. Use the **arm64 (aarch64)** installer for Debian 13 or Ubuntu 24.04 or 26.04. Kali and Parrot publish arm64 images too.
 
 Install the guest from its ISO, log in to the desktop, then run `./install.sh` from a terminal inside it, the same as on any Linux machine. The `vm` module checks the hypervisor with `systemd-detect-virt` and installs the matching guest tools:
 
@@ -62,11 +62,11 @@ Install the guest from its ISO, log in to the desktop, then run `./install.sh` f
 | Parallels Desktop | `parallels` | Tells you to install Parallels Tools: **Actions → Install Parallels Tools** |
 | Proxmox / KVM | `kvm` | Installs `qemu-guest-agent` and `spice-vdagent` (see [KASM.md](KASM.md)) |
 
-xrdp (only inside a VM: it listens on the network), the SSH and xrdp key-regeneration services, and `ns-seal` are set up. If you don't plan to connect over RDP or clone the VM, you can skip the module: `./install.sh --skip vm`.
+xrdp (only inside a VM: it listens on the network), the SSH and xrdp key-regeneration services, and `tb-seal` are set up. If you don't plan to connect over RDP or clone the VM, you can skip the module: `./install.sh --skip vm`.
 
 In UTM, choose the **QEMU** backend ("Virtualize", not "Apple Virtualization") if you want clipboard sharing with the Mac.
 
-**Tor Browser on arm64:** Flathub only builds Tor Browser for x86_64, so in an arm64 guest northstar installs it directly from the Tor Project and verifies its signature. There's no *stable* arm64 Linux build yet, so for now that's the **alpha**, which the installer flags clearly. It switches to stable automatically once a stable arm64 build exists. The Tor Project advises people at high risk to use stable, so for the most sensitive work, use Tor Browser on the Mac host (`./install.sh --only browsers` installs it there from Homebrew). Details in [BREACH-DARKWEB.md](BREACH-DARKWEB.md#tor-browser-on-arm64-vms-on-apple-silicon).
+**Tor Browser on arm64:** Flathub only builds Tor Browser for x86_64, so in an arm64 guest True Bearing installs it directly from the Tor Project and verifies its signature. There's no *stable* arm64 Linux build yet, so for now that's the **alpha**, which the installer flags clearly. It switches to stable automatically once a stable arm64 build exists. The Tor Project advises people at high risk to use stable, so for the most sensitive work, use Tor Browser on the Mac host (`./install.sh --only browsers` installs it there from Homebrew). Details in [BREACH-DARKWEB.md](BREACH-DARKWEB.md#tor-browser-on-arm64-vms-on-apple-silicon).
 
 **Mullvad Browser** and **Signal** have no official arm64 Linux builds yet, so they're skipped in arm64 guests (use Signal on a phone). Firefox, Brave, Telegram Desktop, Element, Obsidian and every other module work normally on arm64.
 
@@ -80,62 +80,62 @@ In UTM, choose the **QEMU** backend ("Virtualize", not "Apple Virtualization") i
 ./install.sh --yes                  Don't prompt
 ```
 
-The installer records the modules you chose **not** to install in `~/.config/northstar/skipped`. `ns-update` upgrades everything else, so a module added in a new release is installed automatically. To install a module you skipped earlier, run `./install.sh --only <module>`. To stop installing one, run `./install.sh --skip <module>`.
+The installer records the modules you chose **not** to install in `~/.config/truebearing/skipped`. `tb-update` upgrades everything else, so a module added in a new release is installed automatically. To install a module you skipped earlier, run `./install.sh --only <module>`. To stop installing one, run `./install.sh --skip <module>`.
 
 ## Where things go
 
 | Path | Contents |
 |---|---|
-| `~/.local/share/northstar/bin` | Menu tools and Go/binary tools (also linked into `~/.local/bin`) |
-| `~/.local/share/northstar/venvs` | Private Python environments (SpiderFoot, recon-ng, blackbird, phone analysis) |
-| `~/.local/share/northstar/src` | Git checkouts of tools installed from source |
-| `~/.local/share/northstar/go` | Go toolchain, only if the system Go was too old |
+| `~/.local/share/truebearing/bin` | Menu tools and Go/binary tools (also linked into `~/.local/bin`) |
+| `~/.local/share/truebearing/venvs` | Private Python environments (SpiderFoot, recon-ng, blackbird, phone analysis) |
+| `~/.local/share/truebearing/src` | Git checkouts of tools installed from source |
+| `~/.local/share/truebearing/go` | Go toolchain, only if the system Go was too old |
 | `~/.local/pipx`, `~/.local/bin` | pipx-managed tools |
-| `~/.config/northstar` | Active case, skipped-module list, install log, API keys (`keys.env`, readable only by you) |
-| `~/Northstar/Cases` | Your investigation output and audit logs |
-| `~/Northstar/Guides` | The guides as offline web pages, linked on the desktop as **Northstar guides**, and the face-search warning page. Rebuilt by every update: don't keep your own files there |
-| `~/Northstar/northstar-bookmarks.html` | Bookmarks export for importing into other browsers |
+| `~/.config/truebearing` | Active case, skipped-module list, install log, API keys (`keys.env`, readable only by you) |
+| `~/TrueBearing/Cases` | Your investigation output and audit logs |
+| `~/TrueBearing/Guides` | The guides as offline web pages, linked on the desktop as **True Bearing guides**, and the face-search warning page. Rebuilt by every update: don't keep your own files there |
+| `~/TrueBearing/truebearing-bookmarks.html` | Bookmarks export for importing into other browsers |
 | `/etc/firefox*/policies/policies.json` | Firefox policy (Linux) |
-| `/etc/brave/policies/managed/northstar.json` | Brave policy (Linux) |
+| `/etc/brave/policies/managed/truebearing.json` | Brave policy (Linux) |
 
 ## Customising
 
-- **Your own bookmarks**: create `~/.config/northstar/bookmarks.local.json` with the same structure as `config/bookmarks.json` (a list of folders). It's merged into the managed folder on the next run, and repository updates never overwrite it.
-- **Extensions**: list extra Firefox add-ons in `~/.config/northstar/firefox-extensions.local.txt`, one addons.mozilla.org slug per line (the part of the add-on's URL after `/addon/`). They're added to northstar's own list on the next run. Apply them now with `./install.sh --only browsers`.
+- **Your own bookmarks**: create `~/.config/truebearing/bookmarks.local.json` with the same structure as `config/bookmarks.json` (a list of folders). It's merged into the managed folder on the next run, and repository updates never overwrite it.
+- **Extensions**: list extra Firefox add-ons in `~/.config/truebearing/firefox-extensions.local.txt`, one addons.mozilla.org slug per line (the part of the add-on's URL after `/addon/`). They're added to True Bearing's own list on the next run. Apply them now with `./install.sh --only browsers`.
 
-Don't edit files inside your northstar-osint checkout. `ns-update` downloads new versions with `git pull`, which fails if repository files were changed by hand. Your files in `~/.config/northstar/` are never touched by updates.
-- **Output location**: set `NS_DATA=/path` in your shell profile to keep cases somewhere other than `~/Northstar`.
+Don't edit files inside your truebearing-osint checkout. `tb-update` downloads new versions with `git pull`, which fails if repository files were changed by hand. Your files in `~/.config/truebearing/` are never touched by updates.
+- **Output location**: set `TB_DATA=/path` in your shell profile to keep cases somewhere other than `~/TrueBearing`.
 
 ## Updating
 
 ```bash
-ns-update
+tb-update
 ```
 
-This pulls the latest northstar-osint, upgrades pipx tools, reinstalls Go tools at their latest versions, pulls source checkouts, upgrades system packages and re-applies browser policies.
+This pulls the latest truebearing-osint, upgrades pipx tools, reinstalls Go tools at their latest versions, pulls source checkouts, upgrades system packages and re-applies browser policies.
 
 ## Uninstalling
 
 ```bash
-# northstar's pipx tools (this leaves any pipx tools of your own alone)
+# True Bearing's pipx tools (this leaves any pipx tools of your own alone)
 for p in sherlock-project maigret socialscan holehe ghunt toutatis theHarvester waymore dnstwist shodan \
          yt-dlp gallery-dl instaloader streamlink internetarchive changedetection.io search-that-hash \
          name-that-hash onionshare-cli shadowfinder; do pipx uninstall "$p"; done
-rm -rf ~/.local/share/northstar ~/.config/northstar
-rm -f ~/.local/bin/northstar ~/.local/bin/ns-*
-rm -f ~/.local/share/applications/northstar.desktop ~/.local/share/applications/ns-*.desktop
+rm -rf ~/.local/share/truebearing ~/.config/truebearing
+rm -f ~/.local/bin/truebearing ~/.local/bin/tb-*
+rm -f ~/.local/share/applications/truebearing.desktop ~/.local/share/applications/tb-*.desktop
 sudo rm -f /etc/firefox/policies/policies.json /etc/firefox-esr/policies/policies.json \
-           /etc/brave/policies/managed/northstar.json /usr/local/sbin/ns-seal \
-           /etc/polkit-1/rules.d/45-northstar-xrdp-colord.rules
-sudo systemctl disable --now northstar-ssh-hostkeys northstar-xrdp-keys northstar-lan-block 2>/dev/null
-sudo nft delete table inet northstar_lan 2>/dev/null
-sudo rm -f /etc/systemd/system/northstar-ssh-hostkeys.service /etc/systemd/system/northstar-xrdp-keys.service \
-           /etc/systemd/system/northstar-lan-block.service
-sudo rm -rf /etc/northstar
+           /etc/brave/policies/managed/truebearing.json /usr/local/sbin/tb-seal \
+           /etc/polkit-1/rules.d/45-truebearing-xrdp-colord.rules
+sudo systemctl disable --now truebearing-ssh-hostkeys truebearing-xrdp-keys truebearing-lan-block 2>/dev/null
+sudo nft delete table inet truebearing_lan 2>/dev/null
+sudo rm -f /etc/systemd/system/truebearing-ssh-hostkeys.service /etc/systemd/system/truebearing-xrdp-keys.service \
+           /etc/systemd/system/truebearing-lan-block.service
+sudo rm -rf /etc/truebearing
 rm -f ~/.config/autostart/org.flameshot.Flameshot.desktop ~/.xsession
 rm -rf ~/.local/share/fonts/MesloLGS-NF
-# Remove the line tagged "northstar-osint" from ~/.bashrc / ~/.zshrc / ~/.profile
-# shell module: chsh -s /bin/bash; rm -rf ~/.oh-my-zsh ~/.p10k.zsh; mv ~/.zshrc.pre-northstar ~/.zshrc (if it exists)
+# Remove the line tagged "truebearing-osint" from ~/.bashrc / ~/.zshrc / ~/.profile
+# shell module: chsh -s /bin/bash; rm -rf ~/.oh-my-zsh ~/.p10k.zsh; mv ~/.zshrc.pre-truebearing ~/.zshrc (if it exists)
 ```
 
-Your case data in `~/Northstar` is left alone. Delete it yourself if you mean to.
+Your case data in `~/TrueBearing` is left alone. Delete it yourself if you mean to.

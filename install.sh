@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # =============================================================================
-#  northstar-osint installer
-#  https://github.com/det0xgravity/northstar-osint
+#  truebearing-osint installer
+#  https://github.com/det0xgravity/truebearing-osint
 #
 #  Builds an OSINT workstation on Debian 13, Ubuntu 24.04/26.04, Kali, Parrot or
 #  macOS (Apple Silicon). Modular, idempotent and safe to re-run.
@@ -12,13 +12,13 @@
 
 set -uo pipefail
 
-NS_REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+TB_REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=lib/common.sh
-. "$NS_REPO/lib/common.sh"
+. "$TB_REPO/lib/common.sh"
 
 usage() {
   cat <<EOF
-northstar-osint $NS_VERSION
+truebearing-osint $TB_VERSION
 
 Usage: ./install.sh [options]
 
@@ -34,7 +34,7 @@ Examples:
   ./install.sh                         # everything supported on this platform
   ./install.sh --only username,domain  # just those two modules
   ./install.sh --skip frameworks,vm    # everything except those
-  ./install.sh --update --yes          # unattended upgrade (used by ns-update)
+  ./install.sh --update --yes          # unattended upgrade (used by tb-update)
 EOF
 }
 
@@ -46,22 +46,22 @@ while [ $# -gt 0 ]; do
     --only=*)  ONLY="${1#*=}" ;;
     --skip)    SKIP="${2:-}"; shift ;;
     --skip=*)  SKIP="${1#*=}" ;;
-    --update)  NS_UPDATE=1 ;;
+    --update)  TB_UPDATE=1 ;;
     --yes|-y)  ASSUME_YES=1 ;;
     --version)
-      printf 'northstar-osint %s%s\n' "$NS_VERSION" "$(git -C "$NS_REPO" describe --always --dirty 2>/dev/null | sed 's/^/ (/; s/$/)/')"
+      printf 'truebearing-osint %s%s\n' "$TB_VERSION" "$(git -C "$TB_REPO" describe --always --dirty 2>/dev/null | sed 's/^/ (/; s/$/)/')"
       exit 0 ;;
     -h|--help) usage; exit 0 ;;
-    *) ns_err "Unknown option: $1"; usage; exit 1 ;;
+    *) tb_err "Unknown option: $1"; usage; exit 1 ;;
   esac
   shift
 done
-export NS_UPDATE
+export TB_UPDATE
 
-ns_detect_platform
+tb_detect_platform
 
-# Load modules in filename order; each one calls ns_register.
-for m in "$NS_REPO"/modules/*.sh; do
+# Load modules in filename order; each one calls tb_register.
+for m in "$TB_REPO"/modules/*.sh; do
   # shellcheck disable=SC1090
   . "$m"
 done
@@ -69,60 +69,63 @@ done
 if [ "$LIST" = 1 ]; then
   printf '%-12s %-14s %s\n' MODULE PLATFORMS DESCRIPTION
   i=0
-  while [ $i -lt ${#NS_MOD_NAMES[@]} ]; do
-    printf '%-12s %-14s %s\n' "${NS_MOD_NAMES[$i]}" "${NS_MOD_PLATS[$i]}" "${NS_MOD_DESCS[$i]}"
+  while [ $i -lt ${#TB_MOD_NAMES[@]} ]; do
+    printf '%-12s %-14s %s\n' "${TB_MOD_NAMES[$i]}" "${TB_MOD_PLATS[$i]}" "${TB_MOD_DESCS[$i]}"
     i=$((i+1))
   done
   exit 0
 fi
 
-[ "$(id -u)" -eq 0 ] && ns_die "Run as your normal user, not root or sudo. You'll be asked for sudo when needed."
+[ "$(id -u)" -eq 0 ] && tb_die "Run as your normal user, not root or sudo. You'll be asked for sudo when needed."
 
 in_csv() { case ",$2," in *",$1,"*) return 0 ;; esac; return 1; }
 
 is_module() {
   local m
-  for m in "${NS_MOD_NAMES[@]}"; do [ "$m" = "$1" ] && return 0; done
+  for m in "${TB_MOD_NAMES[@]}"; do [ "$m" = "$1" ] && return 0; done
   return 1
 }
 
 # Validate module names given to --only / --skip
 for n in $(printf '%s' "$ONLY,$SKIP" | tr ',' ' '); do
-  is_module "$n" || ns_die "Unknown module: $n (see --list)"
+  is_module "$n" || tb_die "Unknown module: $n (see --list)"
 done
+
+# Existing installs from before the rename to True Bearing move across first
+tb_migrate_dirs
 
 # The installer records the modules the user chose NOT to install. Updates run
 # everything else, so modules added in a new release get installed too.
-SKIPPED_FILE="$NS_CONF/skipped"
+SKIPPED_FILE="$TB_CONF/skipped"
 HAVE_STATE=0; SAVED_SKIP=""
 if [ -f "$SKIPPED_FILE" ]; then
   HAVE_STATE=1
   for n in $(tr ',' ' ' < "$SKIPPED_FILE"); do
     is_module "$n" && SAVED_SKIP="${SAVED_SKIP:+$SAVED_SKIP,}$n"   # drop modules that no longer exist
   done
-elif [ -s "$NS_CONF/modules" ]; then
+elif [ -s "$TB_CONF/modules" ]; then
   # v0.2 and earlier recorded the installed modules instead
   HAVE_STATE=1
-  installed=$(cat "$NS_CONF/modules")
+  installed=$(cat "$TB_CONF/modules")
   i=0
-  while [ $i -lt ${#NS_MOD_NAMES[@]} ]; do
-    n="${NS_MOD_NAMES[$i]}"
-    if [ "$n" != core ] && ns_mod_supported "${NS_MOD_PLATS[$i]}" && ! in_csv "$n" "$installed"; then
+  while [ $i -lt ${#TB_MOD_NAMES[@]} ]; do
+    n="${TB_MOD_NAMES[$i]}"
+    if [ "$n" != core ] && tb_mod_supported "${TB_MOD_PLATS[$i]}" && ! in_csv "$n" "$installed"; then
       SAVED_SKIP="${SAVED_SKIP:+$SAVED_SKIP,}$n"
     fi
     i=$((i+1))
   done
 fi
-if [ "$NS_UPDATE" = 1 ] && [ -z "$ONLY" ] && [ -z "$SKIP" ]; then
+if [ "$TB_UPDATE" = 1 ] && [ -z "$ONLY" ] && [ -z "$SKIP" ]; then
   SKIP="$SAVED_SKIP"
 fi
 
 # Build the run list
 RUN_IDX=()
 i=0
-while [ $i -lt ${#NS_MOD_NAMES[@]} ]; do
-  n="${NS_MOD_NAMES[$i]}"
-  if ns_mod_supported "${NS_MOD_PLATS[$i]}"; then
+while [ $i -lt ${#TB_MOD_NAMES[@]} ]; do
+  n="${TB_MOD_NAMES[$i]}"
+  if tb_mod_supported "${TB_MOD_PLATS[$i]}"; then
     if [ "$n" = "core" ]; then
       RUN_IDX+=("$i")
     elif [ -n "$ONLY" ]; then
@@ -134,20 +137,20 @@ while [ $i -lt ${#NS_MOD_NAMES[@]} ]; do
   i=$((i+1))
 done
 
-echo "${C_B}northstar-osint $NS_VERSION${C_0}"
-echo "  Platform : $NS_PLATFORM ($NS_ARCH)${NS_DE:+, desktop: $NS_DE}"
-echo "  Mode     : $([ "$NS_UPDATE" = 1 ] && echo update || echo install)"
+echo "${C_B}truebearing-osint $TB_VERSION${C_0}"
+echo "  Platform : $TB_PLATFORM ($TB_ARCH)${TB_DE:+, desktop: $TB_DE}"
+echo "  Mode     : $([ "$TB_UPDATE" = 1 ] && echo update || echo install)"
 printf '  Modules  :'
-for i in "${RUN_IDX[@]}"; do printf ' %s' "${NS_MOD_NAMES[$i]}"; done
+for i in "${RUN_IDX[@]}"; do printf ' %s' "${TB_MOD_NAMES[$i]}"; done
 echo
 
 # --- platform prerequisites ---------------------------------------------------------
-if ns_is_macos; then
-  xcode-select -p >/dev/null 2>&1 || ns_die "Install the Xcode Command Line Tools first:  xcode-select --install"
-  if ! ns_has brew; then
+if tb_is_macos; then
+  xcode-select -p >/dev/null 2>&1 || tb_die "Install the Xcode Command Line Tools first:  xcode-select --install"
+  if ! tb_has brew; then
     [ -x /opt/homebrew/bin/brew ] && eval "$(/opt/homebrew/bin/brew shellenv)"
   fi
-  ns_has brew || ns_die "Homebrew is required. Install it from https://brew.sh and re-run."
+  tb_has brew || tb_die "Homebrew is required. Install it from https://brew.sh and re-run."
 fi
 
 if [ "$ASSUME_YES" != 1 ]; then
@@ -156,20 +159,21 @@ if [ "$ASSUME_YES" != 1 ]; then
   case "$ans" in [Nn]*) exit 0 ;; esac
 fi
 
-mkdir -p "$NS_CONF" "$NS_HOME" "$NS_DATA"
-LOG="$NS_CONF/install.log"
-# Status lines (lib/common.sh: ns_bg) are drawn on the terminal itself, fd 4,
+mkdir -p "$TB_CONF" "$TB_HOME" "$TB_DATA"
+LOG="$TB_CONF/install.log"
+# Status lines (lib/common.sh: tb_bg) are drawn on the terminal itself, fd 4,
 # so they never clutter install.log
-if [ -t 1 ]; then NS_TTY=1; exec 4>&1; fi
-NS_LOG="$LOG"
-NS_STEP_N=${#RUN_IDX[@]}
+if [ -t 1 ]; then TB_TTY=1; exec 4>&1; fi
+TB_LOG="$LOG"
+TB_STEP_N=${#RUN_IDX[@]}
 exec > >(tee -a "$LOG") 2>&1
-echo "=== $(date) — northstar $NS_VERSION on $NS_PLATFORM ==="
+echo "=== $(date) — True Bearing $TB_VERSION on $TB_PLATFORM ==="
 
-ns_sudo_keepalive
+tb_sudo_keepalive
+tb_migrate_legacy
 
 for i in "${RUN_IDX[@]}"; do
-  ns_step "${NS_MOD_NAMES[$i]}: ${NS_MOD_DESCS[$i]}" "${NS_MOD_FUNCS[$i]}"
+  tb_step "${TB_MOD_NAMES[$i]}: ${TB_MOD_DESCS[$i]}" "${TB_MOD_FUNCS[$i]}"
 done
 
 # Remember which modules the user chose not to install. A module counts as
@@ -178,33 +182,33 @@ done
 # Anything that ran is no longer skipped.
 new_skip=""
 i=0
-while [ $i -lt ${#NS_MOD_NAMES[@]} ]; do
-  n="${NS_MOD_NAMES[$i]}"
+while [ $i -lt ${#TB_MOD_NAMES[@]} ]; do
+  n="${TB_MOD_NAMES[$i]}"
   ran=0
   for j in "${RUN_IDX[@]}"; do [ "$j" = "$i" ] && ran=1; done
-  if [ $ran = 0 ] && [ "$n" != core ] && ns_mod_supported "${NS_MOD_PLATS[$i]}"; then
+  if [ $ran = 0 ] && [ "$n" != core ] && tb_mod_supported "${TB_MOD_PLATS[$i]}"; then
     if [ $HAVE_STATE = 0 ] || in_csv "$n" "$SAVED_SKIP" \
-       || { [ "$NS_UPDATE" != 1 ] && in_csv "$n" "$SKIP"; }; then
+       || { [ "$TB_UPDATE" != 1 ] && in_csv "$n" "$SKIP"; }; then
       new_skip="${new_skip:+$new_skip,}$n"
     fi
   fi
   i=$((i+1))
 done
 printf '%s\n' "$new_skip" > "$SKIPPED_FILE"
-rm -f "$NS_CONF/modules"
+rm -f "$TB_CONF/modules"
 
 echo
 echo "============================================================"
-if [ ${#NS_FAILED[@]} -eq 0 ]; then
+if [ ${#TB_FAILED[@]} -eq 0 ]; then
   echo " ${C_G}All modules completed.${C_0}"
 else
   echo " ${C_Y}Completed with problems in:${C_0}"
-  for f in "${NS_FAILED[@]}"; do echo "   - $f"; done
+  for f in "${TB_FAILED[@]}"; do echo "   - $f"; done
   echo " Full log: $LOG"
   echo " Re-running is safe; see docs/TROUBLESHOOTING.md."
 fi
 echo
-echo " Open a new terminal (to pick up PATH), then run:  northstar"
-ns_is_linux && echo " Log out and back in so new launchers appear in your menu."
+echo " Open a new terminal (to pick up PATH), then run:  truebearing"
+tb_is_linux && echo " Log out and back in so new launchers appear in your menu."
 echo "============================================================"
-[ ${#NS_FAILED[@]} -eq 0 ]
+[ ${#TB_FAILED[@]} -eq 0 ]

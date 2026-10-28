@@ -1,0 +1,219 @@
+#!/usr/bin/env bash
+# tb-case — case records: open a case with an intake record (reference,
+# authority, lawful basis, scope, review date), take contemporaneous notes,
+# build a report, and close the case.
+# Usage: tb-case [open]   ("open" goes straight to opening/switching a case)
+# shellcheck source=../lib/ui.sh
+. "${TB_HOME:-$HOME/.local/share/truebearing}/lib/ui.sh"
+
+open_case() {
+  local new name dir js
+  new=$(ui_entry "Case name (letters, numbers, dashes). An existing name switches to that case:" "$(tb_case)") || return 1
+  name=$(tb_slug "$new")
+  dir="$TB_DATA/Cases/$name"
+  tb_set_case "$name"
+  if [ -f "$dir/case.json" ]; then
+    tb_audit truebearing "$name" "case activated"
+    ui_info "Active case: $name
+
+$(tb_casework show "$dir")"
+    return 0
+  fi
+  ui_question "Record the intake details for case \"$name\" now?
+
+(reference, who authorised it, purpose and lawful basis, scope, review date)" || {
+    tb_audit truebearing "$name" "case activated (no intake record)"; return 0; }
+  js=$(python3 - "$(ui_entry "Client or matter reference:" || true)" \
+                 "$(ui_entry "Authorised by (name, role):" || true)" \
+                 "$(ui_entry "Purpose and lawful basis:" || true)" \
+                 "$(ui_entry "Scope and subjects (who or what, and what's out of scope):" || true)" \
+                 "$(ui_entry "Review or retention date (YYYY-MM-DD):" || true)" <<'PY'
+import json, sys
+keys = ["reference", "authorised_by", "purpose", "scope", "review_date"]
+print(json.dumps(dict(zip(keys, sys.argv[1:]))))
+PY
+)
+  printf '%s' "$js" | tb_casework init "$dir" >/dev/null
+  tb_cmd tb_vault && tb_vault case "$dir" >/dev/null      # Case.md overview for Obsidian
+  tb_audit truebearing "$name" "case opened with intake record"
+  ui_info "Case $name opened.
+
+$(tb_casework show "$dir")"
+}
+
+# Change the intake details; every change (old and new value) goes into the notes
+edit_case() {
+  local cur js
+  cur=$(python3 -c 'import json,sys
+try: d = json.load(open(sys.argv[1]))
+except (OSError, ValueError): d = {}
+print(json.dumps(d))' "$case_dir/case.json")
+  get() { printf '%s' "$cur" | python3 -c 'import json,sys; print(json.load(sys.stdin).get(sys.argv[1], ""))' "$1"; }
+  local ref auth purp scope rev
+  # An emptied field is cleared; Cancel stops without changing anything
+  ref=$(TB_ALLOW_EMPTY=1 ui_entry "Client or matter reference:" "$(get reference)") || return 0
+  auth=$(TB_ALLOW_EMPTY=1 ui_entry "Authorised by (name, role):" "$(get authorised_by)") || return 0
+  purp=$(TB_ALLOW_EMPTY=1 ui_entry "Purpose and lawful basis:" "$(get purpose)") || return 0
+  scope=$(TB_ALLOW_EMPTY=1 ui_entry "Scope and subjects (who or what, and what's out of scope):" "$(get scope)") || return 0
+  rev=$(TB_ALLOW_EMPTY=1 ui_entry "Review or retention date (YYYY-MM-DD):" "$(get review_date)") || return 0
+  js=$(python3 - "$ref" "$auth" "$purp" "$scope" "$rev" <<'PY'
+import json, sys
+keys = ["reference", "authorised_by", "purpose", "scope", "review_date"]
+print(json.dumps(dict(zip(keys, sys.argv[1:]))))
+PY
+)
+  r=$(printf '%s' "$js" | tb_casework amend "$case_dir" 2>&1)
+  tb_audit tb-case "intake" "$(printf '%s' "$r" | tail -1)"
+  tb_cmd tb_vault && tb_vault case "$case_dir" >/dev/null
+  ui_info "$r"
+}
+
+# Notes can't be added to a closed case
+need_open() {
+  [ "$(tb_casework status "$case_dir")" = closed ] || return 0
+  ui_error "Case $(tb_case) is closed. Reopen it first (Case → Reopen this case)."
+  return 1
+}
+
+[ "${1:-}" = open ] && { open_case; exit 0; }
+
+case_dir=$(tb_case_dir)
+last_item="Close this case (verify, export, mark closed)"
+[ "$(tb_casework status "$case_dir")" = closed ] && last_item="Reopen this case"
+choice=$(ui_list "Case: $(tb_case)" \
+  "Add a note" \
+  "Open or switch case" \
+  "Case details" \
+  "Edit case details (intake)" \
+  "Build a report (Word document)" \
+  "Record a supervisor review" \
+  "Adult-site (NSFW) searches: $(tb_casework nsfw "$case_dir" | sed 's/on/allowed/; s/off/off/')" \
+  "Verify notes and audit log" \
+  "$last_item") || exit 0
+
+case "$choice" in
+  "Add a note")
+    need_open || exit 1
+    t=$(ui_entry "Note (saved with the UTC time; it can't be edited later without it showing):") || exit 0
+    tb_casework note "$case_dir" "$t" >/dev/null || { ui_error "The note couldn't be saved."; exit 1; }
+    tb_audit tb-case "note" "note added"
+    ui_notify "Note saved to case $(tb_case)" ;;
+  "Edit case details"*)
+    need_open || exit 1
+    edit_case ;;
+  "Adult-site"*)
+    need_open || exit 1
+    if [ "$(tb_casework nsfw "$case_dir")" = on ]; then
+      ui_question "Adult-site searches are allowed in this case. Stop them?" || exit 0
+      why=$(ui_entry "Reason (optional, recorded in the notes):") || why=""
+      r=$(tb_casework nsfw-set "$case_dir" off "$why" 2>&1)
+    else
+      ui_question "Allow adult-site (NSFW) searches in this case?
+
+Username searches will then also check pornography, webcam and erotic sites. Profiles there can be strong leads (reused usernames, photos, locations), but opening them shows explicit material.
+
+- Only if the case needs it, and your lawful basis and policy cover it.
+- Open hits only inside the VM, and don't download from them.
+- If you see anything that may show a child, stop: don't save, screenshot or share it, and report it to the police or your national hotline." || exit 0
+      if ui_question "Could anyone you'll search for in this case be under 18?"; then
+        ui_error "Adult-site searches stay off. Where a child may be involved, leave this to law enforcement or a body with the authority to do it."
+        tb_audit tb-case "nsfw" "not allowed: a subject may be under 18"
+        exit 0
+      fi
+      why=$(ui_entry "Why does this case need adult-site searches? (recorded in the notes)") || exit 0
+      [ -n "$why" ] || exit 0
+      r=$(tb_casework nsfw-set "$case_dir" on "$why" 2>&1)
+    fi
+    tb_audit tb-case "nsfw" "$(printf '%s' "$r" | tail -1)"
+    tb_cmd tb_vault && tb_vault case "$case_dir" >/dev/null
+    ui_info "$r" ;;
+  "Reopen this case")
+    why=$(ui_entry "Why is the case being reopened? (recorded in the notes)") || exit 0
+    [ -n "$why" ] || exit 0
+    r=$(tb_casework reopen "$case_dir" "$why" 2>&1)
+    tb_audit tb-case "reopen" "$why"
+    tb_cmd tb_vault && tb_vault case "$case_dir" >/dev/null
+    ui_info "$r" ;;
+  "Open or switch"*)
+    open_case ;;
+  "Case details")
+    r=$(tb_casework show "$case_dir"); printf '%s\n' "$r"; ui_info "$r" ;;
+  "Build a report"*)
+    need_open || exit 1
+    tb_cmd pandoc || { ui_error "pandoc isn't installed: ./install.sh --only core"; exit 1; }
+    # Each version gets its own folder: the report, and a frozen copy of the findings it used
+    n=$(find "$case_dir/reports" -mindepth 1 -maxdepth 1 -type d -name 'v*' 2>/dev/null | wc -l | tr -d ' ')
+    ver=$((n + 1))
+    rdir="$case_dir/reports/v${ver}_$(date -u '+%Y%m%dT%H%M%SZ')"
+    ( umask 077; mkdir -p "$rdir" )
+    info=""
+    if tb_cmd tb_vault; then
+      info=$(tb_vault report-sections "$case_dir" "$rdir")
+      warn=$(printf '%s\n' "$info" | sed -n 's/^warnings=//p')
+      if [ "${warn:-0}" -gt 0 ] && ! ui_question "The report has $warn warning(s):
+
+$(printf '%s\n' "$info" | sed -n 's/^warning=/- /p' | head -12)
+
+They're listed at the top of the report. Build it anyway?"; then
+        rm -rf "$rdir"; exit 0
+      fi
+    fi
+    tb_casework report "$case_dir" "$rdir/report.md" "$rdir/findings-section.md" >/dev/null
+    pandoc "$rdir/report.md" -o "$rdir/report.docx" || { ui_error "pandoc couldn't build the Word document."; exit 1; }
+    fsha=$(printf '%s\n' "$info" | sed -n 's/^findings_sha256=//p')
+    ( cd "$rdir" && for f in report.md report.docx findings-frozen.md; do
+        [ -f "$f" ] && printf '%s  %s\n' "$(tb_hash_file "$f")" "$f"; done > hashes.sha256 )
+    tb_casework note "$case_dir" "REPORT v$ver built ($(basename "$rdir")): report.docx sha256 $(tb_hash_file "$rdir/report.docx"), findings sha256 ${fsha:-none}" >/dev/null
+    tb_audit tb-case "report" "v$ver built: $(basename "$rdir")"
+    tb_cmd tb_vault && tb_vault case "$case_dir" >/dev/null
+    ui_info "Report v$ver built: $rdir/report.docx
+
+It has the case details, your Summary and Analysis from Case.md, the reportable findings with their exhibits and fingerprint checks, searches with no result, unused material, the latest review, methodology, exhibits, notes and the audit log. The findings it used are frozen in findings-frozen.md, and the hashes are in the contemporaneous notes." || true
+    ui_reveal "$rdir" ;;
+  "Record a supervisor review")
+    need_open || exit 1
+    tb_cmd tb_vault || { ui_error "The notes engine isn't installed: ./install.sh --only core"; exit 1; }
+    who=$(ui_entry "Reviewer's name:") || exit 0
+    role=$(ui_entry "Reviewer's role:") || exit 0
+    dec=$(ui_list "Decision" "approved" "approved with changes" "changes requested" "not approved") || exit 0
+    com=$(ui_entry "Comments (optional):") || com=""
+    hs=$(tb_vault review-hashes "$case_dir")
+    fsha=$(printf '%s\n' "$hs" | sed -n 's/^findings=//p'); nsha=$(printf '%s\n' "$hs" | sed -n 's/^summary=//p')
+    tb_casework note "$case_dir" "[REVIEW] $who ($role): $dec. ${com:+$com. }Reviewed findings sha256 $fsha, summary sha256 $nsha" >/dev/null
+    tb_audit tb-case "review" "$dec by $who"
+    tb_vault case "$case_dir" >/dev/null
+    ui_notify "Review recorded: $dec" ;;
+  "Verify"*)
+    r="Notes: $(tb_casework notes-verify "$case_dir" | head -1)
+Audit log: $(tb_evidence audit-verify "$case_dir/audit.log" | head -1)"
+    printf '%s\n' "$r"; ui_info "$r" ;;
+  "Close"*)
+    # The pre-close check; if it can't run, say so rather than claim all is well
+    if ! tb_cmd tb_vault || ! cc=$(tb_vault close-check "$case_dir" 2>/dev/null); then
+      cc="problem=the pre-close check couldn't run, so nothing has been checked"
+    fi
+    probs=$(printf '%s\n' "$cc" | sed -n 's/^problem=/- /p')
+    if [ -n "$probs" ]; then
+      ui_question "Case $(tb_case) isn't ready to close:
+
+$probs
+
+Close it anyway? The open points are recorded in the notes." || exit 0
+    else
+      ui_question "Close case $(tb_case)?
+
+Notes, audit log and exhibits verify, a report has been built and reviewed, and no leads are open. The whole case is exported with a SHA-256 to ~/TrueBearing/Exports, and the case is marked closed. Nothing is deleted." || exit 0
+    fi
+    tb_casework note "$case_dir" "CASE CLOSED$( [ -n "$probs" ] && printf ' with open points: %s' "$(printf '%s' "$probs" | sed 's/^- //' | paste -sd ';' -)")" >/dev/null
+    v=$(tb_evidence audit-verify "$case_dir/audit.log" | head -1)
+    e=$(tb_evidence export "$case_dir" "$TB_DATA/Exports")
+    tb_audit tb-case "close" "audit: $v; $(printf '%s' "$e" | tail -1)"
+    tb_casework close "$case_dir" >/dev/null
+    r="Case $(tb_case) closed.
+
+Audit log: $v
+$e
+
+Delete the working copy when your retention rules allow."
+    printf '%s\n' "$r"; ui_info "$r"; ui_reveal "$TB_DATA/Exports" ;;
+esac

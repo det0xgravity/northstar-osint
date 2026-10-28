@@ -1,6 +1,6 @@
-# Running northstar on Proxmox with Kasm Workspaces
+# Running True Bearing on Proxmox with Kasm Workspaces
 
-northstar-osint is designed to run well as a VM, either brokered in a browser by [Kasm Workspaces](https://kasmweb.com) or reached with any RDP client. The `vm` module (Linux) prepares the guest. This guide covers the rest.
+truebearing-osint is designed to run well as a VM, either brokered in a browser by [Kasm Workspaces](https://kasmweb.com) or reached with any RDP client. The `vm` module (Linux) prepares the guest. This guide covers the rest.
 
 ## Recommended VM
 
@@ -21,7 +21,7 @@ Install with `./install.sh` from a terminal **inside the GNOME session** on the 
 - Installs **xrdp** and writes `~/.xsession` for your desktop: `gnome-session`, `startxfce4`, `mate-session` or `startplasma-x11`.
 - Adds a **polkit rule** so RDP sessions don't ask for a password to "create a colour managed device".
 - Adds a first-boot service that **regenerates SSH host keys** when they're missing, so clones never share keys.
-- Installs **`ns-seal`** to `/usr/local/sbin`.
+- Installs **`tb-seal`** to `/usr/local/sbin`.
 
 ## Option A: one persistent VM (static server)
 
@@ -38,12 +38,12 @@ Use this for throwaway sessions where every launch starts clean.
 Keep a **master** VM you maintain, and build templates from clones of it. Never seal the master itself.
 
 ```
-master VM ──(full clone)──▶ clone ──(sudo ns-seal)──▶ shut down ──▶ convert to template
+master VM ──(full clone)──▶ clone ──(sudo tb-seal)──▶ shut down ──▶ convert to template
 ```
 
-1. Update the master: `ns-update`, then reboot and test.
-2. In Proxmox: **Clone → Full clone** of the master, with a new ID and a dated name (e.g. `northstar-tpl-2026-11`).
-3. Boot the clone and run `sudo ns-seal`. It clears browser history, cookies and saved logins (keeping settings and extensions), API keys and logged-in tool sessions (GHunt, instaloader, Censys, Shodan), shell history, recent files, machine-id, SSH and xrdp keys and DHCP leases, optionally wipes case data, then shuts down. Each clone regenerates its SSH and xrdp keys on first boot.
+1. Update the master: `tb-update`, then reboot and test.
+2. In Proxmox: **Clone → Full clone** of the master, with a new ID and a dated name (e.g. `truebearing-tpl-2026-11`).
+3. Boot the clone and run `sudo tb-seal`. It clears browser history, cookies and saved logins (keeping settings and extensions), API keys and logged-in tool sessions (GHunt, instaloader, Censys, Shodan), shell history, recent files, machine-id, SSH and xrdp keys and DHCP leases, optionally wipes case data, then shuts down. Each clone regenerates its SSH and xrdp keys on first boot.
 4. Convert the clone to a template, in the resource pool your Kasm autoscale user can access.
 5. Point your Kasm Server Pool's Proxmox provider at the new template name.
 
@@ -51,18 +51,18 @@ Keep the previous template until the new one is proven. Rolling back is then jus
 
 ### LAN isolation and shared storage
 
-The `lan` module turns on LAN isolation in VMs (`ns-lan`): the VM can't open connections to private networks, while Kasm's RDP connections to it still work. If your cases go to a NAS or another machine on your network (below), allow it on the master before you build the template: `ns-lan allow 192.168.10.5` (or the NAS's subnet).
+The `lan` module turns on LAN isolation in VMs (`tb-lan`): the VM can't open connections to private networks, while Kasm's RDP connections to it still work. If your cases go to a NAS or another machine on your network (below), allow it on the master before you build the template: `tb-lan allow 192.168.10.5` (or the NAS's subnet).
 
 ### Saving data from disposable sessions
 
-Anything left inside a pool clone is destroyed when the session ends. Before closing, copy case folders out to shared storage (NFS, Nextcloud, a Git repo), or set `NS_DATA` to a mounted share in `~/.profile` on the master, so every clone writes its cases there.
+Anything left inside a pool clone is destroyed when the session ends. Before closing, copy case folders out to shared storage (NFS, Nextcloud, a Git repo), or set `TB_DATA` to a mounted share in `~/.profile` on the master, so every clone writes its cases there.
 
 ## Updating
 
-When a new northstar-osint release comes out:
+When a new truebearing-osint release comes out:
 
-- **Option A (persistent VM):** run `ns-update` inside the VM, or pick *Update northstar* in the main menu.
-- **Option B (pool):** clones are discarded after each session, so updating one changes nothing lasting. Update the **master** with `ns-update`, then build and roll out a new template as described above. Kasm's pool picks up the change once it points at the new template.
+- **Option A (persistent VM):** run `tb-update` inside the VM, or pick *Update True Bearing* in the main menu.
+- **Option B (pool):** clones are discarded after each session, so updating one changes nothing lasting. Update the **master** with `tb-update`, then build and roll out a new template as described above. Kasm's pool picks up the change once it points at the new template.
 
 ## Over-the-browser tips
 

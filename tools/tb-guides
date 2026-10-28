@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+# tb-guides — open the user guides (offline web pages built from docs/ by the
+# desktop module) in the browser.
+# Usage: tb-guides [NAME]   e.g. tb-guides INVESTIGATION-GUIDE; no name opens the index
+# shellcheck source=../lib/ui.sh
+. "${TB_HOME:-$HOME/.local/share/truebearing}/lib/ui.sh"
+
+dir="$TB_DATA/Guides"
+page="$dir/${1:-index}.html"
+if [ ! -f "$page" ]; then
+  ui_error "The guides aren't built yet. Run: ./install.sh --only desktop (from your truebearing-osint folder), or Update truebearing."
+  exit 1
+fi
+ui_open "$page"

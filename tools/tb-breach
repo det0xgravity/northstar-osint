@@ -1,0 +1,42 @@
+#!/usr/bin/env bash
+# tb-breach — breach and infostealer exposure lookups. Queries breach-lookup
+# services (never raw dumps) and saves what they return to the case.
+# Free sources always run; paid ones run when their key is set (tb-keys).
+# shellcheck source=../lib/ui.sh
+. "${TB_HOME:-$HOME/.local/share/truebearing}/lib/ui.sh"
+
+choice=$(ui_list "Breach data" \
+  "Email address" \
+  "Username" \
+  "Domain (organisation exposure)" \
+  "Phone number (needs a paid key)" \
+  "Password exposure check (nothing stored)" \
+  "Breach details (HIBP catalogue)" \
+  "Manage API keys") || exit 0
+
+lookup() {   # lookup <kind> <prompt>
+  local q out
+  q=$(ui_entry "$2") || exit 0
+  out=$(tb_outdir breach "$q")
+  tb_run "$out" tb_breach "$1" "$q"
+  chmod 600 "$out/console.log" 2>/dev/null     # may echo masked records; keep it private
+  tb_finish "$out"
+}
+
+case "$choice" in
+  Email*)    lookup email "Email address:" ;;
+  Username*) lookup username "Username:" ;;
+  Domain*)   lookup domain "Domain (e.g. example.com):" ;;
+  Phone*)    lookup phone "Phone number, with country code (e.g. +1 613 555 0100):" ;;
+  Breach*)   lookup breach "Breach name or domain (e.g. Adobe, linkedin.com):" ;;
+  Password*)
+    pw=$(ui_secret "Password to check. Only the first 5 characters of its SHA-1 hash leave this computer, and nothing is saved:") || exit 0
+    # Not through tb_run: the password goes to the engine on stdin, never on a
+    # command line, and no result file is written
+    tb_audit tb-breach "password" "Pwned Passwords check (password not recorded)"
+    r=$(printf '%s\n' "$pw" | tb_breach password 2>&1)
+    pw=""
+    printf '%s\n' "$r"
+    ui_info "$r" ;;
+  Manage*)   tb-keys ;;
+esac

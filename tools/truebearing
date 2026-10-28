@@ -1,0 +1,72 @@
+#!/usr/bin/env bash
+# truebearing — main menu for all truebearing-osint tools.
+# shellcheck source=../lib/ui.sh
+. "${TB_HOME:-$HOME/.local/share/truebearing}/lib/ui.sh"
+
+export TB_FROM_MAIN=1
+
+while true; do
+  case_name=$(tb_case)
+  choice=$(ui_list "Active case: $case_name" \
+    "Missing person (profile, timeline, findings)" \
+    "Username & email" \
+    "Telegram" \
+    "Domain & infrastructure" \
+    "Media download" \
+    "Capture web pages" \
+    "Metadata" \
+    "Image analysis" \
+    "Video verification" \
+    "Photo geolocation" \
+    "Face comparison (within this case)" \
+    "Page monitoring (proof of life)" \
+    "Case map" \
+    "Translate (offline)" \
+    "Country search" \
+    "Breach data" \
+    "Dark web" \
+    "Evidence & exhibits" \
+    "API keys" \
+    "Notes (Obsidian)" \
+    "Case: notes, details, report, close" \
+    "Switch / create case  (current: $case_name)" \
+    "Open latest results" \
+    "Open case folder" \
+    "LAN isolation (firewall)" \
+    "Guides (how to investigate, manuals)" \
+    "Health check" \
+    "Update True Bearing") || break
+
+  case "$choice" in
+    "Missing person"*)         tb-missing ;;
+    "Username & email")        tb-username ;;
+    "Telegram")                tb-telegram ;;
+    "Domain & infrastructure") tb-domain ;;
+    "Media download")          tb-media ;;
+    "Capture web pages")       tb-archive ;;
+    "Metadata")                tb-metadata ;;
+    "Image analysis")          tb-image ;;
+    "Video verification")      tb-video ;;
+    "Photo geolocation")       tb-geo ;;
+    "Face comparison"*)        tb-face ;;
+    "Page monitoring"*)        tb-watch ;;
+    "Case map")                tb-map ;;
+    "Translate"*)              tb-translate ;;
+    "Country search")          tb-country ;;
+    "Breach data")             tb-breach ;;
+    "Dark web")                tb-darkweb ;;
+    "Evidence & exhibits")     tb-evidence ;;
+    "API keys")                tb-keys ;;
+    "Notes (Obsidian)")        tb-notes ;;
+    "Case:"*)                  tb-case ;;
+    "Switch / create case"*)   tb-case open ;;
+    "Open latest results")
+      last=$(cat "$TB_CONF/last_result" 2>/dev/null)
+      if [ -n "$last" ] && [ -d "$last" ]; then ui_reveal "$last"; else ui_reveal "$(tb_case_dir)"; fi ;;
+    "Open case folder")        ui_reveal "$(tb_case_dir)" ;;
+    "Guides"*)                 tb-guides ;;
+    "LAN isolation"*)          tb-lan ;;
+    "Health check")            tb-doctor ;;
+    "Update True Bearing")        tb-update ;;
+  esac
+done

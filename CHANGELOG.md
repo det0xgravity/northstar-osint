@@ -4,6 +4,26 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project uses
 [Semantic Versioning](https://semver.org/).
 
+## [0.41.0] - 2026-10-28
+
+### Changed
+- **Renamed to True Bearing OSINT** (formerly northstar-osint), to avoid
+  confusion with an unrelated commercial service of a similar name. The
+  repository is now `det0xgravity/truebearing-osint` (GitHub redirects the
+  old address). The main menu is `truebearing`, the menu tools are `tb-…`
+  (`tb-case`, `tb-evidence`, `tb-update`…), and the folders are
+  `~/TrueBearing`, `~/.local/share/truebearing` and `~/.config/truebearing`.
+- **Existing installs move across on their next update** (`ns-update`): the
+  folders are moved, not copied, and the old paths become links to the new
+  ones, so Python venvs and paths in earlier notes and exports still work.
+  Also moved: the PATH line and zsh setup, each case's state folder, the
+  Obsidian vault path and snippets (old notes' markers are read as before),
+  launchers and dock favourites, the guides' desktop links, scheduled page
+  monitoring (same interval), the Print Screen binding, LAN isolation (same
+  allow list and on/off state; the old rules stay on until the new ones
+  replace them) and the VM services. The `northstar` and `ns-…` commands
+  still work for now: each says its new name and runs it.
+
 ## [0.40.0] - 2026-10-28
 
 ### Added

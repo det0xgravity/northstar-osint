@@ -203,7 +203,7 @@
       },
       {
         "name": "Face search engines (opens a warning first)",
-        "url": "{NS_DATA}/Guides/face-search.html"
+        "url": "{TB_DATA}/Guides/face-search.html"
       }
     ]
   },

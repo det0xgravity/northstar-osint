@@ -34,15 +34,87 @@ jobs:
           su ns -c "cd '$GITHUB_WORKSPACE' && ./install.sh --yes --skip vm" || true
       - name: End-to-end checks
         # Ubuntu's Firefox is a snap, and snaps don't run in containers
-        run: su ns -c "cd '$GITHUB_WORKSPACE' && NS_E2E_EXPECTED_FAIL='${{ startsWith(matrix.image, 'ubuntu') && 'browsers' || '' }}' bash tests/e2e.sh"
+        run: su ns -c "cd '$GITHUB_WORKSPACE' && TB_E2E_EXPECTED_FAIL='${{ startsWith(matrix.image, 'ubuntu') && 'browsers' || '' }}' bash tests/e2e.sh"
       - name: Keep the install log and health report
         if: always()
         run: |
           mkdir -p logs
-          cp /home/ns/.config/northstar/install.log logs/ 2>/dev/null || true
-          su ns -c 'PATH="$HOME/.local/share/northstar/bin:$PATH" ns_doctor' > logs/doctor.txt 2>&1 || true
+          cp /home/ns/.config/truebearing/install.log logs/ 2>/dev/null || true
+          su ns -c 'PATH="$HOME/.local/share/truebearing/bin:$PATH" tb_doctor' > logs/doctor.txt 2>&1 || true
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: e2e-${{ matrix.runner }}-${{ strategy.job-index }}
+          path: logs/
+
+  # An install from before the rename (northstar-osint 0.40.0) updated to this
+  # version: cases, settings, LAN isolation and the old commands move across.
+  upgrade:
+    runs-on: ubuntu-24.04
+    container:
+      image: debian:trixie
+      options: --privileged
+    timeout-minutes: 90
+    env:
+      OLD: b2b3b72               # 0.40.0, the last northstar-osint release
+    steps:
+      - name: Base packages and a normal user with sudo
+        run: |
+          apt-get update -q
+          DEBIAN_FRONTEND=noninteractive apt-get install -y -q sudo git ca-certificates curl python3
+          useradd -m -s /bin/bash ns
+          echo 'ns ALL=(ALL) NOPASSWD:ALL' > /etc/sudoers.d/ns
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Install northstar-osint 0.40.0 and use it
+        run: |
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          git checkout -q "$OLD"
+          chown -R ns: "$GITHUB_WORKSPACE"
+          su ns -c "cd '$GITHUB_WORKSPACE' && ./install.sh --yes --only notes,shell,lan,desktop" || true
+          su ns -c 'set -e
+            B="$HOME/.local/share/northstar/bin"
+            mkdir -p "$HOME/Northstar/Cases/demo" "$HOME/.config/northstar/telegram"
+            printf "x\n" > "$HOME/Northstar/Cases/demo/audit.log"
+            printf "My own notes.\n" > "$HOME/Northstar/Cases/demo/Case.md"
+            "$B/ns_vault" case "$HOME/Northstar/Cases/demo"
+            printf s > "$HOME/.config/northstar/telegram/northstar.session"
+            "$B/ns-lan" on && "$B/ns-lan" allow 192.168.1.50 || echo "(nftables not available here)"
+            ls "$B" | head -3'
+      - name: Update to this version
+        run: |
+          git -C "$GITHUB_WORKSPACE" checkout -q "$GITHUB_SHA"
+          chown -R ns: "$GITHUB_WORKSPACE"
+          su ns -c "cd '$GITHUB_WORKSPACE' && ./install.sh --update --yes" || true
+      - name: Check that everything moved across
+        run: |
+          su ns -c 'pass=0 fail=0
+            c() { if eval "$2"; then pass=$((pass+1)); echo "  ok    $1"; else fail=$((fail+1)); echo "  FAIL  $1"; fi; }
+            B="$HOME/.local/share/truebearing/bin"
+            c "folders moved, old paths link to them" "[ -L \$HOME/Northstar ] && [ -L \$HOME/.local/share/northstar ] && [ -L \$HOME/.config/northstar ] && [ -d \$HOME/TrueBearing/Cases/demo ]"
+            c "the case notes are kept, under the new markers" "grep -q \"My own notes.\" \$HOME/TrueBearing/Cases/demo/Case.md && grep -q truebearing:auto:end \$HOME/TrueBearing/Cases/demo/Case.md && ! grep -q northstar:auto \$HOME/TrueBearing/Cases/demo/Case.md"
+            c "each case state folder renamed" "[ -d \$HOME/TrueBearing/Cases/demo/.truebearing ] && [ ! -e \$HOME/TrueBearing/Cases/demo/.northstar ]"
+            c "the new commands are installed" "[ -x \$B/truebearing ] && [ -x \$B/tb-case ] && [ -x \$B/tb_vault ]"
+            c "the old commands say their new name and run it" "\$B/ns-lan list 2>&1 | grep -q \"ns-lan is now called tb-lan\""
+            c "no old engines or launchers left" "! ls \$B/ns_* >/dev/null 2>&1 && ! ls \$HOME/.local/share/applications/ns-*.desktop >/dev/null 2>&1"
+            c "PATH line renamed" "grep -q \"local/share/truebearing/bin.*# truebearing-osint\" \$HOME/.bashrc && ! grep -q northstar \$HOME/.bashrc"
+            c "zshrc markers renamed" "grep -q \"^# truebearing-osint: managed-zshrc\" \$HOME/.zshrc && ! grep -q \"(northstar)\" \$HOME/.zshrc"
+            c "Telegram login kept" "[ -f \$HOME/.config/truebearing/telegram/truebearing.session ]"
+            c "the guides are linked on the desktop under the new name" "ls -d \"\$HOME/Desktop/True Bearing guides\" >/dev/null && [ ! -e \"\$HOME/Desktop/Northstar guides\" ]"
+            if sudo nft list tables >/dev/null 2>&1; then
+              c "LAN isolation moved: new table on, old one gone" "sudo nft list table inet truebearing_lan >/dev/null && ! sudo nft list table inet northstar_lan >/dev/null 2>&1 && [ ! -e /etc/northstar ]"
+              c "LAN allow list kept" "\$B/tb-lan list | grep -qx 192.168.1.50/32"
+            fi
+            c "the health check runs" "\$B/tb_doctor >/dev/null 2>&1; [ \$? -le 1 ]"
+            echo "$pass passed, $fail failed"; [ $fail -eq 0 ]'
+      - name: Keep the install log
+        if: always()
+        run: |
+          mkdir -p logs
+          cp /home/ns/.config/truebearing/install.log logs/ 2>/dev/null || true
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: upgrade
           path: logs/

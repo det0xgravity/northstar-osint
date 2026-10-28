@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
-"""Generate browser policy files and a bookmarks export for northstar-osint.
+"""Generate browser policy files and a bookmarks export for truebearing-osint.
 
 Outputs (into --out):
   firefox-policies.json   Firefox enterprise policies: extensions + managed bookmarks
   brave-policies.json     Chromium-style managed bookmarks for Brave
-  northstar-bookmarks.html  Netscape bookmark file for importing anywhere
+  truebearing-bookmarks.html  Netscape bookmark file for importing anywhere
 
 Extension GUIDs are resolved live from addons.mozilla.org using each add-on's
 slug, so the list never goes stale when an author changes an ID.
@@ -34,20 +34,20 @@ def read_slugs(path):
 
 def resolve(slug):
     req = urllib.request.Request(AMO_API.format(slug),
-                                 headers={"User-Agent": "northstar-osint"})
+                                 headers={"User-Agent": "truebearing-osint"})
     with urllib.request.urlopen(req, timeout=20) as resp:
         return json.load(resp)["guid"]
 
 
 def local_links(nodes, data):
-    """Bookmarks to {NS_DATA}/path (local pages such as the face-search warning) as file:// URLs."""
+    """Bookmarks to {TB_DATA}/path (local pages such as the face-search warning) as file:// URLs."""
     out = []
     for n in nodes:
         if "children" in n:
             out.append(dict(n, children=local_links(n["children"], data)))
-        elif str(n.get("url", "")).startswith("{NS_DATA}/"):
+        elif str(n.get("url", "")).startswith("{TB_DATA}/"):
             if data:
-                out.append(dict(n, url=pathlib.Path(os.path.abspath(data), n["url"][len("{NS_DATA}/"):]).as_uri()))
+                out.append(dict(n, url=pathlib.Path(os.path.abspath(data), n["url"][len("{TB_DATA}/"):]).as_uri()))
         else:
             out.append(n)
     return out
@@ -77,7 +77,7 @@ def main():
                     help="add-on slug list; repeat to add files (missing files are skipped)")
     ap.add_argument("--out", required=True)
     ap.add_argument("--folder", default="OSINT", help="top-level bookmark folder name")
-    ap.add_argument("--data", help="northstar's data folder: bookmarks to {NS_DATA}/… become file:// links "
+    ap.add_argument("--data", help="True Bearing's data folder: bookmarks to {TB_DATA}/… become file:// links "
                                    "there (they're left out without it)")
     args = ap.parse_args()
 
@@ -133,7 +133,7 @@ def main():
         json.dump(firefox, fh, indent=2)
     with open(os.path.join(args.out, "brave-policies.json"), "w", encoding="utf-8") as fh:
         json.dump(brave, fh, indent=2)
-    with open(os.path.join(args.out, "northstar-bookmarks.html"), "w", encoding="utf-8") as fh:
+    with open(os.path.join(args.out, "truebearing-bookmarks.html"), "w", encoding="utf-8") as fh:
         fh.write("<!DOCTYPE NETSCAPE-Bookmark-file-1>\n"
                  '<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=UTF-8">\n'
                  "<TITLE>Bookmarks</TITLE>\n<H1>Bookmarks</H1>\n<DL><p>\n"

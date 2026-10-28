@@ -1,6 +1,6 @@
 # Troubleshooting
 
-Everything the installer does is logged to `~/.config/northstar/install.log`. Re-running `./install.sh` is always safe: finished steps are skipped and failed ones are retried.
+Everything the installer does is logged to `~/.config/truebearing/install.log`. Re-running `./install.sh` is always safe: finished steps are skipped and failed ones are retried.
 
 
 ## The install looks stuck
@@ -11,7 +11,7 @@ Each module header shows where you are (`==> [5/18] ████░░░░ geo
     / [5/18] PyTorch (CPU)  03:12  ███████████░░░░░░░░░  56%  torch (104.1 MB)
 ```
 
-If the spinner turns and the time counts up, it's working: PyTorch (geo, translate), Flatpak runtimes and the Go toolchain are large first downloads. If the time stops, check `tail -f ~/.config/northstar/install.log` in another terminal; the full output of every step is there. Status lines only appear in a terminal; piped or in CI, the log has everything.
+If the spinner turns and the time counts up, it's working: PyTorch (geo, translate), Flatpak runtimes and the Go toolchain are large first downloads. If the time stops, check `tail -f ~/.config/truebearing/install.log` in another terminal; the full output of every step is there. Status lines only appear in a terminal; piped or in CI, the log has everything.
 
 ## Installer
 
@@ -21,12 +21,12 @@ Run `./install.sh` without `sudo`. It asks for your password itself and uses sud
 **A module reports FAILED.**
 Look for `[!]` lines just above it, or search the log:
 ```bash
-grep -n '\[!\]' ~/.config/northstar/install.log
+grep -n '\[!\]' ~/.config/truebearing/install.log
 ```
 Common causes are a temporary network error (re-run it), a package name that differs on your distribution (open an issue), or an upstream tool whose install method changed.
 
 **`go install failed`**
-Check `go version`. Current tools need Go 1.22+. northstar installs a current Go into `~/.local/share/northstar/go` automatically when the system Go is older, so open a new terminal to pick up the PATH change and re-run.
+Check `go version`. Current tools need Go 1.22+. True Bearing installs a current Go into `~/.local/share/truebearing/go` automatically when the system Go is older, so open a new terminal to pick up the PATH change and re-run.
 
 **`pipx failed: <tool>`**
 Retry it by hand to see the actual error:
@@ -49,10 +49,10 @@ These only apply when the installer runs inside a GNOME desktop session. Re-run 
 Log out and back in. The launchers are in `~/.local/share/applications/`.
 
 **The guides aren't on the desktop**
-Log out and back in once: GNOME shows desktop icons only after the Desktop Icons NG extension the installer enables has loaded. The guides themselves are in `~/Northstar/Guides` (open `index.html`), and under **Guides** in the main menu. If that folder is empty, pandoc is missing or failed: run `./install.sh --only desktop` and check its output.
+Log out and back in once: GNOME shows desktop icons only after the Desktop Icons NG extension the installer enables has loaded. The guides themselves are in `~/TrueBearing/Guides` (open `index.html`), and under **Guides** in the main menu. If that folder is empty, pandoc is missing or failed: run `./install.sh --only desktop` and check its output.
 
 **A menu opens and closes immediately**
-Run it from a terminal (e.g. `ns-domain`) to see the error. If zenity is missing, re-run `./install.sh --only core`.
+Run it from a terminal (e.g. `tb-domain`) to see the error. If zenity is missing, re-run `./install.sh --only core`.
 
 ## Browsers
 
@@ -62,7 +62,7 @@ Run it from a terminal (e.g. `ns-domain`) to see the error. If zenity is missing
 3. If extensions are missing, the installer may have been offline when it looked up their IDs. Re-run `./install.sh --only browsers`.
 
 **macOS: policies disappeared after Firefox updated**
-Firefox updates replace the app bundle. Run `ns-update`, or `./install.sh --only browsers`.
+Firefox updates replace the app bundle. Run `tb-update`, or `./install.sh --only browsers`.
 
 **KeePassXC-Browser can't connect**
 In KeePassXC: **Settings → Browser Integration → Enable**, tick Firefox, then click *Connect* in the extension.
@@ -88,10 +88,10 @@ Use a sock-puppet login: `instaloader --login <puppet>`. For toutatis, use the `
 Run `ghunt login` once and follow its prompts.
 
 **GHunt or ShadowFinder failed with "headers or library files could not be found for jpeg" or "ffi.h: No such file"**
-That was Ubuntu 26.04 (Python 3.14) before v0.37.2: their last releases asked for library versions that have no Python 3.14 builds. Run `ns-update`: on Python 3.14 northstar now installs GHunt from its main branch and ShadowFinder with current libraries.
+That was Ubuntu 26.04 (Python 3.14) before v0.37.2: their last releases asked for library versions that have no Python 3.14 builds. Run `tb-update`: on Python 3.14 True Bearing now installs GHunt from its main branch and ShadowFinder with current libraries.
 
 **OnionShare says it can't find or connect to Tor**
-The menu's OnionShare options use the system Tor (`ns-darkweb` → **Check Tor connection** starts it). If `onionshare-cli` is missing, run `./install.sh --only darkweb`. On macOS use **Open the OnionShare app** instead.
+The menu's OnionShare options use the system Tor (`tb-darkweb` → **Check Tor connection** starts it). If `onionshare-cli` is missing, run `./install.sh --only darkweb`. On macOS use **Open the OnionShare app** instead.
 
 **Received files (OnionShare)**
 They're in the case under `received/`, with their SHA-256 in `received.txt` and a check of every file in `triage.txt`. Treat them as hostile even when triage finds nothing: open documents only in the VM, never run programs or enable macros, and record what you rely on as an exhibit.
@@ -102,15 +102,15 @@ ClamAV's signatures haven't downloaded yet (about 200 MB, in the background afte
 ## VM / Kasm
 
 **Something on my network stopped working after an update (NAS, printer, file share, local apt mirror)**
-LAN isolation (`ns-lan`) is on: since v0.38.0 it's turned on in VMs, and it blocks connections from the VM to private networks. Check with `ns-lan status`. Allow what you need with `ns-lan allow 192.168.1.20` (an address or a network such as `192.168.1.0/24`), or turn it off with `ns-lan off`; updates won't turn it back on. Connections made **to** the VM (RDP from Kasm, SSH) aren't affected.
+LAN isolation (`tb-lan`) is on: since v0.38.0 it's turned on in VMs, and it blocks connections from the VM to private networks. Check with `tb-lan status`. Allow what you need with `tb-lan allow 192.168.1.20` (an address or a network such as `192.168.1.0/24`), or turn it off with `tb-lan off`; updates won't turn it back on. Connections made **to** the VM (RDP from Kasm, SSH) aren't affected.
 
 **No Mullvad Browser in an arm64 VM, and Tor Browser says "alpha"**
-That's expected. Mullvad Browser has no arm64 Linux build, and Tor Browser's only arm64 Linux builds are alphas for now. northstar switches to stable automatically once one exists. See [BREACH-DARKWEB.md](BREACH-DARKWEB.md#tor-browser-on-arm64-vms-on-apple-silicon).
+That's expected. Mullvad Browser has no arm64 Linux build, and Tor Browser's only arm64 Linux builds are alphas for now. True Bearing switches to stable automatically once one exists. See [BREACH-DARKWEB.md](BREACH-DARKWEB.md#tor-browser-on-arm64-vms-on-apple-silicon).
 
 **Tor Browser "signature did NOT verify"**
-The download didn't match the Tor Project's signing key, so nothing was installed. Usually it's a broken or intercepted download: run `ns-update` again. If it keeps happening, don't install Tor Browser on that network.
+The download didn't match the Tor Project's signing key, so nothing was installed. Usually it's a broken or intercepted download: run `tb-update` again. If it keeps happening, don't install Tor Browser on that network.
 
-**ns-darkweb says Tor isn't reachable**
+**tb-darkweb says Tor isn't reachable**
 On Linux: `sudo systemctl start tor`, then `systemctl status tor`. On macOS: `brew services start tor`. Some networks block Tor; Tor Browser's connection settings can use bridges in that case.
 
 **A breach source shows "rate limit reached" or "key rejected"**
@@ -120,7 +120,7 @@ Free services limit how often you can search (XposedOrNot about 25 an hour; rans
 Its next dialog has probably opened behind another window: GNOME doesn't let a new window jump in front of the one you're using. Press Alt+Tab to find it. Since v0.4.3, tools started from the main menu no longer open the file manager by themselves, so this mostly happens after *Image analysis*, which opens the folder so you can drag the image into the search pages. Use **Open latest results** in the main menu to see what a search produced.
 
 **The Activities overview keeps opening**
-northstar stops the overview opening at login, and in VMs also turns off the two usual triggers: the top-left hot corner, and pressing the Super key on its own. The Super trigger matters because the host's ⌘ or Windows key reaches the VM as Super whenever you switch apps. To check or apply these by hand:
+True Bearing stops the overview opening at login, and in VMs also turns off the two usual triggers: the top-left hot corner, and pressing the Super key on its own. The Super trigger matters because the host's ⌘ or Windows key reaches the VM as Super whenever you switch apps. To check or apply these by hand:
 
 ```bash
 gsettings set org.gnome.desktop.interface enable-hot-corners false
@@ -137,10 +137,10 @@ gsettings set org.gnome.desktop.wm.preferences num-workspaces 1
 To undo them: **Settings → Multitasking** (hot corner and workspaces), `gsettings reset org.gnome.mutter overlay-key`, and `gnome-extensions disable no-overview@fthx`. You can still open the overview with the dots at the top left, or Super+S.
 
 **Clicking Flameshot does nothing**
-Flameshot runs in standby as an icon in the top bar, and GNOME needs the AppIndicator extension to show tray icons. northstar enables it; log out and back in after `ns-update` to see the icon. Flameshot also starts at login. Click its icon, or press Print Screen, to capture. If it ever stops responding: `pkill flameshot`, then start it again.
+Flameshot runs in standby as an icon in the top bar, and GNOME needs the AppIndicator extension to show tray icons. True Bearing enables it; log out and back in after `tb-update` to see the icon. Flameshot also starts at login. Click its icon, or press Print Screen, to capture. If it ever stops responding: `pkill flameshot`, then start it again.
 
 **The prompt shows squares or question marks instead of icons**
-The terminal isn't using the MesloLGS NF font. Run `ns-update` from inside the desktop session, or set the font by hand in your terminal's preferences: **MesloLGS NF**, size 11. Then open a new terminal.
+The terminal isn't using the MesloLGS NF font. Run `tb-update` from inside the desktop session, or set the font by hand in your terminal's preferences: **MesloLGS NF**, size 11. Then open a new terminal.
 
 **The terminal still opens bash**
 The default shell changes from your next login: log out and back in. To check: `getent passwd $USER` should end in `/usr/bin/zsh`.
