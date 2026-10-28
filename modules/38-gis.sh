@@ -9,6 +9,7 @@ mod_gis() {
   if ns_is_macos; then
     ns_cask qgis
   else
-    ns_flatpak org.qgis.qgis
+    # Flathub has two branches (stable, lts): name one, or flatpak stops to ask
+    ns_flatpak org.qgis.qgis//stable
   fi
 }
