@@ -4,6 +4,14 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project uses
 [Semantic Versioning](https://semver.org/).
 
+## [0.38.1] - 2026-10-28
+
+### Changed
+- Ubuntu 26.04 LTS listed as supported: a tester's x86_64 desktop install
+  and the end-to-end tests on x86_64 and arm64 now pass.
+- GNOME extensions the distribution doesn't package (Ubuntu has no
+  `gnome-shell-extensions-extra`) are skipped without an apt error in the log.
+
 ## [0.38.0] - 2026-10-28
 
 ### Added

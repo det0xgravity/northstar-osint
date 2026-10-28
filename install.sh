@@ -3,7 +3,7 @@
 #  northstar-osint installer
 #  https://github.com/det0xgravity/northstar-osint
 #
-#  Builds an OSINT workstation on Debian 13, Ubuntu 24.04, Kali, Parrot or
+#  Builds an OSINT workstation on Debian 13, Ubuntu 24.04/26.04, Kali, Parrot or
 #  macOS (Apple Silicon). Modular, idempotent and safe to re-run.
 #
 #  Usage:  ./install.sh [--list] [--only a,b] [--skip a,b] [--update] [--yes]

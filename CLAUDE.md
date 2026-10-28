@@ -4,7 +4,7 @@ Context for Claude Code sessions working on this repository.
 
 ## What this is
 
-A modular, GPL-3.0-or-later OSINT workstation builder for Debian 13, Ubuntu 24.04,
+A modular, GPL-3.0-or-later OSINT workstation builder for Debian 13, Ubuntu 24.04/26.04,
 Kali, Parrot and macOS on Apple Silicon. It's original work: never copy code,
 templates or assets from OSINT books, courses or paid products, and don't add
 references to them.
@@ -73,8 +73,11 @@ CI (`.github/workflows/lint.yml`) runs the same checks.
 First real install passed on 2026-10-26: Debian 13 GNOME, arm64, in a UTM
 (QEMU) VM on Apple Silicon. The maintainer has since tested the username menu,
 SpiderFoot, Country search, the GNOME tweaks, the wallpaper and the zsh setup
-there. Still untested: x86_64 (Proxmox/Kasm, Tor/Mullvad Flatpaks), Ubuntu,
-Kali, Parrot, macOS. See CHANGELOG.md for the current version.
+there. A tester's Ubuntu 26.04 x86_64 desktop install (Oct 2026, 0.37.0) failed
+only on GHunt and ShadowFinder (Python 3.14 wheels, fixed in 0.37.2/0.38.0);
+browsers (snap Firefox policies) and the Tor/Mullvad Flatpaks installed. The
+e2e workflow covers Debian 13 and Ubuntu 24.04/26.04 containers on both arches.
+Still untested: Proxmox/Kasm, Kali, Parrot, macOS. See CHANGELOG.md.
 
 ## Open work
 

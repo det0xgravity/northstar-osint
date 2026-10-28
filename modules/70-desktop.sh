@@ -82,7 +82,8 @@ PY
 # next login). Non-fatal: not every distribution packages every extension.
 ns_gnome_extension() {
   local uuid="$1" pkg="$2" msg="$3"
-  [ -d "/usr/share/gnome-shell/extensions/$uuid" ] || ns_apt "$pkg" >/dev/null 2>&1
+  # Only ask apt for packages this distribution has (Ubuntu lacks some), so the log stays clean
+  [ -d "/usr/share/gnome-shell/extensions/$uuid" ] || ! apt-cache show "$pkg" >/dev/null 2>&1 || ns_apt "$pkg" >/dev/null 2>&1
   [ -d "/usr/share/gnome-shell/extensions/$uuid" ] || { ns_info "$pkg isn't available here — skipped"; return 0; }
   python3 - "$uuid" <<'PY'
 import ast, subprocess, sys

@@ -9,7 +9,7 @@
 | **Account** | A normal user with `sudo` rights. **Don't** run the installer as root. |
 | **Network** | Unrestricted HTTPS to GitHub, PyPI, Go proxy, Flathub/Homebrew and addons.mozilla.org |
 
-## Linux (Debian 13, Ubuntu 24.04, Kali, Parrot)
+## Linux (Debian 13, Ubuntu 24.04 or 26.04, Kali, Parrot)
 
 ```bash
 sudo apt install -y git
@@ -23,7 +23,7 @@ cd northstar-osint
 Per-distribution notes:
 
 - **Debian 13**: Firefox ESR is the default browser; policies go to `/etc/firefox-esr/policies` and `/etc/firefox/policies`.
-- **Ubuntu 24.04**: Firefox and Chromium are snaps. The policy file at `/etc/firefox/policies/policies.json` is read by the snap. If Firefox is missing, install it with `sudo snap install firefox`.
+- **Ubuntu 24.04 and 26.04**: Firefox and Chromium are snaps. The policy file at `/etc/firefox/policies/policies.json` is read by the snap. If Firefox is missing, install it with `sudo snap install firefox`.
 - **Kali**: most tools are already in Kali's repositories, but northstar installs its own current versions through pipx and Go so behaviour matches other platforms. The two don't conflict: northstar's copies live in `~/.local/share/northstar/bin` and `~/.local/bin`.
 - **Parrot 6**: Parrot's Go is too old for current ProjectDiscovery tools, so northstar automatically installs the current Go release into `~/.local/share/northstar/go`.
 
@@ -50,7 +50,7 @@ macOS differences:
 
 ## Running in a VM on Apple Silicon
 
-You can also install northstar in an arm64 Linux guest under UTM, Parallels Desktop or VMware Fusion. This keeps investigation browsing separate from your Mac. Use the **arm64 (aarch64)** installer for Debian 13 or Ubuntu 24.04. Kali and Parrot publish arm64 images too.
+You can also install northstar in an arm64 Linux guest under UTM, Parallels Desktop or VMware Fusion. This keeps investigation browsing separate from your Mac. Use the **arm64 (aarch64)** installer for Debian 13 or Ubuntu 24.04 or 26.04. Kali and Parrot publish arm64 images too.
 
 Install the guest from its ISO, log in to the desktop, then run `./install.sh` from a terminal inside it, the same as on any Linux machine. The `vm` module checks the hypervisor with `systemd-detect-virt` and installs the matching guest tools:
 

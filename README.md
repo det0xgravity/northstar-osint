@@ -6,7 +6,7 @@ northstar-osint turns a fresh Debian, Ubuntu, Kali, Parrot or macOS install into
 
 [![Lint](https://github.com/det0xgravity/northstar-osint/actions/workflows/lint.yml/badge.svg)](https://github.com/det0xgravity/northstar-osint/actions/workflows/lint.yml)
 ![License: GPL v3](https://img.shields.io/badge/license-GPLv3-blue)
-![Platforms](https://img.shields.io/badge/platforms-Debian%2013%20%7C%20Ubuntu%2024.04%20%7C%20Kali%20%7C%20Parrot%20%7C%20macOS%20(arm64)-informational)
+![Platforms](https://img.shields.io/badge/platforms-Debian%2013%20%7C%20Ubuntu%2024.04%20%2F%2026.04%20%7C%20Kali%20%7C%20Parrot%20%7C%20macOS%20(arm64)-informational)
 
 ---
 
@@ -39,7 +39,7 @@ Most OSINT build scripts are a long list of commands that break silently when on
 | Platform | Status | Notes |
 |---|---|---|
 | Debian 13 (GNOME) | ✅ Primary target | Full feature set including dock integration |
-| Ubuntu 24.04 LTS | ✅ Supported | Firefox is a snap; policies still apply |
+| Ubuntu 24.04 / 26.04 LTS | ✅ Supported | Firefox is a snap; policies still apply. 26.04 ships Python 3.14: GHunt and ShadowFinder are installed with newer libraries there |
 | Kali Linux (rolling) | ✅ Supported | Layers onto an existing Kali install |
 | Parrot OS 6 | ✅ Supported | Installs a current Go automatically if the system Go is too old |
 | macOS 14+ (Apple Silicon) | ✅ Supported | Needs Homebrew; no `vm` module; Brave bookmarks via import |
