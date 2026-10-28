@@ -4,6 +4,16 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project uses
 [Semantic Versioning](https://semver.org/).
 
+## [0.40.0] - 2026-10-28
+
+### Added
+- **PGP for encrypted exports:** Evidence → Export the case, encrypted (age
+  or PGP) can now encrypt for the recipient's PGP public key file (`.asc` or
+  `.gpg`). The key is read into a throwaway keyring, never your own. Its user
+  ID and fingerprint are shown so you can check them with the recipient.
+  Revoked, expired and sign-only keys are refused. The audit log records the
+  fingerprint. `gnupg` is now part of core.
+
 ## [0.39.1] - 2026-10-28
 
 ### Fixed

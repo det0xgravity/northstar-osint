@@ -132,6 +132,31 @@ else
   printf '  skip  encrypted export (age not installed)\n'
 fi
 
+section "Encrypted export (PGP)"
+if command -v gpg >/dev/null 2>&1 && command -v gpgconf >/dev/null 2>&1; then
+  KH="$W/gpg-recipient"; mkdir -p "$KH"; chmod 700 "$KH"
+  gpg --homedir "$KH" --batch --quiet --passphrase '' --quick-gen-key 'Example Recipient <recipient@example.org>' default default never 2>/dev/null
+  gpg --homedir "$KH" --batch --armor --export > "$W/recipient.asc"
+  FPR=$(gpg --homedir "$KH" --batch --with-colons --fingerprint | awk -F: '/^fpr:/ {print $10; exit}')
+  menu ns-evidence "Export the case, encrypted" "The recipient's PGP" "$W/recipient.asc" "yes"
+  ENC=$(ls -t "$W"/data/Exports/*.tar.gz.gpg 2>/dev/null | head -1); PLAIN="${ENC%.gpg}"
+  check "the export is encrypted for the PGP key, with its hash, and the plain copy removed" \
+    "[ -s '$ENC' ] && [ -f '$ENC.sha256' ] && [ ! -e '$PLAIN' ] && [ -f '$PLAIN.sha256' ]"
+  check "the recipient's key opens it, giving the archive that was hashed" \
+    "gpg --homedir '$KH' --batch --quiet --pinentry-mode loopback --passphrase '' -o '$W/pgpdec.tar.gz' --decrypt '$ENC' 2>/dev/null && python3 -c 'import hashlib,sys; print(hashlib.sha256(open(sys.argv[1],\"rb\").read()).hexdigest())' '$W/pgpdec.tar.gz' | grep -qf - '$PLAIN.sha256'"
+  check "the audit log records the key's fingerprint" "grep -q 'encrypted export: .*PGP key $FPR' '$TC/audit.log'"
+  check "the throwaway keyring is removed, so the key never joins yours" "! ls -d \"\${TMPDIR:-/tmp}\"/ns-gpg.* >/dev/null 2>&1"
+  n=$(ls "$W"/data/Exports/*.tar.gz.gpg 2>/dev/null | wc -l)
+  menu ns-evidence "Export the case, encrypted" "The recipient's PGP" "$W/recipient.asc" "no"
+  check "nothing is exported if the fingerprint isn't confirmed" "[ \"\$(ls '$W'/data/Exports/*.tar.gz.gpg | wc -l)\" -eq $n ]"
+  printf 'not a key\n' > "$W/junk.asc"
+  menu ns-evidence "Export the case, encrypted" "The recipient's PGP" "$W/junk.asc"
+  check "a file without a public key is refused" "grep -q 'holds 0 public keys' '$W/out.txt'"
+  gpgconf --homedir "$KH" --kill all >/dev/null 2>&1
+else
+  printf '  skip  PGP encrypted export (gpg not installed)\n'
+fi
+
 section "File triage"
 mkdir -p "$W/tri"
 printf '\177ELF\002\001\001\000\000\000\000\000\000\000\000\000\002\000\076\000' > "$W/tri/invoice.pdf"; head -c 400 /dev/zero >> "$W/tri/invoice.pdf"

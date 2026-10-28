@@ -25,7 +25,7 @@ choice=$(ui_list "Evidence: case $(ns_case)" \
   "Verify the audit log's hash chain" \
   "List exhibits" \
   "Export the case (archive + SHA-256)" \
-  "Export the case, encrypted (age)" \
+  "Export the case, encrypted (age or PGP)" \
   "Check received or suspicious files (triage)") || exit 0
 
 case "$choice" in
@@ -71,20 +71,65 @@ FILES
 Nothing was opened or run. The full report is in the case (triage.txt). No warning signs is not proof that a file is safe: open documents only in this VM."
     ns_finish "$out" ;;
   "Export the case, encrypted"*)
-    ns_cmd age || { ui_error "age isn't installed: ./install.sh --only core"; exit 1; }
     how=$(ui_list "Encrypt the export for" \
       "A passphrase (you type it in the terminal; share it by another channel)" \
-      "The recipient's public key (age1… or an ssh-ed25519 / ssh-rsa key)") || exit 0
-    if [ "${how#The recipient}" != "$how" ]; then
-      key=$(ui_entry "Recipient's public key (age1… or ssh-ed25519 …):") || exit 0
-      case "$key" in age1*|ssh-ed25519\ *|ssh-rsa\ *) ;; *) ui_error "That isn't an age or SSH public key."; exit 1 ;; esac
-    fi
+      "The recipient's public key (age1… or an ssh-ed25519 / ssh-rsa key)" \
+      "The recipient's PGP public key (a .asc or .gpg key file)") || exit 0
+    key="" fpr=""
+    case "$how" in
+      *PGP*)
+        ns_cmd gpg || { ui_error "GnuPG isn't installed: ./install.sh --only core"; exit 1; }
+        kf=$(ui_files "Choose the recipient's PGP public key file") || exit 0
+        kf=$(printf '%s\n' "$kf" | head -1)
+        [ -f "$kf" ] || exit 0
+        # A throwaway keyring: the recipient's key never joins your own
+        gh=$(mktemp -d "${TMPDIR:-/tmp}/ns-gpg.XXXXXX"); chmod 700 "$gh"
+        trap 'gpgconf --homedir "$gh" --kill all >/dev/null 2>&1; rm -rf "$gh"' EXIT
+        gpg --homedir "$gh" --batch --quiet --import "$kf" >/dev/null 2>&1
+        cols=$(gpg --homedir "$gh" --batch --with-colons --fingerprint 2>/dev/null)
+        n=$(printf '%s\n' "$cols" | grep -c '^pub:')
+        if [ "$n" -ne 1 ]; then
+          ui_error "That file holds $n public keys. Use a file with only the recipient's key (a private key or an unreadable file shows as 0)."; exit 1
+        fi
+        pub=$(printf '%s\n' "$cols" | grep '^pub:' | head -1)
+        fpr=$(printf '%s\n' "$cols" | awk -F: '/^fpr:/ {print $10; exit}')
+        uid=$(printf '%s\n' "$cols" | awk -F: '/^uid:/ {print $10; exit}')
+        case "$(printf '%s' "$pub" | cut -d: -f2)" in
+          r) ui_error "That key has been revoked by its owner. Ask the recipient for their current key."; exit 1 ;;
+          e) ui_error "That key has expired. Ask the recipient for their current key."; exit 1 ;;
+        esac
+        case "$(printf '%s' "$pub" | cut -d: -f12)" in
+          *E*) ;;
+          *) ui_error "That key can't be used for encryption (it has no usable encryption subkey)."; exit 1 ;;
+        esac
+        spaced=$(printf '%s' "$fpr" | sed 's/..../& /g; s/ $//')
+        ui_question "Encrypt the export for this key?
+
+${uid:-(no user ID)}
+Fingerprint: $spaced
+
+Check the fingerprint with the recipient by phone or in person, not by the channel the key came from." || exit 0
+        ;;
+      "The recipient"*)
+        ns_cmd age || { ui_error "age isn't installed: ./install.sh --only core"; exit 1; }
+        key=$(ui_entry "Recipient's public key (age1… or ssh-ed25519 …):") || exit 0
+        case "$key" in age1*|ssh-ed25519\ *|ssh-rsa\ *) ;; *) ui_error "That isn't an age or SSH public key."; exit 1 ;; esac
+        ;;
+      *)
+        ns_cmd age || { ui_error "age isn't installed: ./install.sh --only core"; exit 1; } ;;
+    esac
     r=$(ns_evidence export "$case_dir" "$NS_DATA/Exports" 2>&1) || { ui_error "$r"; exit 1; }
     plain=$(printf '%s\n' "$r" | sed -n 's/^Exported: //p')
-    enc="$plain.age"
-    if [ -n "${key:-}" ]; then
+    if [ -n "$fpr" ]; then
+      enc="$plain.gpg"
+      # The archive is already compressed
+      gpg --homedir "$gh" --batch --yes --quiet --trust-model always --compress-algo none \
+          --recipient "$fpr" --output "$enc" --encrypt "$plain" 2>/dev/null
+    elif [ -n "$key" ]; then
+      enc="$plain.age"
       age -r "$key" -o "$enc" "$plain"
     else
+      enc="$plain.age"
       printf '\nChoose a passphrase for %s (age asks twice; nothing is shown as you type).\n' "$(basename "$enc")"
       age -p -o "$enc" "$plain"
     fi
@@ -96,7 +141,10 @@ Nothing was opened or run. The full report is in the case (triage.txt). No warni
     printf '%s  %s\n' "$sha" "$(basename "$enc")" > "$enc.sha256"
     # The encrypted copy replaces the plain one; the plain archive's hash stays in its .sha256
     rm -f "$plain"
-    if [ -n "${key:-}" ]; then
+    if [ -n "$fpr" ]; then
+      for_whom="PGP key $fpr"; tip="Only the holder of that PGP key can open it."
+      dcmd="gpg --output $(basename "$plain") --decrypt $(basename "$enc")"
+    elif [ -n "$key" ]; then
       for_whom="recipient key $(printf '%s' "$key" | cut -c1-24)…"; tip="Only the holder of the matching private key can open it."
       dcmd="age -d -i <their key file> -o $(basename "$plain") $(basename "$enc")"
     else

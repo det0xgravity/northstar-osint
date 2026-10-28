@@ -4,7 +4,7 @@ Every tool is installed from its official source. Each project keeps its own lic
 
 ## core *(always installed)*
 
-System packages (git, curl, jq, Python, pipx, Go, whois, dig, zenity, clipboard tools, flatpak) and the northstar runtime: menu tools, the UI library, configuration and PATH setup.
+System packages (git, curl, jq, Python, pipx, Go, whois, dig, zenity, clipboard tools, flatpak, pandoc, age and GnuPG for encrypted exports) and the northstar runtime: menu tools, the UI library, configuration and PATH setup.
 
 ## username
 
