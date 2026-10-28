@@ -38,8 +38,8 @@ case "$choice" in
 
   # 2. Visible text: signs, shopfronts and plates name places and languages
   if ns_cmd tesseract; then
-    langs=$(tesseract --list-langs 2>/dev/null | tail -n +2 | grep -v '^osd$' | paste -sd+ -)
-    ns_run "$out" tesseract "$base" text -l "${langs:-eng}" >/dev/null
+    langs=$(cd "$out" && ns_ocr_langs "$base")
+    ns_run "$out" tesseract "$base" text -l "$langs" >/dev/null
     if [ -s "$out/text.txt" ] && grep -q '[[:alnum:]]' "$out/text.txt"; then
       summary="${summary}Visible text found: see text.txt
 "

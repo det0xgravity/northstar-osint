@@ -7,6 +7,9 @@ All notable changes to this project are documented here. The format follows
 ## [0.39.0] - 2026-10-28
 
 ### Added
+- **OCR in 22 more languages** (10 scripts, plus script detection): image
+  OCR and Photo geolocation now detect each image's writing system and use
+  only the matching languages, plus English, instead of every installed one.
 - **Email header analysis** (Username & email → Analyse email headers,
   `ns_email`): relay hops oldest first with IPs and UTC times, the first
   public IP, SPF/DKIM/DMARC results, and warning signs of spoofing or

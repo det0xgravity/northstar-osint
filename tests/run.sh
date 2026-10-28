@@ -175,6 +175,21 @@ menu ns-username "Analyse email headers" "$W/phish.eml"
 check "the menu keeps the message and the analysis in the case" \
   "d=\$(ls -td '$TC'/email-headers/* | head -1) && [ -f \"\$d/phish.eml\" ] && grep -q 'Warning signs' \"\$d/headers.txt\" && [ -f \"\$d/manifest.sha256\" ]"
 
+section "OCR languages"
+mkdir -p "$W/ocrstub"
+cat > "$W/ocrstub/tesseract" <<'TS'
+#!/bin/sh
+case "$*" in
+  --list-langs*) printf 'List of available languages (5):\neng\nosd\nrus\nukr\nfra\n' ;;
+  *"--psm 0"*) case "$1" in *cyr*) echo "Script: Cyrillic" ;; *han*) echo "Script: Han" ;; *) echo "Script: Latin" ;; esac ;;
+esac
+TS
+chmod +x "$W/ocrstub/tesseract"
+ocrl() { ( PATH="$W/ocrstub:$PATH"; . "$H/lib/ui.sh"; ns_ocr_langs "$1" ); }
+check "a Cyrillic sign is read in Russian and Ukrainian, plus English" "[ \"\$(ocrl sign_cyr.png)\" = rus+ukr+eng ]"
+check "Latin text uses only the installed Latin-script languages" "[ \"\$(ocrl sign.png)\" = eng+fra ]"
+check "a script with no installed language falls back to English" "[ \"\$(ocrl sign_han.png)\" = eng ]"
+
 section "QGIS"
 menu ns-map "Open the latest case map in QGIS"
 check "QGIS needs a built case map first" "grep -q 'No case map yet' '$W/out.txt'"

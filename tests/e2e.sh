@@ -101,6 +101,7 @@ check "case map has the recorded place and photo GPS" \
 if have tesseract; then
   "$PY" -c "from PIL import Image, ImageDraw, ImageFont; im=Image.new('RGB',(900,200),'white'); d=ImageDraw.Draw(im); d.text((20,60),'MISSING PERSON CALL 555 0199',fill='black',font=ImageFont.load_default(size=48)); im.save('$W/sign.png')" >> "$W/e2e.log" 2>&1
   check "OCR reads text in an image" "tesseract '$W/sign.png' - 2>/dev/null | grep -qi 'missing'"
+  check "OCR languages for other scripts are installed" "for l in rus ara chi_sim jpn osd; do tesseract --list-langs 2>/dev/null | grep -qx \$l || { echo missing \$l; exit 1; }; done"
 else skip "OCR" "tesseract not installed"; fi
 
 section "Face comparison (local models)"

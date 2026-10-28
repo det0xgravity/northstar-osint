@@ -33,6 +33,36 @@ ui_list() {
   printf '%s\n' "$r"
 }
 
+# ns_ocr_langs <image>   -> the Tesseract languages for this image, e.g. "rus+ukr+eng".
+# Tesseract's script detection (OSD) picks the writing system; only installed
+# languages of that script are used, plus English, which signs often add.
+# Passing every installed language at once is slow and less accurate.
+ns_ocr_langs() {
+  local have script want l out=""
+  have=$(tesseract --list-langs 2>/dev/null | tail -n +2)
+  script=""
+  if printf '%s\n' "$have" | grep -qx osd; then
+    script=$(tesseract "$1" - --psm 0 -l osd 2>/dev/null | sed -n 's/^Script: //p' | head -1)
+  fi
+  case "$script" in
+    Cyrillic)   want="rus ukr" ;;
+    Arabic)     want="ara fas" ;;
+    Hebrew)     want="heb" ;;
+    Greek)      want="ell" ;;
+    Devanagari) want="hin" ;;
+    Thai)       want="tha" ;;
+    Han)        want="chi_sim chi_tra" ;;
+    Japanese|Katakana|Hiragana) want="jpn" ;;
+    Hangul)     want="kor" ;;
+    *)          want="eng fra deu spa por ita nld" ;;   # Latin, or too little text to tell
+  esac
+  for l in $want eng; do
+    printf '%s\n' "$have" | grep -qx "$l" || continue
+    case "+$out+" in *"+$l+"*) ;; *) out="${out:+$out+}$l" ;; esac
+  done
+  printf '%s\n' "${out:-eng}"
+}
+
 # ui_entry "Prompt" ["default"]   -> prints the text entered (fails on cancel/empty;
 #                                    with NS_ALLOW_EMPTY=1 only cancel fails)
 ui_entry() {

@@ -6,9 +6,17 @@ ns_register media "Media collection & metadata (yt-dlp, gallery-dl, exiftool…)
 mod_media() {
   local rc=0 m
   if ns_is_macos; then
-    ns_brew ffmpeg exiftool media-info tesseract ocrmypdf || rc=1
+    ns_brew ffmpeg exiftool media-info tesseract tesseract-lang ocrmypdf || rc=1
   else
     ns_apt ffmpeg libimage-exiftool-perl mediainfo mat2 tesseract-ocr ocrmypdf || rc=1
+    # OCR languages for the scripts investigators meet most: Latin, Cyrillic, Arabic,
+    # Hebrew, Greek, Devanagari, Thai, Chinese, Japanese, Korean (a few MB each).
+    # ns_ocr_langs picks the right ones per image, so having many costs nothing.
+    ns_apt tesseract-ocr-osd tesseract-ocr-fra tesseract-ocr-deu tesseract-ocr-spa tesseract-ocr-por \
+           tesseract-ocr-ita tesseract-ocr-nld tesseract-ocr-pol tesseract-ocr-tur tesseract-ocr-vie \
+           tesseract-ocr-ind tesseract-ocr-rus tesseract-ocr-ukr tesseract-ocr-ara tesseract-ocr-fas \
+           tesseract-ocr-heb tesseract-ocr-ell tesseract-ocr-hin tesseract-ocr-tha tesseract-ocr-chi-sim \
+           tesseract-ocr-chi-tra tesseract-ocr-jpn tesseract-ocr-kor || rc=1
   fi
   # monolith: single-file page captures for ns-archive (official release binary)
   if ns_is_macos; then
