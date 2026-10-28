@@ -45,6 +45,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: pandoc (for the guides test)
-        run: if command -v apt-get >/dev/null; then sudo apt-get update -q && sudo apt-get install -y -q pandoc nftables; else brew install pandoc; fi
+        run: if command -v apt-get >/dev/null; then sudo apt-get update -q && sudo apt-get install -y -q pandoc nftables age; else brew install pandoc age; fi
       - name: Functional tests (macOS runs them under its Bash 3.2)
         run: /bin/bash tests/run.sh

@@ -8,11 +8,11 @@ mod_core() {
   local rc=0
 
   if ns_is_macos; then
-    ns_brew git jq python pipx go pandoc || rc=1
+    ns_brew git jq python pipx go pandoc age || rc=1
   else
     ns_apt git curl jq unzip ca-certificates python3 python3-venv python3-pip \
            pipx golang-go whois bind9-dnsutils xdg-utils zenity \
-           wl-clipboard xclip libnotify-bin flatpak file pandoc || rc=1
+           wl-clipboard xclip libnotify-bin flatpak file pandoc age || rc=1
   fi
 
   pipx ensurepath >/dev/null 2>&1 || true

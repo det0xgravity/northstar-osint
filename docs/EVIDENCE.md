@@ -31,6 +31,7 @@ sha256sum -c manifest.sha256          # macOS: shasum -a 256 -c manifest.sha256
 | Verify the audit log's hash chain | Reports intact, broken and unchained lines, and where the chain breaks |
 | List exhibits | Shows `exhibits.csv` |
 | Export the case | Archives the whole case folder to `~/Northstar/Exports/<case>_<UTC time>.tar.gz` (readable only by you) with a `.sha256` beside it, ready to hand over |
+| Export the case, encrypted (age) | The same archive, encrypted with [age](https://age-encryption.org) for a **passphrase** (typed in the terminal, never logged) or the **recipient's public key** (`age1…`, or their `ssh-ed25519`/`ssh-rsa` key). You get `….tar.gz.age` and its `.sha256`; the unencrypted archive is removed, and its own SHA-256 stays in `….tar.gz.sha256`, so after decrypting, the recipient can check they have exactly what was exported. The audit log records the method and the start of the key, never a passphrase. Use this for anything that leaves the VM |
 
 ### OpenTimestamps (optional)
 

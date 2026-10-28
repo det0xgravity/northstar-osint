@@ -4,6 +4,14 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project uses
 [Semantic Versioning](https://semver.org/).
 
+## [0.39.0] - 2026-10-28
+
+### Added
+- **Encrypted case exports:** Evidence → Export the case, encrypted (age),
+  for a passphrase or the recipient's public key (age or SSH). The plain
+  archive is removed; its SHA-256 is kept so the recipient can check the
+  decrypted copy. `age` is now part of core.
+
 ## [0.38.1] - 2026-10-28
 
 ### Changed

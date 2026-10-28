@@ -24,7 +24,8 @@ choice=$(ui_list "Evidence: case $(ns_case)" \
   "Verify a folder (has anything changed?)" \
   "Verify the audit log's hash chain" \
   "List exhibits" \
-  "Export the case (archive + SHA-256)") || exit 0
+  "Export the case (archive + SHA-256)" \
+  "Export the case, encrypted (age)") || exit 0
 
 case "$choice" in
   Record*)
@@ -52,6 +53,47 @@ case "$choice" in
       r=$(cut -d, -f1-4 "$case_dir/exhibits.csv" | column -t -s, 2>/dev/null || cat "$case_dir/exhibits.csv")
     else r="No exhibits recorded yet in case $(ns_case)."; fi
     printf '%s\n' "$r"; ui_info "$r" ;;
+  "Export the case, encrypted"*)
+    ns_cmd age || { ui_error "age isn't installed: ./install.sh --only core"; exit 1; }
+    how=$(ui_list "Encrypt the export for" \
+      "A passphrase (you type it in the terminal; share it by another channel)" \
+      "The recipient's public key (age1… or an ssh-ed25519 / ssh-rsa key)") || exit 0
+    if [ "${how#The recipient}" != "$how" ]; then
+      key=$(ui_entry "Recipient's public key (age1… or ssh-ed25519 …):") || exit 0
+      case "$key" in age1*|ssh-ed25519\ *|ssh-rsa\ *) ;; *) ui_error "That isn't an age or SSH public key."; exit 1 ;; esac
+    fi
+    r=$(ns_evidence export "$case_dir" "$NS_DATA/Exports" 2>&1) || { ui_error "$r"; exit 1; }
+    plain=$(printf '%s\n' "$r" | sed -n 's/^Exported: //p')
+    enc="$plain.age"
+    if [ -n "${key:-}" ]; then
+      age -r "$key" -o "$enc" "$plain"
+    else
+      printf '\nChoose a passphrase for %s (age asks twice; nothing is shown as you type).\n' "$(basename "$enc")"
+      age -p -o "$enc" "$plain"
+    fi
+    if [ ! -s "$enc" ]; then
+      rm -f "$enc"; ui_error "Encryption didn't complete. The unencrypted archive is still in $NS_DATA/Exports."; exit 1
+    fi
+    chmod 600 "$enc"
+    sha=$(ns_hash_file "$enc")
+    printf '%s  %s\n' "$sha" "$(basename "$enc")" > "$enc.sha256"
+    # The encrypted copy replaces the plain one; the plain archive's hash stays in its .sha256
+    rm -f "$plain"
+    if [ -n "${key:-}" ]; then
+      for_whom="recipient key $(printf '%s' "$key" | cut -c1-24)…"; tip="Only the holder of the matching private key can open it."
+      dcmd="age -d -i <their key file> -o $(basename "$plain") $(basename "$enc")"
+    else
+      for_whom="passphrase"; tip="Share the passphrase by a different channel from the file."
+      dcmd="age -d -o $(basename "$plain") $(basename "$enc")"
+    fi
+    ns_audit ns-evidence "$(ns_case)" "encrypted export: $(basename "$enc") sha256 $sha ($for_whom)"
+    r="Encrypted export: $enc
+SHA-256: $sha
+
+The archive inside is the same as an ordinary export (its own SHA-256 is in $(basename "$plain").sha256). The recipient decrypts it with:
+  $dcmd
+$tip"
+    printf '%s\n' "$r"; ui_info "$r"; ui_reveal "$NS_DATA/Exports" ;;
   Export*)
     r=$(ns_evidence export "$case_dir" "$NS_DATA/Exports" 2>&1)
     ns_audit ns-evidence "$(ns_case)" "export: $(printf '%s' "$r" | tail -1)"
