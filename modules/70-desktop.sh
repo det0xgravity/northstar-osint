@@ -129,11 +129,13 @@ tb_wallpaper() {
   local img="$TB_HOME/share/wallpaper/truebearing.png" uri cur prop n=0
   mkdir -p "$(dirname "$img")"
   install -m 644 "$TB_REPO/assets/wallpaper/truebearing.png" "$img" || return 1
+  rm -f "$TB_HOME/share/wallpaper/northstar.png"
   uri="file://$img"
   if tb_in_gnome_session; then
     cur=$(gsettings get org.gnome.desktop.background picture-uri 2>/dev/null)
     case "$cur" in
-      *"/usr/share/"*|"''"|*"$img"*)
+      # (the northstar wallpaper from before v0.41 counts as ours)
+      *"/usr/share/"*|"''"|*"$img"*|*"/northstar/share/wallpaper/northstar.png"*)
         gsettings set org.gnome.desktop.background picture-uri "$uri"
         gsettings set org.gnome.desktop.background picture-uri-dark "$uri"
         gsettings set org.gnome.desktop.background picture-options zoom
@@ -144,7 +146,7 @@ tb_wallpaper() {
     for prop in $(xfconf-query -c xfce4-desktop -l 2>/dev/null | grep '/last-image$'); do
       cur=$(xfconf-query -c xfce4-desktop -p "$prop" 2>/dev/null)
       case "$cur" in
-        ""|/usr/share/*|"$img")
+        ""|/usr/share/*|"$img"|*/northstar/share/wallpaper/northstar.png)
           xfconf-query -c xfce4-desktop -p "$prop" -s "$img" && n=$((n+1)) ;;
       esac
     done

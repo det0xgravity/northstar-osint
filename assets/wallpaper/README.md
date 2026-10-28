@@ -5,8 +5,11 @@ sets on GNOME and XFCE, but only if you're still using the distribution's defaul
 background. It's original artwork made for this project and covered by the
 repository's license (GPL-3.0-or-later):
 
-- a night sky over map contours and a coordinate grid
-- a north star inside a compass ring, with a dipper whose pointer stars lead to it
+- a night chart: a coordinate grid and map contours under a faint aurora
+- a compass rose with true north marked by a star and magnetic north 14° off it,
+  the difference a *true* bearing corrects for
+- a bearing from the rose and back-bearings from two survey (trig) points that
+  cross at one spot on the hill: a position fix, the way a photo is pinned to a place
 - Canadian touches: aurora borealis, a maple leaf, and the coordinates of
   Alert, Nunavut (82° 30′ N), the northernmost permanently inhabited place on Earth
 

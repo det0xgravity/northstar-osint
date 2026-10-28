@@ -23,6 +23,10 @@ All notable changes to this project are documented here. The format follows
   allow list and on/off state; the old rules stay on until the new ones
   replace them) and the VM services. The `northstar` and `ns-…` commands
   still work for now: each says its new name and runs it.
+- **New desktop background** for the new name: a night chart with a compass
+  rose (true north and magnetic north, 14° apart), and a bearing plus two
+  back-bearings crossing at a position fix on the hill. An update replaces
+  the old northstar background, but never one you chose yourself.
 
 ## [0.40.0] - 2026-10-28
 
