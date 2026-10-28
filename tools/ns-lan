@@ -35,9 +35,12 @@ PY
 
 # The nftables ruleset. Loading it replaces any earlier copy of the table.
 rules() {
-  local a4 a6
+  local a4 a6 e4="" e6=""
   a4=$(allowed | sed -n 's/^4 //p' | paste -sd, - | sed 's/,/, /g')
   a6=$(allowed | sed -n 's/^6 //p' | paste -sd, - | sed 's/,/, /g')
+  # An empty set takes no elements line
+  [ -n "$a4" ] && e4=$(printf '\n\t\telements = { %s }' "$a4")
+  [ -n "$a6" ] && e6=$(printf '\n\t\telements = { %s }' "$a6")
   cat <<EOF
 # northstar LAN isolation (ns-lan). Generated: edit the allow list with
 # "ns-lan allow" instead of this file.
@@ -45,12 +48,10 @@ table $TABLE
 delete table $TABLE
 table $TABLE {
 	set allow4 {
-		type ipv4_addr; flags interval;${a4:+
-		elements = { $a4 }}
+		type ipv4_addr; flags interval;$e4
 	}
 	set allow6 {
-		type ipv6_addr; flags interval;${a6:+
-		elements = { $a6 }}
+		type ipv6_addr; flags interval;$e6
 	}
 	set private4 {
 		type ipv4_addr; flags interval;
