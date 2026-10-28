@@ -120,11 +120,11 @@ section "Encrypted export (age)"
 if command -v age >/dev/null 2>&1 && command -v age-keygen >/dev/null 2>&1; then
   age-keygen -o "$W/age.key" 2> "$W/age.pub.txt"; PUB=$(sed -n 's/^Public key: //p' "$W/age.pub.txt")
   menu ns-evidence "Export the case, encrypted" "The recipient" "$PUB"
-  ENC=$(ls -t "$W"/data/Exports/*.tar.gz.age 2>/dev/null | head -1)
+  ENC=$(ls -t "$W"/data/Exports/*.tar.gz.age 2>/dev/null | head -1); PLAIN="${ENC%.age}"
   check "the export is encrypted for the recipient, with its hash, and the plain copy removed" \
-    "[ -s '$ENC' ] && [ -f '$ENC.sha256' ] && [ ! -e '\${ENC%.age}' ] && [ -f '\${ENC%.age}.sha256' ]"
+    "[ -s '$ENC' ] && [ -f '$ENC.sha256' ] && [ ! -e '$PLAIN' ] && [ -f '$PLAIN.sha256' ]"
   check "only the recipient's key opens it, giving the archive that was hashed" \
-    "age -d -i '$W/age.key' -o '$W/dec.tar.gz' '$ENC' && grep -q \"\$(ns_hash_file '$W/dec.tar.gz' 2>/dev/null || shasum -a 256 '$W/dec.tar.gz' | cut -d' ' -f1)\" '\${ENC%.age}.sha256'"
+    "age -d -i '$W/age.key' -o '$W/dec.tar.gz' '$ENC' && python3 -c 'import hashlib,sys; print(hashlib.sha256(open(sys.argv[1],\"rb\").read()).hexdigest())' '$W/dec.tar.gz' | grep -qf - '$PLAIN.sha256'"
   check "the audit log names the method, not the whole key" "grep -q 'encrypted export: .*recipient key age1' '$TC/audit.log' && ! grep -q '$PUB' '$TC/audit.log'"
   menu ns-evidence "Export the case, encrypted" "The recipient" "not-a-key"
   check "anything that isn't a public key is refused" "grep -q \"isn't an age or SSH public key\" '$W/out.txt'"
