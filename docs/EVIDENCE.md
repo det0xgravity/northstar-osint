@@ -39,9 +39,17 @@ Recording an exhibit can also create `manifest.sha256.ots`: a proof, anchored in
 - The proof completes after a few hours. Run `ots upgrade manifest.sha256.ots` in the folder later to make it self-contained.
 - To verify it, open [opentimestamps.org](https://opentimestamps.org) and drop in `manifest.sha256` and its `.ots` file. Verifying it locally needs a Bitcoin node, which northstar doesn't install.
 
-## Notes and reports
+## Files from outside: OnionShare
 
-Case notes (**Case → Add a note**) are chained the same way as the audit log, and **Case → Build a report** pulls the exhibit list, with each exhibit's fingerprint, into the report. See [MENUS.md](MENUS.md#ns-case).
+**Dark web → OnionShare: receive files from a source into this case** saves what a source uploads into a result folder under `received/`, lists each file's SHA-256 in `received.txt`, and seals the folder, so you can record it as an exhibit at once. The drop box's address and key are never written to the case. Received files are untrusted: open them only in the VM.
+
+**OnionShare: send files over a private .onion link** can deliver an export when no approved channel exists. The audit log records each file sent with its SHA-256; give the recipient the `.sha256` separately so they can check it.
+
+## Notes, reports and closing
+
+Case notes (**Case → Add a note**) are chained the same way as the audit log, and **Case → Build a report** pulls the exhibit list, with each exhibit's fingerprint, into the report. A finding linked to a result that was recorded as an exhibit is checked against the exhibit register. See [MENUS.md](MENUS.md#ns-case).
+
+**Case → Close this case** first lists anything unfinished: notes, audit log or exhibits that don't verify, no report or one built before the findings last changed, no review covering the current findings and summary, incomplete intake, open leads. Closing anyway records those points in the notes. A closed case takes no more notes until it's reopened, with a reason.
 
 ## Good practice
 

@@ -7,6 +7,11 @@ All notable changes to this project are documented here. The format follows
 ## [0.38.1] - 2026-10-28
 
 ### Changed
+- Documentation brought up to date: README features and menu tree
+  (notes and reports, guides, safeguards, OnionShare, LAN isolation),
+  troubleshooting for LAN isolation, OnionShare, the guides and the Python
+  3.14 installs, received files and the checked close in EVIDENCE.md, and
+  receiving material from a source in the investigation guide.
 - Ubuntu 26.04 LTS listed as supported: a tester's x86_64 desktop install
   and the end-to-end tests on x86_64 and arm64 now pass.
 - GNOME extensions the distribution doesn't package (Ubuntu has no

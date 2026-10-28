@@ -24,12 +24,15 @@ Most OSINT build scripts are a long list of commands that break silently when on
 
 | | |
 |---|---|
-| **Menus** | `northstar` main menu plus `ns-username`, `ns-domain`, `ns-media`, `ns-metadata`, `ns-image`, `ns-country`, `ns-breach`, `ns-darkweb` and `ns-keys`. Dialogs use zenity on Linux and native dialogs on macOS. |
-| **Cases & audit trail** | Each case has an intake record (reference, authority, lawful basis, scope, review date), hash-chained contemporaneous notes and a one-click Word report. Results are saved under `~/Northstar/Cases/<case>/` (private: only your account can read it), and every action is logged to that case's `audit.log`. |
+| **Menus** | The `northstar` main menu and a menu per task (usernames, Telegram, domains, media, page capture, images, video, geolocation, face comparison, page monitoring, the case map, translation, countries, breach data, the dark web, evidence, notes). Dialogs use zenity on Linux and native dialogs on macOS. See the [menu list](#using-it). |
+| **Cases & audit trail** | Each case has an intake record (reference, authority, lawful basis, scope, review date; changes are logged), hash-chained contemporaneous notes, and a checked close that lists anything unfinished. Results are saved under `~/Northstar/Cases/<case>/` (private: only your account can read it), and every action is logged to that case's `audit.log`. |
+| **Notes, findings & report** | The Cases folder is an [Obsidian](https://obsidian.md) vault: a dashboard per case, a note per result, findings with source and information grades, selectors, accounts, a link chart, a chronology and a handover page. A supervisor review fingerprints the findings and summary, and each report version (Word) is built from the reportable findings with every exhibit re-checked. |
+| **Guides** | A step-by-step [investigation guide](docs/INVESTIGATION-GUIDE.md) with a quick start checklist and worked examples, and every manual, as offline pages on the VM's desktop. |
 | **Countries** | `ns-country`: people, business, phone, property, courts, financial/regulatory, political and transport searches tailored to each country's public records: Canada, the US, UK, Ireland, Australia, New Zealand, Germany, France, the Netherlands, Spain, Italy, Singapore, Malaysia, the Philippines, Thailand, Indonesia and Vietnam, plus an International pack (sanctions, leaks, vessels, aircraft, crypto). Phone analysis for every country, and 250+ curated registry bookmarks. Adding a country is one JSON file. |
 | **Browsers** | Firefox, Brave, Tor Browser and Mullvad Browser. OSINT extensions and a managed bookmarks folder are delivered through **browser policy**, so they apply to every profile and every clone. |
 | **Evidence** | Every result folder is sealed with a SHA-256 manifest and provenance (UTC time, operator, tool versions); `audit.log` is hash-chained so edits show; `ns-evidence` records numbered exhibits (optional OpenTimestamps proof), verifies folders and the log, and exports a case with a checksum. |
-| **Breach & dark web** | `ns-breach`: breach and infostealer exposure by email, username, domain or phone (free sources plus HIBP, Intelligence X, DeHashed and LeakCheck with your keys), and a private password exposure check. `ns-darkweb`: Tor, onion search, text-only capture of onion pages, ransomware leak-site claims. API keys are stored privately and never logged. |
+| **Breach & dark web** | `ns-breach`: breach and infostealer exposure by email, username, domain or phone (free sources plus HIBP, Intelligence X, DeHashed and LeakCheck with your keys), and a private password exposure check. `ns-darkweb`: Tor, onion search, text-only capture of onion pages, ransomware leak-site claims, and OnionShare (a private .onion drop box that receives files from a source into the case, and sending files over a private link). API keys are stored privately and never logged. |
+| **Safeguards** | Adult-site username searches and online face search engines only with a recorded reason, never for a possible child or victim; face comparison runs locally on case photos only. LAN isolation (`ns-lan`) stops the VM from reaching your own network. |
 | **Recon** | Pipelines for subdomain enumeration → DNS resolution → live-host probing → screenshots, plus WHOIS/DNS, crawling, archives and lookalike domains. |
 | **Media** | Video/audio/playlists with platform metadata preserved, galleries, Instagram, live-stream recording, Wayback captures. |
 | **VM-ready** | Guest tools for the detected hypervisor, xrdp with the right desktop session (VMs only), clone-safe SSH and xrdp keys, and `ns-seal`, which strips history, saved logins, API keys and tool sessions before you make a template. |
@@ -123,6 +126,8 @@ northstar                # main menu
 ├── Switch / create case
 ├── Open latest results
 ├── Open case folder
+├── LAN isolation (firewall)   # ns-lan
+├── Guides (how to investigate, manuals)   # ns-guides
 ├── Health check         # ns-doctor
 └── Update northstar     # ns-update
 ```

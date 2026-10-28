@@ -11,7 +11,9 @@ The hub. Besides opening each menu, it lets you:
 - **Switch / create case**: sets the active case. Names are sanitised to letters, numbers, `.`, `_`, `@` and `-`.
 - **Open latest results**: the folder from the last search you ran
 - **Open case folder**
+- **LAN isolation (firewall)**: `ns-lan`, see [below](#ns-lan-linux).
 - **Guides (how to investigate, manuals)**: these guides as offline web pages (`ns-guides`). They're also linked on the desktop.
+- **Health check**: `ns-doctor`.
 - **Update northstar**: runs `ns-update`.
 
 ## ns-missing

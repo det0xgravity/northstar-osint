@@ -27,6 +27,13 @@ references to them.
   `cell()`/`code()`/`fence()`/`flink()`; never put raw web-sourced text in a link.
 - `lib/ns_country.py`: engine for `ns-country` (reads the country packs, builds
   search links, phone analysis, `validate`).
+- `lib/ns_guides.py`: renders `docs/*.md` to offline HTML in `~/Northstar/Guides`
+  (desktop module; GitHub-style anchors via pandoc's `gfm` reader). Keep the
+  guides' internal links working: `tests/run.sh` checks every anchor.
+- `tools/ns-lan`: LAN isolation (nftables table `inet northstar_lan`, service
+  `northstar-lan-block`, allow list in `/etc/northstar/lan-allow`).
+- Bookmarks may point to `{NS_DATA}/…` (local pages such as
+  `assets/face-search.html`); `gen_policies.py --data` turns them into file:// links.
 - `modules/NN-name.sh`: one module each; it registers with
   `ns_register name "desc" "linux macos" mod_name`.
 - `tools/`: menu tools installed to `~/.local/share/northstar/bin`.
@@ -88,8 +95,8 @@ Still untested: Proxmox/Kasm, Kali, Parrot, macOS. See CHANGELOG.md.
 2. **arm64 Tor Browser is the alpha.** `ns_tor_browser_tarball` switches to
    stable by itself once the release channel has `linux-aarch64`; then update
    the "alpha" notes in `docs/`. Mullvad Browser still has no arm64 Linux build.
-   The signature check has only been reasoned about, not run: confirm the
-   installer prints "signature-verified" on the arm64 VM.
+   The signature check passes in the arm64 e2e containers (Oct 2026); still
+   confirm "signature-verified" in the arm64 VM's install log.
 3. **Bookmarks to check by hand.** `ns-linkcheck` can't verify sites that block
    scripts (403), including many in the country packs. Government sites in
    Australia, Indonesia, Thailand and Vietnam also drop connections from abroad
@@ -99,9 +106,19 @@ Still untested: Proxmox/Kasm, Kali, Parrot, macOS. See CHANGELOG.md.
    ship 3.14. SpiderFoot is unmaintained (last commit Nov 2023) and installed
    with lifted version caps (`modules/40-frameworks.sh`); if it breaks, look for
    a maintained fork or drop it.
+   On Python 3.14 (Ubuntu 26.04), GHunt comes from its main branch (2.3.4 caps
+   Pillow < 11) and ShadowFinder goes in a private venv with current cartopy and
+   timezonefinder (0.7.1 caps them): switch back to the PyPI releases once they
+   lift those caps (`modules/10-username.sh`, `modules/35-geo.sh`).
    `lib/ns_translate.py` forces `ARGOS_COMPUTE_TYPE=float32` on x86_64: the
    automatic int8 type gave repeated garbage on CI runners (Oct 2026). Retest
    with `auto` after CTranslate2 updates; float32 is slower.
+
+5. **Not yet tried in a real VM** (tests and containers only): LAN isolation
+   (`ns-lan`; containers don't exercise boot-time loading or a real LAN),
+   OnionShare receive and send, adult-site flags with the real Sherlock,
+   Maigret and Blackbird, the face-search menu, and the case close, reopen and
+   edit-intake flows.
 
 ## Future ideas (not started)
 

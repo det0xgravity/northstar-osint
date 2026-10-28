@@ -248,6 +248,8 @@ Profiles change and posts get deleted. When you find something relevant, capture
 5. **Image analysis** → **Face search engines (online; read the warning)**: PimEyes, FaceCheck.ID, Search4faces and Lenso.ai search the web for a face. The photo leaves the VM, a face is biometric data, and results are look-alikes, never identifications. northstar warns you first, won't open them for a child or a victim, and records your reason and lawful basis in the notes. Use them only when the case needs it and your basis covers it. The **Face search engines** bookmark opens the same warning as a page, but records nothing.
 6. **Face comparison (within this case)**: compares a reference face (the official photo) with faces in photos already in the case. It asks for the lawful basis the first time. A score is similarity, never identification: treat it as a reason to look closer.
 
+**Material from a source.** If someone (a witness, a family member, a whistle-blower) needs to send you files and has no safe way to do it, **Dark web** → **OnionShare: receive files from a source into this case** gives them a private .onion drop box. Send them the address and the private key, and ask them to use Tor Browser. What arrives is hashed, sealed and listed in the case; record it as an exhibit, and treat every file as hostile (no programs, no macros).
+
 ### 4.6 Video
 
 **Video verification** with a URL or file: frames at every scene change for reverse searching, technical metadata, and an offline transcript and translation of the speech.

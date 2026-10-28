@@ -48,6 +48,9 @@ These only apply when the installer runs inside a GNOME desktop session. Re-run 
 **Launchers don't show in the app menu**
 Log out and back in. The launchers are in `~/.local/share/applications/`.
 
+**The guides aren't on the desktop**
+Log out and back in once: GNOME shows desktop icons only after the Desktop Icons NG extension the installer enables has loaded. The guides themselves are in `~/Northstar/Guides` (open `index.html`), and under **Guides** in the main menu. If that folder is empty, pandoc is missing or failed: run `./install.sh --only desktop` and check its output.
+
 **A menu opens and closes immediately**
 Run it from a terminal (e.g. `ns-domain`) to see the error. If zenity is missing, re-run `./install.sh --only core`.
 
@@ -84,7 +87,19 @@ Use a sock-puppet login: `instaloader --login <puppet>`. For toutatis, use the `
 **GHunt says it isn't logged in**
 Run `ghunt login` once and follow its prompts.
 
+**GHunt or ShadowFinder failed with "headers or library files could not be found for jpeg" or "ffi.h: No such file"**
+That was Ubuntu 26.04 (Python 3.14) before v0.37.2: their last releases asked for library versions that have no Python 3.14 builds. Run `ns-update`: on Python 3.14 northstar now installs GHunt from its main branch and ShadowFinder with current libraries.
+
+**OnionShare says it can't find or connect to Tor**
+The menu's OnionShare options use the system Tor (`ns-darkweb` → **Check Tor connection** starts it). If `onionshare-cli` is missing, run `./install.sh --only darkweb`. On macOS use **Open the OnionShare app** instead.
+
+**Received files (OnionShare)**
+They're in the case under `received/`, with their SHA-256 in `received.txt`. Treat them as hostile: open documents only in the VM, never run programs or enable macros, and record what you rely on as an exhibit.
+
 ## VM / Kasm
+
+**Something on my network stopped working after an update (NAS, printer, file share, local apt mirror)**
+LAN isolation (`ns-lan`) is on: since v0.38.0 it's turned on in VMs, and it blocks connections from the VM to private networks. Check with `ns-lan status`. Allow what you need with `ns-lan allow 192.168.1.20` (an address or a network such as `192.168.1.0/24`), or turn it off with `ns-lan off`; updates won't turn it back on. Connections made **to** the VM (RDP from Kasm, SSH) aren't affected.
 
 **No Mullvad Browser in an arm64 VM, and Tor Browser says "alpha"**
 That's expected. Mullvad Browser has no arm64 Linux build, and Tor Browser's only arm64 Linux builds are alphas for now. northstar switches to stable automatically once one exists. See [BREACH-DARKWEB.md](BREACH-DARKWEB.md#tor-browser-on-arm64-vms-on-apple-silicon).
