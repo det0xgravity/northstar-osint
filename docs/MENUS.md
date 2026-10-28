@@ -29,6 +29,7 @@ The hub. Besides opening each menu, it lets you:
 | Google account | `ghunt email` | `ghunt.json` |
 | Generate username and email variants | From a full name and birth year (pre-filled from the Missing person profile): likely usernames (`janedoe`, `jane.doe`, `jdoe`, `janedoe99`, …; accents removed, compound surnames handled) and emails at common providers. Optionally checks the top 10 usernames with Sherlock and the top 10 emails with holehe | `usernames.txt`, `emails.txt`, `sherlock/`, `console.log` |
 | Instagram profile details | toutatis (session ID **redacted** from the audit log) | `console.log` |
+| Analyse email headers (offline) | A saved message (`.eml`) or its headers: the relay hops oldest first with IPs and UTC times, the first public IP, SPF/DKIM/DMARC as recorded by the receiving server, and warning signs (a Reply-To elsewhere, From/Return-Path/DKIM domains that don't match, failed checks, times out of order). Nothing is looked up; the message is kept in the case with the analysis. IPs and addresses go to Selectors | `headers.txt`, `headers.json`, the message |
 
 The search term is copied to your clipboard for the web services that open.
 

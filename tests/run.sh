@@ -20,7 +20,7 @@ H="$W/home"; mkdir -p "$H/lib" "$H/bin" "$H/config" "$W/data" "$W/conf"
 cp "$R/lib/ui.sh" "$R/lib/ns_country.py" "$H/lib/"
 cp "$R/config/ctf-categories.txt" "$H/config/"
 cp -R "$R/config/countries" "$H/config/"
-for e in breach darkweb evidence doctor missing watch casemap vault triage; do ln -s "$R/lib/ns_$e.py" "$H/bin/ns_$e"; done
+for e in breach darkweb evidence doctor missing watch casemap vault triage email; do ln -s "$R/lib/ns_$e.py" "$H/bin/ns_$e"; done
 ln -s "$R/lib/ns_case.py" "$H/bin/ns_casework"
 export NS_HOME="$H" NS_DATA="$W/data" XDG_CONFIG_HOME="$W/xdg" NS_UI=script NS_UI_ANSWERS="$W/answers"
 export PATH="$H/bin:$PATH"
@@ -149,6 +149,31 @@ check "a plain text file shows no warning signs, with its hash" "[ \"\$(verdict 
 menu ns-evidence "Check received" "$W/tri/form.pdf"
 check "the menu saves the triage report in the case and seals it" \
   "t=\$(ls -td '$TC'/triage/* | head -1) && grep -q 'CAUTION' \"\$t/triage.txt\" && [ -f \"\$t/manifest.sha256\" ]"
+
+section "Email headers"
+cat > "$W/phish.eml" <<'EML'
+Received: from mx.example.net (mx.example.net [192.0.2.5])
+        by inbound.example.org with ESMTPS id abc;
+        Tue, 27 Oct 2026 09:15:02 +0000
+Authentication-Results: inbound.example.org; spf=softfail smtp.mailfrom=example.biz; dkim=none; dmarc=fail header.from=bank.example.com
+Received: from [10.0.0.20] (unknown [8.8.4.4])
+        by mx.example.net with ESMTPSA id xyz;
+        Tue, 27 Oct 2026 09:44:58 +0000
+From: "Example Bank" <security@bank.example.com>
+Reply-To: <help@collect.example.biz>
+Return-Path: <bounce@example.biz>
+Subject: Verify your account
+Date: Tue, 27 Oct 2026 09:14:50 +0000
+
+Body
+EML
+python3 "$R/lib/ns_email.py" "$W/phish.eml" > "$W/eh.txt"
+check "hops are read oldest first, with the first public IP" "grep -q 'First public IP in the chain: 8.8.4.4' '$W/eh.txt' && grep -q '1. 2026-10-27 09:44:58 UTC' '$W/eh.txt'"
+check "phishing signs are flagged: Reply-To elsewhere, failed checks, times out of order" \
+  "grep -q 'Reply-To domain (collect.example.biz) differs' '$W/eh.txt' && grep -q 'DMARC fail' '$W/eh.txt' && grep -q 'timestamped 29 min before' '$W/eh.txt'"
+menu ns-username "Analyse email headers" "$W/phish.eml"
+check "the menu keeps the message and the analysis in the case" \
+  "d=\$(ls -td '$TC'/email-headers/* | head -1) && [ -f \"\$d/phish.eml\" ] && grep -q 'Warning signs' \"\$d/headers.txt\" && [ -f \"\$d/manifest.sha256\" ]"
 
 section "QGIS"
 menu ns-map "Open the latest case map in QGIS"

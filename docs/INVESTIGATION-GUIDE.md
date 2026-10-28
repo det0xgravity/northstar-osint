@@ -212,7 +212,8 @@ Below is the order used for the Jane Doe example. Skip what doesn't apply to you
 1. **Username search** with `janedoe90`. Sherlock, Maigret, socialscan and Blackbird check hundreds of sites. Expect **false positives**: a "hit" only means a profile with that name exists.
 2. **Email search** with the email: which services it's registered with (holehe).
 3. **Generate username and email variants**: likely variants from the name and birth year, optionally checked. These are guesses: hits on them are especially likely to be someone else.
-4. **Google account** (with an email; needs `ghunt login`): the name, photo and sometimes public Maps reviews, which can be a location lead.
+4. **Analyse email headers (offline)**, when the case starts from an email (a threat, a scam, a phishing message): save it with full headers ("Show original" / "Download original"), then see where it really came from and whether it's forged. The first public IP is often the sender's mail provider, not the sender.
+5. **Google account** (with an email; needs `ghunt login`): the name, photo and sometimes public Maps reviews, which can be a location lead.
 
 **Adult sites** (pornography, webcam, erotic) are left out unless you allow them for the case: Case → **Adult-site (NSFW) searches**, with your reason. They can be strong leads when a case needs them (a reused username, photos, a location), but opening hits shows explicit material: open them only in the VM, download nothing, and if anything may show a child, stop and report it. They can't be allowed if anyone you're searching for could be under 18.
 

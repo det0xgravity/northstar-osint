@@ -7,6 +7,10 @@ All notable changes to this project are documented here. The format follows
 ## [0.39.0] - 2026-10-28
 
 ### Added
+- **Email header analysis** (Username & email → Analyse email headers,
+  `ns_email`): relay hops oldest first with IPs and UTC times, the first
+  public IP, SPF/DKIM/DMARC results, and warning signs of spoofing or
+  phishing. Offline; the message is kept in the case.
 - **Crypto addresses in Selectors:** Bitcoin (legacy, P2SH, bech32 and
   bech32m, checksum-verified) and Ethereum-style addresses, read from tool
   results and also from captured onion pages and Telegram posts and messages,

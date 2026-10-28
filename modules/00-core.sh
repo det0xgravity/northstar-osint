@@ -47,6 +47,7 @@ mod_core() {
   install -m 755 "$NS_REPO/lib/ns_casemap.py" "$NS_BIN/ns_casemap"
   install -m 755 "$NS_REPO/lib/ns_vault.py" "$NS_BIN/ns_vault"
   install -m 755 "$NS_REPO/lib/ns_triage.py" "$NS_BIN/ns_triage"
+  install -m 755 "$NS_REPO/lib/ns_email.py" "$NS_BIN/ns_email"
   cp "$NS_REPO"/config/*.json "$NS_REPO"/config/*.txt "$NS_HOME/config/" 2>/dev/null
   rm -f "$NS_HOME"/config/countries/*.json      # drop packs removed upstream
   cp "$NS_REPO"/config/countries/*.json "$NS_HOME/config/countries/"

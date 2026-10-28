@@ -8,7 +8,8 @@ choice=$(ui_list "Username & email" \
   "Email search (holehe, socialscan)" \
   "Google account from email (GHunt — run 'ghunt login' once first)" \
   "Instagram profile details (toutatis — needs a session ID)" \
-  "Generate username and email variants from a name") || exit 0
+  "Generate username and email variants from a name" \
+  "Analyse email headers (offline)") || exit 0
 
 case "$choice" in
 Username*)
@@ -65,6 +66,20 @@ Email*)
           "$(ns_google "\"$e\"")"
   echo "Email copied to clipboard for the breach/lookup sites."
   ui_notify "\"$e\" is on your clipboard: paste it into the breach and lookup sites"
+  ns_finish "$out" ;;
+
+"Analyse email headers"*)
+  ui_info "Save the message with its full headers first: in Gmail, ⋮ → Show original → Download original; in Outlook, File → Properties (copy the headers into a text file) or save as .eml; in Thunderbird, File → Save As. Then choose that file.
+
+Nothing is looked up: the analysis runs on this computer." || true
+  f=$(ui_files "Choose the saved message (.eml) or a text file with its headers") || exit 0
+  f=$(printf '%s\n' "$f" | head -1)
+  [ -f "$f" ] || exit 0
+  out=$(ns_outdir email-headers "$(basename "$f")")
+  cp "$f" "$out/"                      # the message itself is part of the record
+  ns_run "$out" ns_email --json "$out/headers.json" "$out/$(basename "$f")"
+  sed -n '/^Email header analysis/,$p' "$out/console.log" > "$out/headers.txt"
+  ns_audit ns-username "$(basename "$f")" "email headers analysed: $(grep -c '^  !!' "$out/headers.txt") warning sign(s)"
   ns_finish "$out" ;;
 
 Google*)
