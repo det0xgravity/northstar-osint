@@ -85,7 +85,7 @@ def main(argv):
             if not path:
                 found.append(f"✗ {c}")
                 continue
-            v = "" if c in NO_VERSION or c.startswith("ns") else version(c)
+            v = "" if c in NO_VERSION or c.startswith("tb") else version(c)
             found.append(f"✓ {c}" + (f" ({v})" if v else ""))
         missing = [f[2:] for f in found if f.startswith("✗")]
         say(f"[{module}] " + ("all present" if not missing else f"missing: {', '.join(missing)}"))

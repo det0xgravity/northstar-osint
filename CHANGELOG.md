@@ -4,6 +4,13 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project uses
 [Semantic Versioning](https://semver.org/).
 
+## [0.41.1] - 2026-10-29
+
+### Fixed
+- **Health check opened menus** (Country search, Breach data…) and stopped
+  on "Unknown country code": since the rename it asked True Bearing's own
+  `tb-…` menus for their version instead of skipping them.
+
 ## [0.41.0] - 2026-10-28
 
 ### Changed
