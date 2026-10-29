@@ -140,10 +140,14 @@ To undo them: **Settings → Multitasking** (hot corner and workspaces), `gsetti
 Flameshot runs in standby as an icon in the top bar, and GNOME needs the AppIndicator extension to show tray icons. True Bearing enables it; log out and back in after `tb-update` to see the icon. Flameshot also starts at login. Click its icon, or press Print Screen (or Super+Shift+S: Cmd+Shift+S on a Mac keyboard), to capture. If it ever stops responding: `pkill flameshot`, then start it again.
 
 **Flameshot says "Unable to capture screen"**
-On Wayland, GNOME only lets Flameshot capture once it has permission, and the copy in the tray never gets asked. The extras module grants it; on an older install run `tb-update`, or:
+On Wayland, GNOME only lets Flameshot capture once it has permission, and it never asks when Flameshot runs from the tray or a shortcut. The extras module grants it; on an older install run `tb-update --only extras`, or:
 ```bash
 flatpak permission-set screenshot screenshot org.flameshot.Flameshot yes
+flatpak permission-set screenshot screenshot flameshot yes
 ```
+
+**Cmd+Shift+S says "Screenshot aborted"**
+Releasing Cmd (Super) during the capture cancels it. The shortcut waits half a second for that; on an older install run `tb-update --only extras`.
 
 **The prompt shows squares or question marks instead of icons**
 The terminal isn't using the MesloLGS NF font. Run `tb-update` from inside the desktop session, or set the font by hand in your terminal's preferences: **MesloLGS NF**, size 11. Then open a new terminal.

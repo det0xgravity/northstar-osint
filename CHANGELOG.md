@@ -4,6 +4,14 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project uses
 [Semantic Versioning](https://semver.org/).
 
+## [0.41.3] - 2026-10-29
+
+### Fixed
+- **Flameshot's Super+Shift+S shortcut** said "Screenshot aborted", then
+  "Unable to capture screen": letting go of Super cancelled the capture (it
+  now waits half a second), and GNOME names Flameshot started by a shortcut
+  `flameshot`, which also needs the screenshot permission.
+
 ## [0.41.2] - 2026-10-29
 
 ### Fixed

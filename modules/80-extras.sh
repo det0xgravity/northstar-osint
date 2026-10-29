@@ -4,7 +4,7 @@
 
 tb_register extras "KeePassXC, Flameshot, OBS Studio" "linux macos" mod_extras
 
-# One GNOME custom shortcut that runs "flameshot gui": $1 path name, $2 key
+# One GNOME custom shortcut for Flameshot: $1 path name, $2 key, $3 command
 tb_flameshot_key() {
   local schema="org.gnome.settings-daemon.plugins.media-keys"
   local kpath="/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/$1/"
@@ -17,30 +17,38 @@ tb_flameshot_key() {
   esac
   [ -n "${new:-}" ] && { gsettings set "$schema" custom-keybindings "$new" || return 1; }
   gsettings set "$schema.custom-keybinding:$kpath" name    'Flameshot' &&
-  gsettings set "$schema.custom-keybinding:$kpath" command 'flameshot gui' &&
+  gsettings set "$schema.custom-keybinding:$kpath" command "$3" &&
   gsettings set "$schema.custom-keybinding:$kpath" binding "$2"
 }
 
 # Print Screen, and Super+Shift+S for Mac keyboards (no Print Screen key; Cmd
-# is Super in a UTM VM, and UTM keeps Ctrl+Option for releasing the mouse)
+# is Super in a UTM VM, and UTM keeps Ctrl+Option for releasing the mouse).
+# The delay lets go of Super first: releasing it during the capture cancelled
+# it ("Screenshot aborted").
 tb_flameshot_printkey() {
   tb_in_gnome_session || return 0
-  tb_flameshot_key truebearing-flameshot 'Print' &&
-  tb_flameshot_key truebearing-flameshot-mac '<Shift><Super>s' &&
+  tb_flameshot_key truebearing-flameshot 'Print' 'flameshot gui' &&
+  tb_flameshot_key truebearing-flameshot-mac '<Shift><Super>s' 'flameshot gui --delay 500' &&
   gsettings set org.gnome.shell.keybindings show-screenshot-ui "[]" &&
   tb_info "Print Screen and Super+Shift+S (Cmd+Shift+S on a Mac keyboard) now open Flameshot"
 }
 
 # On Wayland, GNOME's screenshot portal only lets an app capture silently once
-# it has permission. The copy started at login is known by its app ID, which
-# never gets the prompt, so it failed with "Unable to capture screen".
+# it has permission, and it names Flameshot by how it was started: the copy
+# started at login is org.flameshot.Flameshot, one started by a shortcut is
+# flameshot. Neither gets a prompt, so both failed with "Unable to capture
+# screen".
 tb_flameshot_portal() {
+  local app rc=0
   tb_in_gnome_session && tb_has gdbus || return 0
-  gdbus call --session --dest org.freedesktop.impl.portal.PermissionStore \
-    --object-path /org/freedesktop/impl/portal/PermissionStore \
-    --method org.freedesktop.impl.portal.PermissionStore.SetPermission \
-    screenshot true screenshot org.flameshot.Flameshot "['yes']" >/dev/null 2>&1 \
-    || tb_warn "Couldn't allow Flameshot to take screenshots: if the tray icon says it can't capture, run: flatpak permission-set screenshot screenshot org.flameshot.Flameshot yes"
+  for app in org.flameshot.Flameshot flameshot; do
+    gdbus call --session --dest org.freedesktop.impl.portal.PermissionStore \
+      --object-path /org/freedesktop/impl/portal/PermissionStore \
+      --method org.freedesktop.impl.portal.PermissionStore.SetPermission \
+      screenshot true screenshot "$app" "['yes']" >/dev/null 2>&1 \
+      || { tb_warn "Couldn't allow Flameshot to take screenshots: if it says it can't capture, run: flatpak permission-set screenshot screenshot $app yes"; rc=1; }
+  done
+  return $rc
 }
 
 # Flameshot runs in standby as a tray icon (GNOME's tray comes from the
@@ -79,7 +87,7 @@ mod_extras() {
       tb_flatpak com.obsproject.Studio || rc=1
     fi
     tb_flameshot_tray
-    tb_flameshot_portal
+    tb_flameshot_portal || :
     tb_flameshot_printkey || rc=1
   fi
   return $rc
