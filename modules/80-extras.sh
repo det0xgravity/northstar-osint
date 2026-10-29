@@ -4,10 +4,10 @@
 
 tb_register extras "KeePassXC, Flameshot, OBS Studio" "linux macos" mod_extras
 
-tb_flameshot_printkey() {
-  tb_in_gnome_session || return 0
+# One GNOME custom shortcut that runs "flameshot gui": $1 path name, $2 key
+tb_flameshot_key() {
   local schema="org.gnome.settings-daemon.plugins.media-keys"
-  local kpath="/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/truebearing-flameshot/"
+  local kpath="/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/$1/"
   local cur new
   cur=$(gsettings get "$schema" custom-keybindings) || return 1
   case "$cur" in
@@ -18,9 +18,29 @@ tb_flameshot_printkey() {
   [ -n "${new:-}" ] && { gsettings set "$schema" custom-keybindings "$new" || return 1; }
   gsettings set "$schema.custom-keybinding:$kpath" name    'Flameshot' &&
   gsettings set "$schema.custom-keybinding:$kpath" command 'flameshot gui' &&
-  gsettings set "$schema.custom-keybinding:$kpath" binding 'Print' &&
+  gsettings set "$schema.custom-keybinding:$kpath" binding "$2"
+}
+
+# Print Screen, and Super+Shift+S for Mac keyboards (no Print Screen key; Cmd
+# is Super in a UTM VM, and UTM keeps Ctrl+Option for releasing the mouse)
+tb_flameshot_printkey() {
+  tb_in_gnome_session || return 0
+  tb_flameshot_key truebearing-flameshot 'Print' &&
+  tb_flameshot_key truebearing-flameshot-mac '<Shift><Super>s' &&
   gsettings set org.gnome.shell.keybindings show-screenshot-ui "[]" &&
-  tb_info "Print Screen now opens Flameshot"
+  tb_info "Print Screen and Super+Shift+S (Cmd+Shift+S on a Mac keyboard) now open Flameshot"
+}
+
+# On Wayland, GNOME's screenshot portal only lets an app capture silently once
+# it has permission. The copy started at login is known by its app ID, which
+# never gets the prompt, so it failed with "Unable to capture screen".
+tb_flameshot_portal() {
+  tb_in_gnome_session && tb_has gdbus || return 0
+  gdbus call --session --dest org.freedesktop.impl.portal.PermissionStore \
+    --object-path /org/freedesktop/impl/portal/PermissionStore \
+    --method org.freedesktop.impl.portal.PermissionStore.SetPermission \
+    screenshot true screenshot org.flameshot.Flameshot "['yes']" >/dev/null 2>&1 \
+    || tb_warn "Couldn't allow Flameshot to take screenshots: if the tray icon says it can't capture, run: flatpak permission-set screenshot screenshot org.flameshot.Flameshot yes"
 }
 
 # Flameshot runs in standby as a tray icon (GNOME's tray comes from the
@@ -59,6 +79,7 @@ mod_extras() {
       tb_flatpak com.obsproject.Studio || rc=1
     fi
     tb_flameshot_tray
+    tb_flameshot_portal
     tb_flameshot_printkey || rc=1
   fi
   return $rc

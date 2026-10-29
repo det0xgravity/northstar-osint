@@ -4,6 +4,18 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project uses
 [Semantic Versioning](https://semver.org/).
 
+## [0.41.2] - 2026-10-29
+
+### Fixed
+- **Flameshot said "Unable to capture screen"** from its tray icon under
+  GNOME on Wayland: GNOME's screenshot portal knows the copy started at login
+  by its app ID and never asked it for permission. The extras module now
+  grants it.
+
+### Added
+- **Super+Shift+S** also opens Flameshot on GNOME, for Mac keyboards, which
+  have no Print Screen key (Cmd+Shift+S in a UTM VM).
+
 ## [0.41.1] - 2026-10-29
 
 ### Fixed

@@ -92,7 +92,7 @@ tb-update                                # pull the latest version and upgrade e
 | `countries` | Phone-number analysis for the country menus (the country bookmarks come with `browsers`) |
 | `desktop` | App-menu launchers, GNOME dock favourites, macOS `TrueBearing.app` |
 | `shell` | zsh with Oh My Zsh, the Powerlevel10k prompt, autosuggestions, syntax highlighting and the MesloLGS NF font *(Linux)* |
-| `extras` | KeePassXC, Flameshot (bound to Print Screen on GNOME), OBS Studio |
+| `extras` | KeePassXC, Flameshot (bound to Print Screen and Super+Shift+S on GNOME), OBS Studio |
 | `messaging` | Telegram Desktop, Signal (x86_64), Element (Matrix) for research accounts |
 | `notes` | Obsidian, with the Cases folder set up as a vault (templates, Case.md, Results.md) |
 | `lan` | LAN isolation (`tb-lan`): blocks connections from the VM to private networks *(Linux; on in VMs)* |

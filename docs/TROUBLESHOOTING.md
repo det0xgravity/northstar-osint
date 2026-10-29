@@ -39,7 +39,7 @@ Open a new terminal. The PATH line is added to `~/.bashrc`, `~/.zshrc` or `~/.pr
 
 ## Desktop and menus
 
-**Dock icons or the Print Screen binding didn't appear**
+**Dock icons or the Print Screen and Super+Shift+S bindings didn't appear**
 These only apply when the installer runs inside a GNOME desktop session. Re-run from a terminal on the desktop, not over SSH:
 ```bash
 ./install.sh --only desktop,extras
@@ -137,7 +137,13 @@ gsettings set org.gnome.desktop.wm.preferences num-workspaces 1
 To undo them: **Settings → Multitasking** (hot corner and workspaces), `gsettings reset org.gnome.mutter overlay-key`, and `gnome-extensions disable no-overview@fthx`. You can still open the overview with the dots at the top left, or Super+S.
 
 **Clicking Flameshot does nothing**
-Flameshot runs in standby as an icon in the top bar, and GNOME needs the AppIndicator extension to show tray icons. True Bearing enables it; log out and back in after `tb-update` to see the icon. Flameshot also starts at login. Click its icon, or press Print Screen, to capture. If it ever stops responding: `pkill flameshot`, then start it again.
+Flameshot runs in standby as an icon in the top bar, and GNOME needs the AppIndicator extension to show tray icons. True Bearing enables it; log out and back in after `tb-update` to see the icon. Flameshot also starts at login. Click its icon, or press Print Screen (or Super+Shift+S: Cmd+Shift+S on a Mac keyboard), to capture. If it ever stops responding: `pkill flameshot`, then start it again.
+
+**Flameshot says "Unable to capture screen"**
+On Wayland, GNOME only lets Flameshot capture once it has permission, and the copy in the tray never gets asked. The extras module grants it; on an older install run `tb-update`, or:
+```bash
+flatpak permission-set screenshot screenshot org.flameshot.Flameshot yes
+```
 
 **The prompt shows squares or question marks instead of icons**
 The terminal isn't using the MesloLGS NF font. Run `tb-update` from inside the desktop session, or set the font by hand in your terminal's preferences: **MesloLGS NF**, size 11. Then open a new terminal.

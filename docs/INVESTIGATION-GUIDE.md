@@ -10,7 +10,7 @@ It draws on reviews by an experienced case manager (evidence, supervision, hando
 
 You don't need to know the command line. Everything here is in the **True Bearing** menu (the compass icon in the dock, or type `truebearing` in a terminal). Menu names in **bold** are exactly what you'll see.
 
-> **📷 Screenshots.** Places marked 📷 show what you should see at that step. To capture your own, press **Print Screen** in the VM (Flameshot).
+> **📷 Screenshots.** Places marked 📷 show what you should see at that step. To capture your own, press **Print Screen** in the VM (Flameshot), or **Cmd+Shift+S** on a Mac keyboard.
 
 ## Quick start checklist
 

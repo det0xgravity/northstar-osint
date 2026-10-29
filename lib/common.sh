@@ -5,7 +5,7 @@
 #  Sourced by install.sh and every module. Bash 3.2 compatible (macOS).
 # =============================================================================
 
-TB_VERSION="0.41.1"
+TB_VERSION="0.41.2"
 
 TB_HOME="${TB_HOME:-$HOME/.local/share/truebearing}"   # tools, venvs, sources
 TB_BIN="$TB_HOME/bin"                                # all True Bearing binaries
